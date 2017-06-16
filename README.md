@@ -17,6 +17,7 @@ https://github.com/jakeogh/gpgmda-client
 # DEPENDENCIES:
 -------------------------
 
+- gpgmda: https://github.com/jakeogh/gpgmda (server side)
 - python3: http://python.org
 - bash: https://www.gnu.org/software/bash/
 - gnupg: http://gnupg.org
