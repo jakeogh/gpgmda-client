@@ -49,10 +49,10 @@ print_cmd = ~/cfg/print/to_text_file
 	[[default]]
 		realname = ${name}
 		address = ${alias_address}
-		sendmail_command = ${DIR}/mail_send ${email_address} ${alias_address}
+		sendmail_command = ${DIR}/gpgmda-client-send ${email_address} ${alias_address}
 		[[[abook]]]
 			type = shellcommand
-			command = ${DIR}/gpgmda_client ${email_address} --address_query
+			command = ${DIR}/gpgmda-client ${email_address} --address_query
 			regexp = \"(?P<name>.+)\"\s*<(?P<email>.*.+?@.+?)>
 
 # to send a mail in alot enter the compose command http://alot.readthedocs.org/en/latest/usage/index.html#commands
