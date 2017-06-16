@@ -235,8 +235,8 @@ def move_terminal_text_up_one_page():
 
 def start_alot():
     check_for_notmuch_database()
-    alot_config = subprocess.Popen([gpgmda_program_folder + b"/make_alot_config", email_address], stdout=subprocess.PIPE).communicate()
-    alot_theme = subprocess.Popen([gpgmda_program_folder + b"/make_alot_theme"], stdout=subprocess.PIPE).communicate()
+    alot_config = subprocess.Popen([gpgmda_program_folder + b"/gpgmda-client-make-alot-config", email_address], stdout=subprocess.PIPE).communicate()
+    alot_theme = subprocess.Popen([gpgmda_program_folder + b"/gpgmda-client-make-alot-theme"], stdout=subprocess.PIPE).communicate()
 
     alot_config_f = open(b'/dev/shm/__alot_config_' + email_address, 'wb')
     alot_theme_f = open(b'/dev/shm/__alot_theme_' + email_address, 'wb')
