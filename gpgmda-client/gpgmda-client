@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 # todo: locking to prevent multiple instances of mail_update
 
 import sys
 import os
-import traceback
+#import traceback
 import argparse
 import time
 import subprocess
@@ -23,7 +20,7 @@ from multiprocessing import cpu_count
 from kcl.fileops import empty_file
 from kcl.fileops import file_exists
 from kcl.dirops import path_is_dir
-from kcl.dirops import create_dir
+#from kcl.dirops import create_dir
 from kcl.dirops import check_or_create_dir
 from kcl.dirops import count_files
 from kcl.dirops import list_files
@@ -39,8 +36,10 @@ def check_for_notmuch_database():
         eprint('''Error: notmuch has not created the xapian database yet. Run \"mail_update user@domain.com --update\" first. Exiting.''')
         os._exit(1)
 
+
 def rsync_mail():
     load_ssh_key()
+    eprint("running rsync")
     #rsync_p = \
         #subprocess.Popen([b'rsync', b'--ignore-existing', b'--size-only', b'-t', b'--whole-file', b'--copy-links', b'--checksum', b'--stats', b'-i', b'-r', b'-vv', email_address + b':gpgMaildir', gpgMaildir_archive_folder + b'/'], stdout=subprocess.PIPE)
     rsync_p = \
@@ -59,6 +58,7 @@ def rsync_mail():
     with open(b"/dev/shm/.gpgmda_rsync_last_new_mail_" + email_address, 'wb') as rsync_logfile_handle:
         rsync_logfile_handle.write(rsync_p_output[0])
 
+
 def run_notmuch(mode, query=b"", debug=False):
     yesall = False
     if debug: eprint("run_notmuch():", mode)
@@ -72,7 +72,6 @@ def run_notmuch(mode, query=b"", debug=False):
     make_notmuch_config()
 
     if mode == "update_notmuch_db":
-
         current_env = os.environ.copy()
         current_env["NOTMUCH_CONFIG"] = notmuch_config_file
         notmuch_p = subprocess.Popen([b'notmuch', b'new'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, env=current_env)
@@ -114,7 +113,6 @@ def run_notmuch(mode, query=b"", debug=False):
                         break
                 else:
                     delete_message_answer = 'yes'
-
 
                 if delete_message_answer.lower() == "yes":
                     non_mail_path = b'~/.gpgmda/non-mail'
@@ -199,6 +197,7 @@ def run_notmuch(mode, query=b"", debug=False):
         eprint("invalid mode", mode, "exiting.")
         os._exit(1)
 
+
 def make_notmuch_config():
     username = email_address.split(b"@")[0]
 
@@ -224,6 +223,7 @@ synchronize_flags = false
     notmuch_config_file_handle.write(notmuch_config)
     notmuch_config_file_handle.close()
 
+
 def move_terminal_text_up_one_page():
     eprint("moving terminal text up one page")
     tput_p = subprocess.Popen(['tput', 'lines'], stdout=subprocess.PIPE)
@@ -232,6 +232,7 @@ def move_terminal_text_up_one_page():
 
     for line in range(int(tput_p_output)):
         print('', file=sys.stderr)
+
 
 def start_alot():
     check_for_notmuch_database()
@@ -284,11 +285,13 @@ def load_ssh_key():
             eprint("something went wrong adding the ssh_key, exiting")
             os._exit(1)
 
+
 def short_random_string():
     command = [b"gpg2", b"--gen-random", b"--armor", b"1", b"100"]
     cmd_proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=False)
     cmd_output = cmd_proc.stdout.read().strip() #get rid of newline
     return cmd_output
+
 
 def warm_up_gpg():
     # due to https://bugs.g10code.com/gnupg/issue1190 first get gpg-agent warmed up by decrypting a test message.
@@ -329,10 +332,12 @@ def warm_up_gpg():
 
     return True
 
+
 def get_maildir_file_counts():
     files_in_gpgmaildir = count_files(gpgmaildir)
     files_in_maildir = count_files(maildir)
     return {'files_in_gpgmaildir':files_in_gpgmaildir, "files_in_maildir":files_in_maildir}
+
 
 def parse_rsync_log_to_list():
     rsync_log = b'/dev/shm/.gpgmda_rsync_last_new_mail_' + email_address
@@ -354,6 +359,7 @@ def parse_rsync_log_to_list():
     #    return []
     return full_path_list
 
+
 def decrypt_list_of_messages(message_list):
     message_list = filter(None, message_list)   #remove empty items
     process_count = cpu_count()
@@ -361,6 +367,7 @@ def decrypt_list_of_messages(message_list):
     eprint("message_list:", message_list)
     for message in message_list:    #useful for debugging
        decrypt_message(message)
+
 
 def move_to_badmail(gpgfile):
     badmail_path = os.path.expanduser(b'~/.gpgmda/badmail')
@@ -372,6 +379,7 @@ def move_to_badmail(gpgfile):
     os.path.altsep = b'/'
     shutil.move(gpgfile, badmail_path)
 
+
 def decrypt_message(gpgfile, stdout=False):
     global delete_badmail
     global skip_badmail
@@ -381,7 +389,7 @@ def decrypt_message(gpgfile, stdout=False):
         os._exit(1)
     eprint("\ndecrypt_msg() gpgfile:", gpgfile)
     if b'@' not in email_address:
-        eprint("Invalid email address:", email_address,", exiting.")
+        eprint("Invalid email address:", email_address, ", exiting.")
         os._exit(1)
 
     if not file_exists(gpgfile):
@@ -404,7 +412,7 @@ def decrypt_message(gpgfile, stdout=False):
         eprint("maildir:", maildir, "does not exist. Exiting.")
         os._exit(1)
 
-    file_previously_decrypted = 0
+    #file_previously_decrypted = 0
     glob_pattern = maildir + b'/' + maildir_subfolder + b'/*.' + gpgfile_name
     eprint("glob_pattern:", glob_pattern)
     result = glob.glob(glob_pattern)
@@ -513,7 +521,6 @@ def decrypt_message(gpgfile, stdout=False):
     return True
 
 
-
 def gpgmaildir_to_maildir():
     # todo add locking
     eprint("gpgmda_to_maildir using gpgMaildir_archive_folder:", gpgMaildir_archive_folder)
@@ -549,8 +556,10 @@ def gpgmaildir_to_maildir():
     eprint("\nchecking if the message counts in the maildir and the gpgmaildir match")
     maildir_counts_dict = get_maildir_file_counts()
     eprint("maildir_counts_dict:", maildir_counts_dict)
-    if maildir_counts_dict['files_in_gpgmaildir'] > maildir_counts_dict['files_in_maildir']:
-        eprint("files_in_gpgmaildir > files_in_maildir:", maildir_counts_dict['files_in_gpgmaildir'], '>', maildir_counts_dict['files_in_maildir'])
+    maildir_file_count = maildir_counts_dict['files_in_maildir']
+    gpgmaildir_file_count = maildir_counts_dict['files_in_gpgmaildir']
+    if gpgmaildir_file_count > maildir_file_count:
+        eprint("files_in_gpgmaildir > files_in_maildir:", gpgmaildir_file_count, '>', maildir_file_count)
         eprint("locating un-decrypted files")
         files_in_gpgmaildir = list_files(gpgmaildir)
         files_in_maildir = list_files(maildir)
@@ -565,6 +574,7 @@ def gpgmaildir_to_maildir():
                 print("\n\nfound file that has not been decrypted yet:", file)
                 decrypt_message(file, stdout=False)
     return
+
 
 def search_list_of_strings_for_substring(list, substring):
     item_found = ''
@@ -581,20 +591,26 @@ def search_list_of_strings_for_substring(list, substring):
 def update_notmuch_db():
     run_notmuch("update_notmuch_db")
 
+
 def update_notmuch_address_db():
     run_notmuch("update_address_db")
+
 
 def update_notmuch_address_db_build():
     run_notmuch("build_address_db")
 
+
 def query_notmuch(query):
     run_notmuch("query_notmuch", query)
+
 
 def query_afew(query):
     run_notmuch("query_afew", query)
 
+
 def query_notmuch_address_db(query):
     run_notmuch("query_address_db", query)
+
 
 def check_noupdate_list():
     noupdate_list = open(gpgmda_program_folder + b"/.noupdate", 'r').readlines() #todo move config to ~/.gpgmda
@@ -602,6 +618,7 @@ def check_noupdate_list():
         if args.email_address in item:
             eprint(args.email_address + " is listed in .noupdate, exiting")
             os._exit(1)
+
 
 def main():
     global options, args
@@ -698,6 +715,7 @@ def main():
         query = args.address_query
         query_notmuch_address_db(query)
 
+
 # http://stackoverflow.com/questions/3853722/python-argparse-how-to-insert-newline-in-the-help-text
 class SmartFormatter(argparse.HelpFormatter):
     def _split_lines(self, text, width):
@@ -706,8 +724,8 @@ class SmartFormatter(argparse.HelpFormatter):
             return text[2:].splitlines()
         return argparse.HelpFormatter._split_lines(self, text, width)
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     try:
         start_time = time.time()
         parser = argparse.ArgumentParser(formatter_class=SmartFormatter)
@@ -739,9 +757,4 @@ if __name__ == '__main__':
         raise e
     except SystemExit as e:
         raise e
-    except Exception as e:
-        eprint('ERROR, UNEXPECTED EXCEPTION')
-        eprint(str(e))
-        traceback.print_exc()
-        os._exit(1)
 
