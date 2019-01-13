@@ -29,7 +29,7 @@ debug = False
 
 
 def check_for_notmuch_database(email_archive_folder):
-    notmuch_database_folder = email_archive_folder + b"/_Maildirs/.notmuch/xapian"
+    notmuch_database_folder = email_archive_folder + "/_Maildirs/.notmuch/xapian"
     if not os.path.isdir(notmuch_database_folder):
         eprint('''Error: notmuch has not created the xapian database yet. Run \"mail_update user@domain.com --update\" first. Exiting.''')
         os._exit(1)
@@ -53,7 +53,7 @@ def rsync_mail(email_address, gpgMaildir_archive_folder):
         eprint("rsync did not return 0, exiting")
 #        os._exit(1)
 
-    with open(b"/dev/shm/.gpgmda_rsync_last_new_mail_" + email_address, 'wb') as rsync_logfile_handle:
+    with open("/dev/shm/.gpgmda_rsync_last_new_mail_" + email_address, 'wb') as rsync_logfile_handle:
         rsync_logfile_handle.write(rsync_p_output[0])
 
 
