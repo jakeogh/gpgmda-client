@@ -210,9 +210,9 @@ tags = unread;inbox;
 [maildir]
 synchronize_flags = false
 """
-    notmuch_config_folder = email_archive_folder + "/_notmuch_config"
+    notmuch_config_folder = '/'.join(email_archive_folder, "_notmuch_config"])
     check_or_create_dir(notmuch_config_folder)
-    notmuch_config_file_location = notmuch_config_folder + "/.notmuch_config"
+    notmuch_config_file_location = '/'.join([notmuch_config_folder, ".notmuch_config"])
     if debug:
         eprint("writing notmuch config to:", notmuch_config_file_location)
     notmuch_config_file_handle = open(notmuch_config_file_location, "w")
@@ -600,22 +600,22 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
 @click.pass_context
 def build_paths(ctx, email_address):
     assert '@' in email_address
-    ctx.email_archive_folder = "/home/user/__email_folders/"
+    ctx.email_archive_folder = "/home/user/__email_folders"
     check_or_create_dir(ctx.email_archive_folder)
 
-    ctx.gpgMaildir_archive_folder_base_path = ctx.email_archive_folder + "/_gpgMaildirs/"
+    ctx.gpgMaildir_archive_folder_base_path = '/'.join([ctx.email_archive_folder, "_gpgMaildirs"])
     check_or_create_dir(ctx.gpgMaildir_archive_folder_base_path)
 
-    ctx.gpgMaildir_archive_folder = ctx.gpgMaildir_archive_folder_base_path + email_address
+    ctx.gpgMaildir_archive_folder = '/'.join([ctx.gpgMaildir_archive_folder_base_path, email_address])
     check_or_create_dir(ctx.gpgMaildir_archive_folder)
 
-    ctx.gpgmaildir = ctx.gpgMaildir_archive_folder + "/gpgMaildir/"
+    ctx.gpgmaildir = '/'.join([ctx.gpgMaildir_archive_folder, "gpgMaildir"])
     check_or_create_dir(ctx.gpgmaildir)
 
-    stdMaildir_archive_folder = ctx.email_archive_folder + "/_Maildirs/" + email_address
+    stdMaildir_archive_folder = '/'.join([ctx.email_archive_folder, "_Maildirs", email_address])
     check_or_create_dir(stdMaildir_archive_folder)
 
-    ctx.maildir = stdMaildir_archive_folder + "/Maildir/"
+    ctx.maildir = '/'.join([stdMaildir_archive_folder, "Maildir"])
     check_or_create_dir(ctx.maildir + "/new/")
     check_or_create_dir(ctx.maildir + "/cur/")
     check_or_create_dir(ctx.maildir + "/.sent/")
