@@ -3,10 +3,11 @@
 
 # todo: locking to prevent multiple instances of mail_update
 
+import click
 import sys
 import os
 #import traceback
-import argparse
+#import argparse
 import time
 import subprocess
 import shutil
@@ -37,7 +38,7 @@ def check_for_notmuch_database():
         os._exit(1)
 
 
-def rsync_mail():
+def rsync_mail(email_address):
     load_ssh_key()
     eprint("running rsync")
     #rsync_p = \
@@ -59,7 +60,7 @@ def rsync_mail():
         rsync_logfile_handle.write(rsync_p_output[0])
 
 
-def run_notmuch(mode, query=b"", debug=False):
+def run_notmuch(mode, email_address, query=b"", debug=False):
     yesall = False
     if debug: eprint("run_notmuch():", mode)
     if not isinstance(query, bytes):
@@ -69,7 +70,7 @@ def run_notmuch(mode, query=b"", debug=False):
     check_or_create_dir(notmuch_config_folder)
 
     notmuch_config_file = notmuch_config_folder + b"/.notmuch_config"
-    make_notmuch_config()
+    make_notmuch_config(email_address=email_address)
 
     if mode == "update_notmuch_db":
         current_env = os.environ.copy()
@@ -198,7 +199,7 @@ def run_notmuch(mode, query=b"", debug=False):
         os._exit(1)
 
 
-def make_notmuch_config():
+def make_notmuch_config(email_address):
     username = email_address.split(b"@")[0]
 
     notmuch_config = b"""
@@ -234,7 +235,7 @@ def move_terminal_text_up_one_page():
         print('', file=sys.stderr)
 
 
-def start_alot():
+def start_alot(email_address):
     check_for_notmuch_database()
     alot_config = subprocess.Popen([gpgmda_program_folder + b"/gpgmda-client-make-alot-config", email_address], stdout=subprocess.PIPE).communicate()
     alot_theme = subprocess.Popen([gpgmda_program_folder + b"/gpgmda-client-make-alot-theme"], stdout=subprocess.PIPE).communicate()
@@ -256,7 +257,7 @@ def start_alot():
     alot_p = os.system(b' '.join([b'/usr/bin/alot', b'-C', b'256', b'--debug-level=debug', b'--logfile=/dev/shm/__alot_log', b'--notmuch-config', notmuch_config_folder + b'/.notmuch_config', b'--mailindex-path', email_archive_folder + b'/_Maildirs', b'-c', b'/dev/shm/__alot_config_' + email_address]))
 
 
-def load_ssh_key():
+def load_ssh_key(email_address):
     eprint("load_ssh_key(%s)" % email_address)
     if b'gmail' in email_address:
         return
@@ -323,7 +324,7 @@ def warm_up_gpg():
             eprint("warm_up_gpg did not return 0, exiting")
             os._exit(1)
 
-        if not test_string in gpg_cmd_proc_output_stdout:
+        if test_string not in gpg_cmd_proc_output_stdout:
             eprint("test_string:", test_string, "is not in gpg_cmd_proc_output_stdout:", gpg_cmd_proc_output_stdout, "Exiting.")
             os._exit(1)
         else:
@@ -336,10 +337,10 @@ def warm_up_gpg():
 def get_maildir_file_counts():
     files_in_gpgmaildir = count_files(gpgmaildir)
     files_in_maildir = count_files(maildir)
-    return {'files_in_gpgmaildir':files_in_gpgmaildir, "files_in_maildir":files_in_maildir}
+    return {'files_in_gpgmaildir': files_in_gpgmaildir, "files_in_maildir": files_in_maildir}
 
 
-def parse_rsync_log_to_list():
+def parse_rsync_log_to_list(email_address):
     rsync_log = b'/dev/shm/.gpgmda_rsync_last_new_mail_' + email_address
     #try:
     with open(rsync_log, 'rb') as fh:
@@ -360,13 +361,13 @@ def parse_rsync_log_to_list():
     return full_path_list
 
 
-def decrypt_list_of_messages(message_list):
+def decrypt_list_of_messages(message_list, email_address, delete_badmail, skip_badmail, move_badmail):
     message_list = filter(None, message_list)   #remove empty items
     process_count = cpu_count()
     p = Pool(process_count)
     eprint("message_list:", message_list)
-    for message in message_list:    #useful for debugging
-       decrypt_message(message)
+    for gpgfile in message_list:    #useful for debugging
+       decrypt_message(email_address=email_address, gpgfile=gpgfile, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail)
 
 
 def move_to_badmail(gpgfile):
@@ -380,10 +381,7 @@ def move_to_badmail(gpgfile):
     shutil.move(gpgfile, badmail_path)
 
 
-def decrypt_message(gpgfile, stdout=False):
-    global delete_badmail
-    global skip_badmail
-    global move_badmail
+def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_badmail, stdout=False):
     if not isinstance(gpgfile, bytes):
         eprint("decrypt_message() takes the gpgfile as bytes")
         os._exit(1)
@@ -421,14 +419,14 @@ def decrypt_message(gpgfile, stdout=False):
         eprint("ERROR: This shouldnt happen. More than one result was returned for glob_pattern:", glob_pattern, ": ", result)
         os._exit(1)
 
-    if stdout == False:
+    if stdout is False:
         if len(result) == 1:
             result = result[0]
             eprint("skipping existing file:", result)
             return True
 
     eprint("decrypting:", gpgfile)
-    if stdout == True:
+    if stdout:
 #       command = "gpg2 -o - --decrypt " + gpgfile + " | tar --transform=s/$/." + gpgfile_name + "/ -xvf -" # hides the tar header
         command = b"gpg2 -o - --decrypt " + gpgfile
         eprint("decrypt_msg() command:", command)
@@ -489,7 +487,7 @@ def decrypt_message(gpgfile, stdout=False):
                 move_to_badmail(gpgfile)
 
             elif not skip_badmail:
-                if delete_badmail == False:
+                if delete_badmail is False:
                     delete_message_answer = input("Would you like to move this message locally to the ~/.gpgmda/badmail folder and delete it off the server? (yes/no/yesall/skipall/moveall): ")
                     if delete_message_answer.lower() == "yesall":
                         delete_badmail = True
@@ -497,7 +495,7 @@ def decrypt_message(gpgfile, stdout=False):
                         skip_badmail = True
                     if delete_message_answer.lower() == "moveall":
                         move_badmail = True
-                if delete_badmail == True:
+                if delete_badmail:
                     delete_message_answer = "yes"
 
                 if delete_message_answer.lower() == "yes":
@@ -521,7 +519,7 @@ def decrypt_message(gpgfile, stdout=False):
     return True
 
 
-def gpgmaildir_to_maildir():
+def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badmail):
     # todo add locking
     eprint("gpgmda_to_maildir using gpgMaildir_archive_folder:", gpgMaildir_archive_folder)
     eprint("Checking for default-recipient in ~/.gnupg/gpg.conf")
@@ -546,9 +544,9 @@ def gpgmaildir_to_maildir():
             eprint("rsync transferred 0 files, skipping decrypt")
 
         else:
-            rsync_list = parse_rsync_log_to_list()
+            rsync_list = parse_rsync_log_to_list(email_address=email_address)
             eprint("rsync_list:", rsync_list)
-            decrypt_list_of_messages(rsync_list)
+            decrypt_list_of_messages(message_list=rsync_list, email_address=email_address, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail)
 
     else:
         eprint(rsync_last_new_mail_file, "does not exist or is 0 bytes")
@@ -567,12 +565,12 @@ def gpgmaildir_to_maildir():
         eprint("len(files_in_maildir):", len(files_in_maildir))
         full_maildir_string = b"\n".join(files_in_maildir)
 
-        for file in files_in_gpgmaildir:
-            subfolder = file.split(b'/')[-2]
-            hash = file.split(b'/')[-1]
-            if hash not in full_maildir_string:
-                print("\n\nfound file that has not been decrypted yet:", file)
-                decrypt_message(file, stdout=False)
+        for gpgfile in files_in_gpgmaildir:
+            #subfolder = file.split(b'/')[-2]
+            gpghash = gpgfile.split(b'/')[-1]
+            if gpghash not in full_maildir_string:
+                eprint("\n\nfound gpgfile that has not been decrypted yet:", gpgfile)
+                decrypt_message(email_address=email_address, gpgfile=gpgfile, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail, stdout=False)
     return
 
 
@@ -588,48 +586,43 @@ def search_list_of_strings_for_substring(list, substring):
     return item_found
 
 
-def update_notmuch_db():
-    run_notmuch("update_notmuch_db")
+def update_notmuch_db(email_address):
+    run_notmuch("update_notmuch_db", email_address=email_address)
 
 
-def update_notmuch_address_db():
-    run_notmuch("update_address_db")
+def update_notmuch_address_db(email_address):
+    run_notmuch("update_address_db", email_address=email_address)
 
 
-def update_notmuch_address_db_build():
-    run_notmuch("build_address_db")
+def update_notmuch_address_db_build(email_address):
+    run_notmuch("build_address_db", email_address=email_address)
 
 
-def query_notmuch(query):
-    run_notmuch("query_notmuch", query)
+def query_notmuch(email_address, query):
+    run_notmuch("query_notmuch", email_address=email_address, query=query)
 
 
-def query_afew(query):
-    run_notmuch("query_afew", query)
+def query_afew(email_address, query):
+    run_notmuch("query_afew", email_address=email_address, query=query)
 
 
-def query_notmuch_address_db(query):
-    run_notmuch("query_address_db", query)
+def query_notmuch_address_db(email_address, query):
+    run_notmuch("query_address_db", email_address=email_address, query=query)
 
 
-def check_noupdate_list():
+def check_noupdate_list(email_address):
     noupdate_list = open(gpgmda_program_folder + b"/.noupdate", 'r').readlines() #todo move config to ~/.gpgmda
     for item in noupdate_list:
-        if args.email_address in item:
-            eprint(args.email_address + " is listed in .noupdate, exiting")
+        if email_address in item:
+            eprint(email_address + " is listed in .noupdate, exiting")
             os._exit(1)
 
 
-def main():
-    global options, args
-    global delete_badmail
-    delete_badmail = False
-    global skip_badmail
-    skip_badmail = False
-    global move_badmail
-    move_badmail = False
-    global email_address
-    email_address = bytes(args.email_address, encoding='UTF8')
+def main(email_address, verbose, warm_up_gpg, read, update_notmuch, download_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, address_db_build, notmuch_query, address_query, afew_query):
+
+    #email_address = bytes(args.email_address, encoding='UTF8')
+    assert email_address == 'user@v6y.net'
+
     global gpgmda_program_folder
     gpgmda_program_folder = os.path.dirname(bytes(os.path.realpath(__file__), encoding='UTF8'))
     global email_archive_folder
@@ -650,35 +643,34 @@ def main():
     check_or_create_dir(maildir + b"/.sent")
     email_archive_type = "gpgMaildir"       # fixme: support getmail
 
-    if args.warm_up_gpg:
+    if warm_up_gpg:
         warm_up_gpg()
 
-
-    if args.download:
-        check_noupdate_list()
+    if download:
+        check_noupdate_list(email_address=email_address)
 
         if email_archive_type == "gpgMaildir":
             check_or_create_dir(gpgMaildir_archive_folder)
             warm_up_gpg()
-            rsync_mail()
+            rsync_mail(email_address=email_address)
 
         else:
             eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
             os._exit(1)
 
-    if args.decrypt:
+    if decrypt:
         check_noupdate_list()
 
         if email_archive_type == "gpgMaildir":
             check_or_create_dir(gpgMaildir_archive_folder)
             warm_up_gpg()
-            gpgmaildir_to_maildir()
+            gpgmaildir_to_maildir(email_address=email_address)
 
         else:
             eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
             os._exit(1)
 
-    if args.update_notmuch:
+    if update_notmuch:
         check_noupdate_list()
 
         if email_archive_type == "gpgMaildir":
@@ -695,66 +687,78 @@ def main():
         update_notmuch_db()
         update_notmuch_address_db()
 
-    if args.read:
-        load_ssh_key()     # so mail can be sent without having to unlock the key
-        make_notmuch_config()
-        start_alot()
+    if read:
+        load_ssh_key(email_address=email_address)     # so mail can be sent without having to unlock the key
+        make_notmuch_config(email_address=email_address)
+        start_alot(email_address=email_address)
 
-    if args.notmuch_query:
-        print(args)
-        query_notmuch(args.notmuch_query)
+    if notmuch_query:
+        eprint(notmuch_query)
+        query_notmuch(notmuch_query)
 
-    if args.afew_query:
-        print(args)
-        query_afew(args.afew_query)
+    if afew_query:
+        eprint(afew_query)
+        query_afew(afew_query)
 
-    if args.address_db_build:
+    if address_db_build:
         update_notmuch_address_db_build()
 
-    if args.address_query:
-        query = args.address_query
+    if address_query:
+        query = address_query
         query_notmuch_address_db(query)
 
 
-# http://stackoverflow.com/questions/3853722/python-argparse-how-to-insert-newline-in-the-help-text
-class SmartFormatter(argparse.HelpFormatter):
-    def _split_lines(self, text, width):
-        # this is the RawTextHelpFormatter._split_lines
-        if text.startswith('R|'):
-            return text[2:].splitlines()
-        return argparse.HelpFormatter._split_lines(self, text, width)
+## http://stackoverflow.com/questions/3853722/python-argparse-how-to-insert-newline-in-the-help-text
+#class SmartFormatter(argparse.HelpFormatter):
+#    def _split_lines(self, text, width):
+#        # this is the RawTextHelpFormatter._split_lines
+#        if text.startswith('R|'):
+#            return text[2:].splitlines()
+#        return argparse.HelpFormatter._split_lines(self, text, width)
+
+
+@click.command()
+@click.argument("email_address", nargs=1)
+@click.option("--verbose", is_flag=True)
+@click.option("--warm-up-gpg", help="warm up gpg", is_flag=True)
+@click.option("--read", help="read mail without checking for new mail", is_flag=True)
+@click.option("--update-notmuch", help="update notmuch with new mail from (normal, unencrypted) maildir", is_flag=True)
+@click.option("--download", help="rsync new mail to encrypted maildir", is_flag=True)
+@click.option("--decrypt", help="decrypt new mail in encrypted maildir to unencrypted maildir", is_flag=True)
+@click.option("--delete-badmail", help="", is_flag=True)
+@click.option("--skip-badmail", help="", is_flag=True)
+@click.option("--move-badmail", help="", is_flag=True)
+@click.option("--address-db-build", help="build address database for use with --address_query", is_flag=True)
+@click.option("--notmuch-query",  help="R|execute arbitrary notmuch query", type=str, is_flag=False)
+@click.option("--address-query", help="search for address string", type=str, is_flag=False)
+@click.option("--afew-query",  help="R|execute arbitrary afew query", type=str, is_flag=False)
+def gpgmda_client(email_address, verbose, warm_up_gpg, read, update_notmuch, download_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, address_db_build, notmuch_query, address_query, afew_query):
+    start_time = time.time()
+    #parser = argparse.ArgumentParser(formatter_class=SmartFormatter)
+    #parser.add_argument("email_address", help='R|email address')
+
+    #parser.add_argument("--verbose", help="R|enable debug output", action="store_true", default=False)
+    #parser.add_argument("--warm-up-gpg", help="R|warm up gpg", action="store_true", default=False)
+    #parser.add_argument("--read", help="R|read mail without checking for new mail", action="store_true", default=False)
+
+    #parser.add_argument("--update_notmuch", help="R|update notmuch with new mail from (normal, unencrypted) maildir", action="store_true", default=False)
+    #parser.add_argument("--download",       help="R|rsync new mail to encrypted maildir", action="store_true", default=False)
+    #parser.add_argument("--decrypt",        help="R|decrypt new mail in encrypted maildir to unencrypted maildir", action="store_true", default=False)
+    #parser.add_argument("--address_query",  help="R|search for address string", type=str)
+    #parser.add_argument("--address_db_build", help="R|build address database for use with --address_query", action="store_true", default=False)
+    #parser.add_argument("--notmuch_query",  help="R|execute arbitrary notmuch query", type=str)
+    #parser.add_argument("--afew_query",  help="R|execute arbitrary afew query", type=str)
+
+    #args = parser.parse_args()
+    if verbose:
+        eprint(time.asctime())
+    main_result = main(email_address=email_address, verbose=verbose, warm_up_gpg=warm_up_gpg, read=read, update_notmuch=update_notmuch, download_notmuch=download_notmuch, download=download, decrypt=decrypt, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail, address_db_build=address_db_build, notmuch_query=notmuch_query, address_query=address_query, afew_query=afew_query)
+    if debug: eprint("main_result:", main_result)
+    if verbose:
+        eprint(time.asctime())
+        eprint('TOTAL TIME IN MINUTES:',)
+        eprint((time.time() - start_time) / 60.0)
 
 
 if __name__ == '__main__':
-    try:
-        start_time = time.time()
-        parser = argparse.ArgumentParser(formatter_class=SmartFormatter)
-        parser.add_argument("email_address", help='R|email address')
-
-        parser.add_argument("--verbose", help="R|enable debug output", action="store_true", default=False)
-        parser.add_argument("--warm-up-gpg", help="R|warm up gpg", action="store_true", default=False)
-        parser.add_argument("--read", help="R|read mail without checking for new mail", action="store_true", default=False)
-
-        parser.add_argument("--update_notmuch", help="R|update notmuch with new mail from (normal, unencrypted) maildir", action="store_true", default=False)
-        parser.add_argument("--download",       help="R|rsync new mail to encrypted maildir", action="store_true", default=False)
-        parser.add_argument("--decrypt",        help="R|decrypt new mail in encrypted maildir to unencrypted maildir", action="store_true", default=False)
-        parser.add_argument("--address_query",  help="R|search for address string", type=str)
-        parser.add_argument("--address_db_build", help="R|build address database for use with --address_query", action="store_true", default=False)
-        parser.add_argument("--notmuch_query",  help="R|execute arbitrary notmuch query", type=str)
-        parser.add_argument("--afew_query",  help="R|execute arbitrary afew query", type=str)
-
-        args = parser.parse_args()
-        if args.verbose:
-            eprint(time.asctime())
-        main_result = main()
-        if debug: eprint("main_result:", main_result)
-        if args.verbose:
-            eprint(time.asctime())
-            eprint('TOTAL TIME IN MINUTES:',)
-            eprint((time.time() - start_time) / 60.0)
-
-    except KeyboardInterrupt as e:
-        raise e
-    except SystemExit as e:
-        raise e
-
+    gpgmda_client()

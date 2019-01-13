@@ -23,12 +23,12 @@ version = 0.01
 #    long_descr = f.read().decode("utf-8")
 
 setup(
-    name = "gpgmda-client",
-    version = version,
-    url = "https://github.com/jakeogh/gpgmda-client",
+    name="gpgmda-client",
+    version=version,
+    url="https://github.com/jakeogh/gpgmda-client",
     license='MIT',
-    author = "jakeogh",
-    author_email = "github.com@v6y.net",
+    author="jakeogh",
+    author_email="github.com@v6y.net",
     description='client for gpgmda',
     long_description=__doc__,
     packages=find_packages(exclude=['tests']),
