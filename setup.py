@@ -40,7 +40,7 @@ setup(
     install_requires=dependencies,
     entry_points={
         'console_scripts': [
-            'gpgmda-client = gpgmda_client.gpgmda_client:gpgmda_client',
+            'gpgmda-client = gpgmda_client.gpgmda_client:client',
         ],
     },
 #   long_description = long_descr,
