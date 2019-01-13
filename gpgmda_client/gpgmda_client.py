@@ -592,8 +592,6 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
     global gpgmda_program_folder
     gpgmda_program_folder = os.path.dirname(bytes(os.path.realpath(__file__), encoding='UTF8'))
 
-    ctx.email_archive_folder = "/home/user/__email_folders"
-    check_or_create_dir(ctx.email_archive_folder)
 
     #ctx.gpgMaildir_archive_folder = ctx.email_archive_folder + "/_gpgMaildirs/" + email_address
 
@@ -615,6 +613,9 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
 @click.argument("email_address", nargs=1)
 @click.pass_context
 def build_paths(ctx, email_address):
+    ctx.email_archive_folder = "/home/user/__email_folders"
+    check_or_create_dir(ctx.email_archive_folder)
+
     ctx.gpgMaildir_archive_folder_base_path = ctx.email_archive_folder + "/_gpgMaildirs/"
     check_or_create_dir(ctx.gpgMaildir_archive_folder_base_path)
 
