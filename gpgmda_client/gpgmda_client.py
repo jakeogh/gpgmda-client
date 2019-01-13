@@ -596,8 +596,6 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
     check_or_create_dir(ctx.email_archive_folder)
 
     #ctx.gpgMaildir_archive_folder = ctx.email_archive_folder + "/_gpgMaildirs/" + email_address
-    ctx.gpgMaildir_archive_folder_base_path = ctx.email_archive_folder + "/_gpgMaildirs/"
-    check_or_create_dir(ctx.gpgMaildir_archive_folder_base_path)
 
     #global gpgmaildir
     #gpgmaildir = ctx.gpgMaildir_archive_folder +"email address" + "/gpgMaildir" #wroing
@@ -617,8 +615,12 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
 @click.argument("email_address", nargs=1)
 @click.pass_context
 def build_paths(ctx, email_address):
+    ctx.gpgMaildir_archive_folder_base_path = ctx.email_archive_folder + "/_gpgMaildirs/"
+    check_or_create_dir(ctx.gpgMaildir_archive_folder_base_path)
+
     ctx.gpgMaildir_archive_folder = ctx.gpgMaildir_archive_folder_base_path + email_address
     check_or_create_dir(ctx.gpgMaildir_archive_folder)
+
     ctx.gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
     check_or_create_dir(ctx.gpgmaildir)
 
@@ -626,10 +628,10 @@ def build_paths(ctx, email_address):
     check_or_create_dir(stdMaildir_archive_folder)
 
     ctx.maildir = stdMaildir_archive_folder + "/Maildir"
-
     check_or_create_dir(ctx.maildir + "/new")
     check_or_create_dir(ctx.maildir + "/cur")
     check_or_create_dir(ctx.maildir + "/.sent")
+
 
 @client.command()
 @click.argument("email_address", nargs=1)
