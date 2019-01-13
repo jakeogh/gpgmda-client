@@ -481,7 +481,7 @@ def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badm
         eprint("error: default-recipient is not defined in ~/.gnupg/gpg.conf. Exiting.")
         os._exit(1)
 
-    rsync_last_new_mail_file = b'/dev/shm/.gpgmda_rsync_last_new_mail_' + email_address
+    rsync_last_new_mail_file = '/dev/shm/.gpgmda_rsync_last_new_mail_' + email_address
     eprint("checking to see if", rsync_last_new_mail_file, "exists and is greater than 0 bytes")
     rsync_files_transferred = 0
     if file_exists(rsync_last_new_mail_file):
