@@ -616,64 +616,7 @@ def check_noupdate_list(email_address):
 
 
 def main_func(email_address, verbose, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, email_archive_type):
-    #email_address = bytes(args.email_address, encoding='UTF8')
-    assert email_address == 'user@v6y.net'
 
-    global gpgmda_program_folder
-    gpgmda_program_folder = os.path.dirname(bytes(os.path.realpath(__file__), encoding='UTF8'))
-    global email_archive_folder
-    email_archive_folder = "/home/user/__email_folders"
-    check_or_create_dir(email_archive_folder)
-    global gpgMaildir_archive_folder
-    gpgMaildir_archive_folder = email_archive_folder + "/_gpgMaildirs/" + email_address
-    check_or_create_dir(gpgMaildir_archive_folder)
-    global gpgmaildir
-    gpgmaildir = gpgMaildir_archive_folder + "/gpgMaildir"
-    check_or_create_dir(gpgmaildir)
-    Maildir_archive_folder = email_archive_folder + "/_Maildirs/" + email_address
-    check_or_create_dir(Maildir_archive_folder)
-    global maildir
-    maildir = Maildir_archive_folder + "/Maildir"
-    check_or_create_dir(maildir + "/new")
-    check_or_create_dir(maildir + "/cur")
-    check_or_create_dir(maildir + "/.sent")
-
-    warm_up_gpg()
-
-
-    if decrypt:
-        check_noupdate_list()
-
-        if email_archive_type == "gpgMaildir":
-            check_or_create_dir(gpgMaildir_archive_folder)
-            warm_up_gpg()
-            gpgmaildir_to_maildir(email_address=email_address)
-
-        else:
-            eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
-            os._exit(1)
-
-    if update_notmuch:
-        check_noupdate_list()
-
-        if email_archive_type == "gpgMaildir":
-            check_or_create_dir(gpgMaildir_archive_folder)
-            warm_up_gpg()
-
-        elif email_archive_type == "getmail":
-            eprint('gpgmda_program_folder/getmail_gmail "${email_address}" || exit 1')
-            eprint("todo, call /getmail_gmail ${email_address}")
-
-        else:
-            eprint("unknown folder type", email_archive_type, ", exiting")
-
-        update_notmuch_db()
-        update_notmuch_address_db()
-
-    if read:
-        load_ssh_key(email_address=email_address)     # so mail can be sent without having to unlock the key
-        make_notmuch_config(email_address=email_address)
-        start_alot(email_address=email_address)
 
 @click.command()
 @click.argument("email_address", nargs=1)
@@ -731,7 +674,8 @@ def notmuch_query(query):
 @click.option("--skip-badmail", help="", is_flag=True)
 @click.option("--move-badmail", help="", is_flag=True)
 @click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
-def gpgmda_client(email_address, verbose, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, email_archive_type):
+@click.pass_context
+def gpgmda_client(ctx, email_address, verbose, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, email_archive_type):
     start_time = time.time()
     #parser = argparse.ArgumentParser(formatter_class=SmartFormatter)
     #parser.add_argument("email_address", help='R|email address')
@@ -750,8 +694,68 @@ def gpgmda_client(email_address, verbose, read, update_notmuch, download, decryp
 
     if verbose:
         eprint(time.asctime())
-    main_result = main_func(email_address=email_address, verbose=verbose, read=read, update_notmuch=update_notmuch, download=download, decrypt=decrypt, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail, email_archive_type=email_archive_type)
-    if debug: eprint("main_result:", main_result)
+
+    #email_address = bytes(args.email_address, encoding='UTF8')
+    assert email_address == 'user@v6y.net'
+
+    global gpgmda_program_folder
+    gpgmda_program_folder = os.path.dirname(bytes(os.path.realpath(__file__), encoding='UTF8'))
+    global email_archive_folder
+    email_archive_folder = "/home/user/__email_folders"
+    check_or_create_dir(email_archive_folder)
+    global gpgMaildir_archive_folder
+    gpgMaildir_archive_folder = email_archive_folder + "/_gpgMaildirs/" + email_address
+    check_or_create_dir(gpgMaildir_archive_folder)
+    global gpgmaildir
+    gpgmaildir = gpgMaildir_archive_folder + "/gpgMaildir"
+    check_or_create_dir(gpgmaildir)
+    Maildir_archive_folder = email_archive_folder + "/_Maildirs/" + email_address
+    check_or_create_dir(Maildir_archive_folder)
+    global maildir
+    maildir = Maildir_archive_folder + "/Maildir"
+    check_or_create_dir(maildir + "/new")
+    check_or_create_dir(maildir + "/cur")
+    check_or_create_dir(maildir + "/.sent")
+
+    ceprint("calling warm_up_gpg()")
+    ctx.forward(warm_up_gpg)
+
+    if decrypt:
+        check_noupdate_list()
+
+        if email_archive_type == "gpgMaildir":
+            check_or_create_dir(gpgMaildir_archive_folder)
+            warm_up_gpg()
+            gpgmaildir_to_maildir(email_address=email_address)
+
+        else:
+            eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
+            os._exit(1)
+
+    if update_notmuch:
+        check_noupdate_list()
+
+        if email_archive_type == "gpgMaildir":
+            check_or_create_dir(gpgMaildir_archive_folder)
+            warm_up_gpg()
+
+        elif email_archive_type == "getmail":
+            eprint('gpgmda_program_folder/getmail_gmail "${email_address}" || exit 1')
+            eprint("todo, call /getmail_gmail ${email_address}")
+
+        else:
+            eprint("unknown folder type", email_archive_type, ", exiting")
+
+        update_notmuch_db()
+        update_notmuch_address_db()
+
+    if read:
+        load_ssh_key(email_address=email_address)     # so mail can be sent without having to unlock the key
+        make_notmuch_config(email_address=email_address)
+        start_alot(email_address=email_address)
+
+    if debug:
+        eprint("main_result:", main_result)
     if verbose:
         eprint(time.asctime())
         eprint('TOTAL TIME IN MINUTES:',)
