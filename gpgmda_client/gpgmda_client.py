@@ -58,14 +58,8 @@ def rsync_mail(email_address, gpgMaildir_archive_folder):
         ceprint("wrote rsync_logfile:", rsync_logfile)
 
 
-def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, debug=False):
+def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, notmuch_config_file, notmuch_config_folder):
     yesall = False
-
-    notmuch_config_folder = email_archive_folder + "/_notmuch_config"
-    check_or_create_dir(notmuch_config_folder)
-
-    notmuch_config_file = notmuch_config_folder + "/.notmuch_config"
-    make_notmuch_config(email_address=email_address, email_archive_folder=email_archive_folder)
 
     if mode == "update_notmuch_db":
         current_env = os.environ.copy()
@@ -539,24 +533,24 @@ def search_list_of_strings_for_substring(list, substring):
     return item_found
 
 
-def update_notmuch_db(email_address, email_archive_folder, gpgmaildir):
-    run_notmuch("update_notmuch_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False)
+def update_notmuch_db(email_address, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
+    run_notmuch("update_notmuch_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False, notmuch_config_file=notmuch_config_file, notmuch_config_folder=notmuch_config_folder)
 
 
-def update_notmuch_address_db(email_address, email_archive_folder, gpgmaildir):
-    run_notmuch("update_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False)
+def update_notmuch_address_db(email_address, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
+    run_notmuch("update_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False, notmuch_config_file=notmuch_config_file, notmuch_config_folder=notmuch_config_folder)
 
 
-def update_notmuch_address_db_build(email_address, email_archive_folder, gpgmaildir):
-    run_notmuch("build_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False)
+def update_notmuch_address_db_build(email_address, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
+    run_notmuch("build_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False, notmuch_config_file=notmuch_config_file, notmuch_config_folder=notmuch_config_folder)
 
 
-def query_afew(email_address, query, email_archive_folder, gpgmaildir):
-    run_notmuch("query_afew", email_address=email_address, query=query, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir)
+def query_afew(email_address, query, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
+    run_notmuch("query_afew", email_address=email_address, query=query, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, notmuch_config_file=notmuch_config_file, notmuch_config_folder=notmuch_config_folder)
 
 
-def query_notmuch_address_db(email_address, query, email_archive_folder, gpgmaildir):
-    run_notmuch("query_address_db", email_address=email_address, query=query, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir)
+def query_notmuch_address_db(email_address, query, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
+    run_notmuch("query_address_db", email_address=email_address, query=query, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, notmuch_config_file=notmuch_config_file, notmuch_config_folder=notmuch_config_folder)
 
 
 def check_noupdate_list(email_address):
@@ -614,6 +608,13 @@ def build_paths(ctx, email_address):
     check_or_create_dir(ctx.maildir + "/new/")
     check_or_create_dir(ctx.maildir + "/cur/")
     check_or_create_dir(ctx.maildir + "/.sent/")
+
+    ctx.notmuch_config_folder = '/'.join([ctx.email_archive_folder, "_notmuch_config"])
+    check_or_create_dir(ctx.notmuch_config_folder)
+
+    ctx.notmuch_config_file = '/'.join([ctx.notmuch_config_folder, ".notmuch_config"])
+    make_notmuch_config(email_address=email_address, email_archive_folder=ctx.email_archive_folder)
+
     return ctx
 
 
@@ -624,7 +625,7 @@ def build_paths(ctx, email_address):
 def address_query(ctx, email_address, query):
     '''search for address string'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    query_notmuch_address_db(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir, email_archive_folder=ctx.email_archive_folder)
+    query_notmuch_address_db(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir, email_archive_folder=ctx.email_archive_folder, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
 
 
 @client.command()
@@ -673,9 +674,8 @@ def update_notmuch(ctx, email_address):
     else:
         eprint("unknown folder type", ctx.email_archive_type, ", exiting")
 
-
-    update_notmuch_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
-    update_notmuch_address_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
+    update_notmuch_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
+    update_notmuch_address_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
 
 
 @client.command()
@@ -701,7 +701,7 @@ def download(ctx, email_address):
 def address_db_build(ctx, email_address):
     '''build address database for use with address_query'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    update_notmuch_address_db_build(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
+    update_notmuch_address_db_build(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
 
 
 @client.command()
@@ -723,7 +723,7 @@ def notmuch_query(ctx, email_address, query):
     '''execute arbitrary notmuch query'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
-    run_notmuch("query_notmuch", email_address=email_address, query=query, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
+    run_notmuch("query_notmuch", email_address=email_address, query=query, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
 
 
 @client.command()
