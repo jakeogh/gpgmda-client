@@ -293,7 +293,7 @@ def short_random_string():
     return cmd_output
 
 
-@click.command()
+@client.command()
 def warm_up_gpg():
     # due to https://bugs.g10code.com/gnupg/issue1190 first get gpg-agent warmed up by decrypting a test message.
     decrypt_test = 0
