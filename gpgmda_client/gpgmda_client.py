@@ -650,7 +650,7 @@ def read(ctx, email_address):
 @click.pass_context
 def decrypt(ctx, email_address, email_archive_type):
     '''decrypt new mail in encrypted maildir to unencrypted maildir'''
-    ctx.invoke(build_paths)
+    ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(email_address=email_address)
 
     if email_archive_type == "gpgMaildir":
@@ -668,7 +668,7 @@ def decrypt(ctx, email_address, email_archive_type):
 @click.pass_context
 def update_notmuch(ctx, email_address, email_archive_type):
     '''update notmuch with new mail from (normal, unencrypted) maildir'''
-    ctx.invoke(build_paths)
+    ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(email_address=email_address)
 
     if email_archive_type == "gpgMaildir":
@@ -692,7 +692,7 @@ def update_notmuch(ctx, email_address, email_archive_type):
 @click.pass_context
 def download(ctx, email_address, email_archive_type):
     '''rsync new mail to encrypted maildir'''
-    ctx.invoke(build_paths)
+    ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(email_address=email_address)
 
     if email_archive_type == "gpgMaildir":
@@ -709,7 +709,7 @@ def download(ctx, email_address, email_archive_type):
 @click.pass_context
 def address_db_build(ctx, email_address):
     '''build address database for use with address_query'''
-    ctx.invoke(build_paths)
+    ctx = ctx.invoke(build_paths, email_address=email_address)
     update_notmuch_address_db_build(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
 
 
@@ -721,7 +721,7 @@ def address_db_build(ctx, email_address):
 @click.pass_context
 def afew_query(ctx, email_address, query):
     '''execute arbitrary afew query'''
-    ctx.invoke(build_paths)
+    ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
     query_afew(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir)
 
@@ -732,7 +732,7 @@ def afew_query(ctx, email_address, query):
 @click.pass_context
 def notmuch_query(ctx, email_address, query):
     '''execute arbitrary notmuch query'''
-    ctx.invoke(build_paths)
+    ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
     query_notmuch(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir)
 
