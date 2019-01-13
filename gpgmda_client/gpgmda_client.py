@@ -615,7 +615,7 @@ def build_paths(ctx, email_address):
     ctx.gpgMaildir_archive_folder = ctx.gpgMaildir_archive_folder_base_path + email_address
     check_or_create_dir(ctx.gpgMaildir_archive_folder)
 
-    ctx.gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir/"
+    ctx.gpgmaildir = ctx.gpgMaildir_archive_folder + "/gpgMaildir/"
     check_or_create_dir(ctx.gpgmaildir)
 
     stdMaildir_archive_folder = ctx.email_archive_folder + "/_Maildirs/" + email_address
