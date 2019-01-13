@@ -64,7 +64,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, no
     if mode == "update_notmuch_db":
         current_env = os.environ.copy()
         current_env["NOTMUCH_CONFIG"] = notmuch_config_file
-        notmuch_new_command = "NOTMUCH_CONFIG=" + notmuch_config_file + " notmuch new"
+        notmuch_new_command = ["NOTMUCH_CONFIG=" + notmuch_config_file, "notmuch", "new"]
         ceprint("notmuch_new_command:", notmuch_new_command)
         #notmuch_p = subprocess.Popen([b'notmuch', b'new'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, env=current_env)
         notmuch_p = subprocess.Popen(notmuch_new_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, env=current_env)
