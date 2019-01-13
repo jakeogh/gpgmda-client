@@ -661,7 +661,6 @@ def notmuch_query(query):
     query_notmuch(query)
 
 
-@click.group()
 @click.command()
 @click.argument("email_address", nargs=1)
 @click.option("--verbose", is_flag=True)
@@ -673,6 +672,7 @@ def notmuch_query(query):
 @click.option("--skip-badmail", help="", is_flag=True)
 @click.option("--move-badmail", help="", is_flag=True)
 @click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
+@click.group()
 @click.pass_context
 def client(ctx, email_address, verbose, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, email_archive_type):
     start_time = time.time()
