@@ -720,7 +720,7 @@ def address_db_build(ctx, email_address):
 @click.pass_context
 def address_query(ctx, email_address, query):
     '''search for address string'''
-    ctx.invoke(build_paths)
+    ctx.forward(build_paths)
     query_notmuch_address_db(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir)
 
 
