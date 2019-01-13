@@ -166,7 +166,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
     elif mode == "query_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_config_folder + "/nottoomuch-addresses.sh " + query
+        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + "nottoomuch-addresses.sh " + query
         return_code = os.system(command)
         if return_code != 0:
             eprint("\"nottoomuch-addresses.sh\" returned nonzero, exiting")
@@ -174,7 +174,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
     elif mode == "build_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_config_folder + "/nottoomuch-addresses.sh --update --rebuild"
+        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + "nottoomuch-addresses.sh --update --rebuild"
         return_code = os.system(command)
         if return_code != 0:
             eprint("\"nottoomuch-addresses.sh\" returned nonzero, exiting")
@@ -182,7 +182,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
     elif mode == "update_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_config_folder + "/nottoomuch-addresses.sh --update"
+        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + "nottoomuch-addresses.sh --update"
         return_code = os.system(command)
         if return_code != 0:
             eprint("\"nottoomuch-addresses.sh\" returned nonzero, exiting")
