@@ -28,14 +28,14 @@ global debug
 debug = False
 
 
-def check_for_notmuch_database():
+def check_for_notmuch_database(email_archive_folder):
     notmuch_database_folder = email_archive_folder + b"/_Maildirs/.notmuch/xapian"
     if not os.path.isdir(notmuch_database_folder):
         eprint('''Error: notmuch has not created the xapian database yet. Run \"mail_update user@domain.com --update\" first. Exiting.''')
         os._exit(1)
 
 
-def rsync_mail(email_address):
+def rsync_mail(email_address, gpgMaildir_archive_folder):
     load_ssh_key()
     eprint("running rsync")
     #rsync_p = \
@@ -57,7 +57,7 @@ def rsync_mail(email_address):
         rsync_logfile_handle.write(rsync_p_output[0])
 
 
-def run_notmuch(mode, email_address, query=b"", debug=False):
+def run_notmuch(mode, email_address, email_archive_folder, query=b"", debug=False):
     yesall = False
     if debug:
         eprint("run_notmuch():", mode)
@@ -151,7 +151,7 @@ def run_notmuch(mode, email_address, query=b"", debug=False):
             os._exit(1)
 
     elif mode == "query_notmuch":
-        check_for_notmuch_database()
+        check_for_notmuch_database(email_archive_folder=email_archive_folder)
         command = b"NOTMUCH_CONFIG=" + notmuch_config_file + b" notmuch " + query
         eprint("command:", command)
         return_code = os.system(command)
@@ -160,7 +160,7 @@ def run_notmuch(mode, email_address, query=b"", debug=False):
             os._exit(1)
 
     elif mode == "query_afew":
-        check_for_notmuch_database()
+        check_for_notmuch_database(email_archive_folder=email_archive_folder)
         command = b"afew" + b" --notmuch-config=" + notmuch_config_file + b" " + query
         eprint("command:", command)
         return_code = os.system(command)
@@ -169,7 +169,7 @@ def run_notmuch(mode, email_address, query=b"", debug=False):
             os._exit(1)
 
     elif mode == "query_address_db":
-        check_for_notmuch_database()
+        check_for_notmuch_database(email_archive_folder=email_archive_folder)
         command = b"XDG_CONFIG_HOME=" + notmuch_config_folder + b" NOTMUCH_CONFIG=" + notmuch_config_file + b" " + gpgmda_program_folder + b"/nottoomuch-addresses.sh " + query
         return_code = os.system(command)
         if return_code != 0:
@@ -177,7 +177,7 @@ def run_notmuch(mode, email_address, query=b"", debug=False):
             os._exit(1)
 
     elif mode == "build_address_db":
-        check_for_notmuch_database()
+        check_for_notmuch_database(email_archive_folder=email_archive_folder)
         command = b"XDG_CONFIG_HOME=" + notmuch_config_folder + b" NOTMUCH_CONFIG=" + notmuch_config_file + b" " + gpgmda_program_folder + b"/nottoomuch-addresses.sh --update --rebuild"
         return_code = os.system(command)
         if return_code != 0:
@@ -185,7 +185,7 @@ def run_notmuch(mode, email_address, query=b"", debug=False):
             os._exit(1)
 
     elif mode == "update_address_db":
-        check_for_notmuch_database()
+        check_for_notmuch_database(email_archive_folder=email_archive_folder)
         command = b"XDG_CONFIG_HOME=" + notmuch_config_folder + b" NOTMUCH_CONFIG=" + notmuch_config_file + b" " + gpgmda_program_folder + b"/nottoomuch-addresses.sh --update"
         return_code = os.system(command)
         if return_code != 0:
@@ -197,7 +197,7 @@ def run_notmuch(mode, email_address, query=b"", debug=False):
         os._exit(1)
 
 
-def make_notmuch_config(email_address):
+def make_notmuch_config(email_address, email_archive_folder):
     username = email_address.split(b"@")[0]
 
     notmuch_config = b"""
@@ -234,8 +234,8 @@ def move_terminal_text_up_one_page():
         print('', file=sys.stderr)
 
 
-def start_alot(email_address):
-    check_for_notmuch_database()
+def start_alot(email_address, email_archive_folder):
+    check_for_notmuch_database(email_archive_folder=email_archive_folder)
     alot_config = subprocess.Popen([gpgmda_program_folder + b"/gpgmda-client-make-alot-config", email_address], stdout=subprocess.PIPE).communicate()
     alot_theme = subprocess.Popen([gpgmda_program_folder + b"/gpgmda-client-make-alot-theme"], stdout=subprocess.PIPE).communicate()
 
@@ -300,7 +300,7 @@ def get_maildir_file_counts():
     return {'files_in_gpgmaildir': files_in_gpgmaildir, "files_in_maildir": files_in_maildir}
 
 
-def parse_rsync_log_to_list(email_address):
+def parse_rsync_log_to_list(email_address, gpgMaildir_archive_folder):
     rsync_log = b'/dev/shm/.gpgmda_rsync_last_new_mail_' + email_address
     with open(rsync_log, 'rb') as fh:
         rsync_log = fh.readlines()
@@ -476,7 +476,7 @@ def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_b
     return True
 
 
-def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badmail):
+def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badmail, gpgMaildir_archive_folder):
     # todo add locking
     eprint("gpgmda_to_maildir using gpgMaildir_archive_folder:", gpgMaildir_archive_folder)
     eprint("Checking for default-recipient in ~/.gnupg/gpg.conf")
@@ -543,28 +543,28 @@ def search_list_of_strings_for_substring(list, substring):
     return item_found
 
 
-def update_notmuch_db(email_address):
-    run_notmuch("update_notmuch_db", email_address=email_address)
+def update_notmuch_db(email_address, email_archive_folder):
+    run_notmuch("update_notmuch_db", email_address=email_address, email_archive_folder=email_archive_folder)
 
 
-def update_notmuch_address_db(email_address):
-    run_notmuch("update_address_db", email_address=email_address)
+def update_notmuch_address_db(email_address, email_archive_folder):
+    run_notmuch("update_address_db", email_address=email_address, email_archive_folder=email_archive_folder)
 
 
-def update_notmuch_address_db_build(email_address):
-    run_notmuch("build_address_db", email_address=email_address)
+def update_notmuch_address_db_build(email_address, email_archive_folder):
+    run_notmuch("build_address_db", email_address=email_address, email_archive_folder=email_archive_folder)
 
 
-def query_notmuch(email_address, query):
-    run_notmuch("query_notmuch", email_address=email_address, query=query)
+def query_notmuch(email_address, query, email_archive_folder):
+    run_notmuch("query_notmuch", email_address=email_address, query=query, email_archive_folder=email_archive_folder)
 
 
-def query_afew(email_address, query):
-    run_notmuch("query_afew", email_address=email_address, query=query)
+def query_afew(email_address, query, email_archive_folder):
+    run_notmuch("query_afew", email_address=email_address, query=query, email_archive_folder=email_archive_folder)
 
 
-def query_notmuch_address_db(email_address, query):
-    run_notmuch("query_address_db", email_address=email_address, query=query)
+def query_notmuch_address_db(email_address, query, email_archive_folder):
+    run_notmuch("query_address_db", email_address=email_address, query=query, email_archive_folder=email_archive_folder)
 
 
 def check_noupdate_list(email_address):
@@ -588,7 +588,6 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
     if verbose:
         eprint(time.asctime())
 
-    assert '@' in email_address
     global gpgmda_program_folder
     gpgmda_program_folder = os.path.dirname(bytes(os.path.realpath(__file__), encoding='UTF8'))
     global email_archive_folder
@@ -618,13 +617,13 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
 
 @client.command()
 @click.argument("email_address", nargs=1)
-#@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
+@click.option("--email-archive-folder", help="", type=str, default="/home/user/__email_folders/")
 @click.pass_context
 def read(ctx, email_address):
     '''read mail without checking for new mail'''
     load_ssh_key(email_address=email_address)     # so mail can be sent without having to unlock the key
     make_notmuch_config(email_address=email_address)
-    start_alot(email_address=email_address)
+    start_alot(email_address=email_address, email_archive_folder=email_archive_folder)
 
 
 @client.command()
@@ -648,8 +647,9 @@ def decrypt(ctx, email_address, email_archive_type):
 @client.command()
 @click.argument("email_address", nargs=1)
 @click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
+@click.option("--email-archive-folder", help="", type=str, default="/home/user/__email_folders/")
 @click.pass_context
-def update_notmuch(ctx, email_address, email_archive_type):
+def update_notmuch(ctx, email_address, email_archive_type, email_archive_folder):
     '''update notmuch with new mail from (normal, unencrypted) maildir'''
     check_noupdate_list()
 
@@ -664,8 +664,8 @@ def update_notmuch(ctx, email_address, email_archive_type):
     else:
         eprint("unknown folder type", email_archive_type, ", exiting")
 
-    update_notmuch_db()
-    update_notmuch_address_db()
+    update_notmuch_db(email_address=email_address, email_archive_folder=email_archive_folder)
+    update_notmuch_address_db(email_address=email_address, email_archive_folder=email_archive_folder)
 
 
 @client.command()
@@ -687,9 +687,11 @@ def download(ctx, email_address, email_archive_type):
 
 
 @client.command()
-def address_db_build():
+@click.argument("email_address", nargs=1)
+@click.option("--email-archive-folder", help="", type=str, default="/home/user/__email_folders/")
+def address_db_build(email_address, email_archive_folder):
     '''build address database for use with address_query'''
-    update_notmuch_address_db_build()
+    update_notmuch_address_db_build(email_address=email_address, email_archive_folder=email_archive_folder)
 
 
 @client.command()
