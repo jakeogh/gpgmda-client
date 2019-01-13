@@ -615,9 +615,6 @@ def check_noupdate_list(email_address):
             os._exit(1)
 
 
-def main_func(email_address, verbose, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, email_archive_type):
-
-
 @click.command()
 @click.argument("email_address", nargs=1)
 @click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
