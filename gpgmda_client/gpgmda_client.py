@@ -313,7 +313,7 @@ def parse_rsync_log_to_list(email_address, gpgMaildir_archive_folder):
     return full_path_list
 
 
-def decrypt_list_of_messages(message_list, email_address, delete_badmail, skip_badmail, move_badmail):
+def decrypt_list_of_messages(message_list, email_address, maildir, delete_badmail, skip_badmail, move_badmail):
     message_list = filter(None, message_list)   #remove empty items
     process_count = cpu_count()
     p = Pool(process_count)
@@ -498,7 +498,7 @@ def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badm
         else:
             rsync_list = parse_rsync_log_to_list(email_address=email_address, gpgMaildir_archive_folder=gpgMaildir_archive_folder)
             eprint("rsync_list:", rsync_list)
-            decrypt_list_of_messages(message_list=rsync_list, email_address=email_address, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail)
+            decrypt_list_of_messages(message_list=rsync_list, email_address=email_address, maildir=maildir, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail)
 
     else:
         eprint(rsync_last_new_mail_file, "does not exist or is 0 bytes")
