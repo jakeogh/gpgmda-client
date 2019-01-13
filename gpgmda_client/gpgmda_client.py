@@ -39,7 +39,8 @@ def rsync_mail(email_address):
     #rsync_p = \
         #subprocess.Popen([b'rsync', b'--ignore-existing', b'--size-only', b'-t', b'--whole-file', b'--copy-links', b'--checksum', b'--stats', b'-i', b'-r', b'-vv', email_address + b':gpgMaildir', gpgMaildir_archive_folder + b'/'], stdout=subprocess.PIPE)
     rsync_p = \
-        subprocess.Popen([b'rsync', b'--ignore-existing', b'--size-only', b'-t', b'--whole-file', b'--copy-links', b'--stats', b'-i', b'-r', b'-vv', email_address + b':gpgMaildir', gpgMaildir_archive_folder + b'/'], stdout=subprocess.PIPE)
+        subprocess.Popen(['rsync', '--ignore-existing', '--size-only', '-t', '--whole-file', '--copy-links', '--stats', '-i', '-r', '-vv', email_address + ':gpgMaildir', gpgMaildir_archive_folder + '/'], stdout=subprocess.PIPE)
+        #subprocess.Popen([b'rsync', b'--ignore-existing', b'--size-only', b'-t', b'--whole-file', b'--copy-links', b'--stats', b'-i', b'-r', b'-vv', email_address + b':gpgMaildir', gpgMaildir_archive_folder + b'/'], stdout=subprocess.PIPE)
     rsync_p_output = rsync_p.communicate()
     for line in rsync_p_output[0].split(b'\n'):
 #       eprint(line.decode('utf-8'))
@@ -620,21 +621,21 @@ def main_func(email_address, verbose, warm_up_gpg, read, update_notmuch, downloa
     global gpgmda_program_folder
     gpgmda_program_folder = os.path.dirname(bytes(os.path.realpath(__file__), encoding='UTF8'))
     global email_archive_folder
-    email_archive_folder = b"/home/user/__email_folders"
+    email_archive_folder = "/home/user/__email_folders"
     check_or_create_dir(email_archive_folder)
     global gpgMaildir_archive_folder
-    gpgMaildir_archive_folder = email_archive_folder + b"/_gpgMaildirs/" + email_address
+    gpgMaildir_archive_folder = email_archive_folder + "/_gpgMaildirs/" + email_address
     check_or_create_dir(gpgMaildir_archive_folder)
     global gpgmaildir
-    gpgmaildir = gpgMaildir_archive_folder + b"/gpgMaildir"
+    gpgmaildir = gpgMaildir_archive_folder + "/gpgMaildir"
     check_or_create_dir(gpgmaildir)
-    Maildir_archive_folder = email_archive_folder + b"/_Maildirs/" + email_address
+    Maildir_archive_folder = email_archive_folder + "/_Maildirs/" + email_address
     check_or_create_dir(Maildir_archive_folder)
     global maildir
-    maildir = Maildir_archive_folder + b"/Maildir"
-    check_or_create_dir(maildir + b"/new")
-    check_or_create_dir(maildir + b"/cur")
-    check_or_create_dir(maildir + b"/.sent")
+    maildir = Maildir_archive_folder + "/Maildir"
+    check_or_create_dir(maildir + "/new")
+    check_or_create_dir(maildir + "/cur")
+    check_or_create_dir(maildir + "/.sent")
     email_archive_type = "gpgMaildir"       # fixme: support getmail
 
     if warm_up_gpg:
