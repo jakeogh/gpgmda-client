@@ -625,6 +625,16 @@ def build_paths(ctx, email_address):
     check_or_create_dir(ctx.maildir + "/new/")
     check_or_create_dir(ctx.maildir + "/cur/")
     check_or_create_dir(ctx.maildir + "/.sent/")
+    return ctx
+
+@client.command()
+@click.argument("email_address", nargs=1)
+@click.argument("query", type=str)
+@click.pass_context
+def address_query(ctx, email_address, query):
+    '''search for address string'''
+    ctx = ctx.invoke(build_paths, email_address=email_address)
+    query_notmuch_address_db(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir)
 
 
 @client.command()
@@ -706,14 +716,6 @@ def address_db_build(ctx, email_address):
     update_notmuch_address_db_build(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
 
 
-@client.command()
-@click.argument("email_address", nargs=1)
-@click.argument("query", type=str)
-@click.pass_context
-def address_query(ctx, email_address, query):
-    '''search for address string'''
-    ctx.invoke(build_paths, email_address=email_address)
-    query_notmuch_address_db(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir)
 
 
 @client.command()
