@@ -669,7 +669,7 @@ def update_notmuch(ctx, email_address, email_archive_type):
         eprint("unknown folder type", email_archive_type, ", exiting")
 
 
-    gpgmaildir = ctx.gpgMaildir_archive_folder + email address + "/gpgMaildir"
+    gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
     check_or_create_dir(gpgmaildir)
 
     update_notmuch_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=gpgmaildir)
