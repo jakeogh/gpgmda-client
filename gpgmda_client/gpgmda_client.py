@@ -36,7 +36,7 @@ def check_for_notmuch_database(email_archive_folder):
 
 
 def rsync_mail(email_address, gpgMaildir_archive_folder):
-    load_ssh_key()
+    load_ssh_key(email_address=email_address)
     eprint("running rsync")
     #rsync_p = \
         #subprocess.Popen([b'rsync', b'--ignore-existing', b'--size-only', b'-t', b'--whole-file', b'--copy-links', b'--checksum', b'--stats', b'-i', b'-r', b'-vv', email_address + b':gpgMaildir', gpgMaildir_archive_folder + b'/'], stdout=subprocess.PIPE)
