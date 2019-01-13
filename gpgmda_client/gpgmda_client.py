@@ -540,15 +540,15 @@ def search_list_of_strings_for_substring(list, substring):
 
 
 def update_notmuch_db(email_address, email_archive_folder, gpgmaildir):
-    run_notmuch("update_notmuch_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir)
+    run_notmuch("update_notmuch_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False)
 
 
 def update_notmuch_address_db(email_address, email_archive_folder, gpgmaildir):
-    run_notmuch("update_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir)
+    run_notmuch("update_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False)
 
 
 def update_notmuch_address_db_build(email_address, email_archive_folder, gpgmaildir):
-    run_notmuch("build_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir)
+    run_notmuch("build_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False)
 
 
 def query_notmuch(email_address, query, email_archive_folder, gpgmaildir):
