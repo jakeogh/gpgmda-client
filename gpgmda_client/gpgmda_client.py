@@ -734,7 +734,7 @@ def notmuch_query(ctx, email_address, query):
     '''execute arbitrary notmuch query'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
-    query_notmuch(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir)
+    query_notmuch(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir, email_archive_folder=ctx.email_archive_folder)
 
 
 @client.command()
