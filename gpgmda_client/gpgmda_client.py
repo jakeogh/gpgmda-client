@@ -290,6 +290,7 @@ def short_random_string():
     return cmd_output
 
 
+@click.command()
 def warm_up_gpg():
     # due to https://bugs.g10code.com/gnupg/issue1190 first get gpg-agent warmed up by decrypting a test message.
     decrypt_test = 0
@@ -614,7 +615,7 @@ def check_noupdate_list(email_address):
             os._exit(1)
 
 
-def main_func(email_address, verbose, warm_up_gpg, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, address_db_build, notmuch_query, address_query, afew_query):
+def main_func(email_address, verbose, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, email_archive_type):
     #email_address = bytes(args.email_address, encoding='UTF8')
     assert email_address == 'user@v6y.net'
 
@@ -636,22 +637,9 @@ def main_func(email_address, verbose, warm_up_gpg, read, update_notmuch, downloa
     check_or_create_dir(maildir + "/new")
     check_or_create_dir(maildir + "/cur")
     check_or_create_dir(maildir + "/.sent")
-    email_archive_type = "gpgMaildir"       # fixme: support getmail
 
-    if warm_up_gpg:
-        warm_up_gpg()
+    warm_up_gpg()
 
-    if download:
-        check_noupdate_list(email_address=email_address)
-
-        if email_archive_type == "gpgMaildir":
-            check_or_create_dir(gpgMaildir_archive_folder)
-            warm_up_gpg()
-            rsync_mail(email_address=email_address)
-
-        else:
-            eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
-            os._exit(1)
 
     if decrypt:
         check_noupdate_list()
@@ -687,35 +675,50 @@ def main_func(email_address, verbose, warm_up_gpg, read, update_notmuch, downloa
         make_notmuch_config(email_address=email_address)
         start_alot(email_address=email_address)
 
-    if notmuch_query:
-        eprint(notmuch_query)
-        query_notmuch(notmuch_query)
+@click.command()
+@click.argument("email_address", nargs=1)
+@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
+def download(email_address, email_archive_type):
+        check_noupdate_list(email_address=email_address)
 
-    if afew_query:
-        eprint(afew_query)
-        query_afew(afew_query)
+        if email_archive_type == "gpgMaildir":
+            check_or_create_dir(gpgMaildir_archive_folder)
+            warm_up_gpg()
+            rsync_mail(email_address=email_address)
 
-    if address_db_build:
-        update_notmuch_address_db_build()
-
-    if address_query:
-        query = address_query
-        query_notmuch_address_db(query)
+        else:
+            eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
+            os._exit(1)
 
 
-## http://stackoverflow.com/questions/3853722/python-argparse-how-to-insert-newline-in-the-help-text
-#class SmartFormatter(argparse.HelpFormatter):
-#    def _split_lines(self, text, width):
-#        # this is the RawTextHelpFormatter._split_lines
-#        if text.startswith('R|'):
-#            return text[2:].splitlines()
-#        return argparse.HelpFormatter._split_lines(self, text, width)
+@click.command(help="build address database for use with address_query")
+def address_db_build():
+    update_notmuch_address_db_build()
+
+
+@click.command()
+@click.argument("query", help="search for address string", type=str)
+def address_query(query):
+    query_notmuch_address_db(query)
+
+
+@click.command()
+@click.argument("query", help="execute arbitrary afew query", type=str)
+def afew_query(query):
+    eprint(query)
+    query_afew(query)
+
+
+@click.command()
+@click.argument("query", help="execute arbitrary notmuch query", type=str)
+def notmuch_query(query):
+    eprint(query)
+    query_notmuch(query)
 
 
 @click.command()
 @click.argument("email_address", nargs=1)
 @click.option("--verbose", is_flag=True)
-@click.option("--warm-up-gpg", help="warm up gpg", is_flag=True)
 @click.option("--read", help="read mail without checking for new mail", is_flag=True)
 @click.option("--update-notmuch", help="update notmuch with new mail from (normal, unencrypted) maildir", is_flag=True)
 @click.option("--download", help="rsync new mail to encrypted maildir", is_flag=True)
@@ -723,11 +726,8 @@ def main_func(email_address, verbose, warm_up_gpg, read, update_notmuch, downloa
 @click.option("--delete-badmail", help="", is_flag=True)
 @click.option("--skip-badmail", help="", is_flag=True)
 @click.option("--move-badmail", help="", is_flag=True)
-@click.option("--address-db-build", help="build address database for use with --address_query", is_flag=True)
-@click.option("--notmuch-query",  help="R|execute arbitrary notmuch query", type=str, is_flag=False)
-@click.option("--address-query", help="search for address string", type=str, is_flag=False)
-@click.option("--afew-query",  help="R|execute arbitrary afew query", type=str, is_flag=False)
-def gpgmda_client(email_address, verbose, warm_up_gpg, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, address_db_build, notmuch_query, address_query, afew_query):
+@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
+def gpgmda_client(email_address, verbose, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, email_archive_type):
     start_time = time.time()
     #parser = argparse.ArgumentParser(formatter_class=SmartFormatter)
     #parser.add_argument("email_address", help='R|email address')
@@ -744,10 +744,9 @@ def gpgmda_client(email_address, verbose, warm_up_gpg, read, update_notmuch, dow
     #parser.add_argument("--notmuch_query",  help="R|execute arbitrary notmuch query", type=str)
     #parser.add_argument("--afew_query",  help="R|execute arbitrary afew query", type=str)
 
-    #args = parser.parse_args()
     if verbose:
         eprint(time.asctime())
-    main_result = main_func(email_address=email_address, verbose=verbose, warm_up_gpg=warm_up_gpg, read=read, update_notmuch=update_notmuch, download=download, decrypt=decrypt, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail, address_db_build=address_db_build, notmuch_query=notmuch_query, address_query=address_query, afew_query=afew_query)
+    main_result = main_func(email_address=email_address, verbose=verbose, read=read, update_notmuch=update_notmuch, download=download, decrypt=decrypt, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail, email_archive_type=email_archive_type)
     if debug: eprint("main_result:", main_result)
     if verbose:
         eprint(time.asctime())
