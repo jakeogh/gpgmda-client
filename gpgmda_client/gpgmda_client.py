@@ -152,7 +152,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
     elif mode == "query_notmuch":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = b"NOTMUCH_CONFIG=" + notmuch_config_file + b" notmuch " + query
+        command = "NOTMUCH_CONFIG=" + notmuch_config_file + " notmuch " + query
         eprint("command:", command)
         return_code = os.system(command)
         if return_code != 0:
@@ -161,7 +161,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
     elif mode == "query_afew":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = b"afew" + b" --notmuch-config=" + notmuch_config_file + b" " + query
+        command = "afew" + " --notmuch-config=" + notmuch_config_file + " " + query
         eprint("command:", command)
         return_code = os.system(command)
         if return_code != 0:
