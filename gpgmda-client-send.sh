@@ -22,5 +22,6 @@ sentuser="sentuser@${domain}"
 #cat - | tee /dev/shm/lastmail | ssh "${1}" "cat - | /usr/sbin/sendmail -N delay,failure,success -t -i -f reply_to_the_from_address@${domain}" || exit 1
 
 #bug potential race
+#bug uploading the message twice (cant write it to the remote disk, need to pee |)
 tee /dev/shm/lastmail | ssh "${sentuser}" "cat - | /bin/gpgmda" || exit 1
 cat /dev/shm/lastmail | ssh "${user}" "cat - | /usr/sbin/sendmail -N delay,failure,success -t -i -f reply_to_the_from_address@${domain}" || exit 1
