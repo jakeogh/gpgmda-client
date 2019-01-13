@@ -90,7 +90,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, no
                 eprint("random_id:", random_id)
                 maildir_subfolder = non_mail_file.split(b'/')[-2]
                 eprint("maildir_subfolder:", maildir_subfolder)
-                encrypted_file = gpgmaildir + b'/' + maildir_subfolder + b'/' + random_id
+                encrypted_file = gpgmaildir + '/' + maildir_subfolder + '/' + random_id
                 eprint("encrypted_file:", encrypted_file)
                 eprint("head -c 500:")
                 command = b"head -c 500 " + non_mail_file
