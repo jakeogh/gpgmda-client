@@ -582,9 +582,6 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
     global gpgmda_config_folder
     gpgmda_config_folder = os.path.expanduser('~/.gpgmda/')
 
-    ceprint("calling warm_up_gpg()")
-    ctx.invoke(warm_up_gpg)
-
     if verbose:
         eprint(time.asctime())
         eprint('TOTAL TIME IN MINUTES:',)
