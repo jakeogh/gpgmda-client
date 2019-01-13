@@ -691,28 +691,31 @@ def download(email_address, email_archive_type):
             os._exit(1)
 
 
-#@click.command(help="build address database for use with address_query")
 @click.command()
 def address_db_build():
+    '''build address database for use with address_query'''
     update_notmuch_address_db_build()
 
 
 @click.command()
-@click.argument("query", help="search for address string", type=str)
+@click.argument("query", type=str)
 def address_query(query):
+    '''search for address string'''
     query_notmuch_address_db(query)
 
 
 @click.command()
-@click.argument("query", help="execute arbitrary afew query", type=str)
+@click.argument("query", type=str)
 def afew_query(query):
+    '''execute arbitrary afew query'''
     eprint(query)
     query_afew(query)
 
 
 @click.command()
-@click.argument("query", help="execute arbitrary notmuch query", type=str)
+@click.argument("query", type=str)
 def notmuch_query(query):
+    '''execute arbitrary notmuch query'''
     eprint(query)
     query_notmuch(query)
 
