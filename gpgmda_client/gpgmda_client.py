@@ -59,10 +59,6 @@ def rsync_mail(email_address, gpgMaildir_archive_folder):
 
 def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b"", debug=False):
     yesall = False
-    if debug:
-        eprint("run_notmuch():", mode)
-    if not isinstance(query, bytes):
-        query = bytes(query, encoding='UTF8')
 
     notmuch_config_folder = email_archive_folder + "/_notmuch_config"
     check_or_create_dir(notmuch_config_folder)
@@ -156,7 +152,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
         eprint("command:", command)
         return_code = os.system(command)
         if return_code != 0:
-            eprint(b"\"notmuch " + query + b"\" returned nonzero, exiting")
+            eprint("\"notmuch " + query + "\" returned nonzero, exiting")
             os._exit(1)
 
     elif mode == "query_afew":
@@ -165,7 +161,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
         eprint("command:", command)
         return_code = os.system(command)
         if return_code != 0:
-            eprint(b"\"notmuch " + query + b"\" returned nonzero, exiting")
+            eprint("\"notmuch " + query + "\" returned nonzero, exiting")
             os._exit(1)
 
     elif mode == "query_address_db":
