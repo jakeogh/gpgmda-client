@@ -615,51 +615,6 @@ def check_noupdate_list(email_address):
             os._exit(1)
 
 
-@client.command()
-@click.argument("email_address", nargs=1)
-@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
-@click.pass_context
-def download(ctx, email_address, email_archive_type):
-        check_noupdate_list(email_address=email_address)
-
-        if email_archive_type == "gpgMaildir":
-            check_or_create_dir(gpgMaildir_archive_folder)
-            ctx.invoke(warm_up_gpg)
-            rsync_mail(email_address=email_address)
-
-        else:
-            eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
-            os._exit(1)
-
-
-@client.command()
-def address_db_build():
-    '''build address database for use with address_query'''
-    update_notmuch_address_db_build()
-
-
-@client.command()
-@click.argument("query", type=str)
-def address_query(query):
-    '''search for address string'''
-    query_notmuch_address_db(query)
-
-
-@client.command()
-@click.argument("query", type=str)
-def afew_query(query):
-    '''execute arbitrary afew query'''
-    eprint(query)
-    query_afew(query)
-
-
-@client.command()
-@click.argument("query", type=str)
-def notmuch_query(query):
-    '''execute arbitrary notmuch query'''
-    eprint(query)
-    query_notmuch(query)
-
 
 @click.command()
 @click.argument("email_address", nargs=1)
@@ -759,6 +714,53 @@ def client(ctx, email_address, verbose, read, update_notmuch, download, decrypt,
         eprint(time.asctime())
         eprint('TOTAL TIME IN MINUTES:',)
         eprint((time.time() - start_time) / 60.0)
+
+
+@client.command()
+@click.argument("email_address", nargs=1)
+@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
+@click.pass_context
+def download(ctx, email_address, email_archive_type):
+        check_noupdate_list(email_address=email_address)
+
+        if email_archive_type == "gpgMaildir":
+            check_or_create_dir(gpgMaildir_archive_folder)
+            ctx.invoke(warm_up_gpg)
+            rsync_mail(email_address=email_address)
+
+        else:
+            eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
+            os._exit(1)
+
+
+@client.command()
+def address_db_build():
+    '''build address database for use with address_query'''
+    update_notmuch_address_db_build()
+
+
+@client.command()
+@click.argument("query", type=str)
+def address_query(query):
+    '''search for address string'''
+    query_notmuch_address_db(query)
+
+
+@client.command()
+@click.argument("query", type=str)
+def afew_query(query):
+    '''execute arbitrary afew query'''
+    eprint(query)
+    query_afew(query)
+
+
+@client.command()
+@click.argument("query", type=str)
+def notmuch_query(query):
+    '''execute arbitrary notmuch query'''
+    eprint(query)
+    query_notmuch(query)
+
 
 
 if __name__ == '__main__':
