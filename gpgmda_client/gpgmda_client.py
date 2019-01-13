@@ -293,44 +293,6 @@ def short_random_string():
     return cmd_output
 
 
-@client.command()
-def warm_up_gpg():
-    # due to https://bugs.g10code.com/gnupg/issue1190 first get gpg-agent warmed up by decrypting a test message.
-    decrypt_test = 0
-
-    while decrypt_test != 1:
-        eprint("generating gpg test string")
-        test_string = short_random_string()
-        eprint("warm_up_gpg test_string:", test_string)
-
-        command = "gpg --yes --trust-model always --throw-keyids --encrypt -o - | gpg --decrypt"
-        gpg_cmd_proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        eprint("writing test_string to gpg_cmd_proc and reading output")
-        gpg_cmd_proc_output_stdout, gpg_cmd_proc_output_stderr = gpg_cmd_proc.communicate(test_string)
-        eprint("gpg_cmd_proct_output_stdout:", gpg_cmd_proc_output_stdout)
-        eprint("gpg_cmd_proct_output_stdout:")
-        gpg_cmd_proc_output_stdout_decoded = gpg_cmd_proc_output_stdout.decode('utf-8')
-        for line in gpg_cmd_proc_output_stdout_decoded.split('\n'):
-            eprint("STDOUT:", line)
-
-        eprint("gpg_cmd_proc_output_stderr:")
-        gpg_cmd_proc_output_stderr_decoded = gpg_cmd_proc_output_stderr.decode('utf-8')
-        for line in gpg_cmd_proc_output_stderr_decoded.split('\n'):
-            eprint("STDERR:", line)
-
-        eprint("gpg_cmd_proc.returncode:", gpg_cmd_proc.returncode)
-
-        if gpg_cmd_proc.returncode != 0:
-            eprint("warm_up_gpg did not return 0, exiting")
-            os._exit(1)
-
-        if test_string not in gpg_cmd_proc_output_stdout:
-            eprint("test_string:", test_string, "is not in gpg_cmd_proc_output_stdout:", gpg_cmd_proc_output_stdout, "Exiting.")
-            os._exit(1)
-        else:
-            eprint("found test string in gpg_cmd_proc_output_stdout, gpg is working")
-            decrypt_test = 1
-
 
 def get_maildir_file_counts():
     files_in_gpgmaildir = count_files(gpgmaildir)
@@ -753,6 +715,44 @@ def notmuch_query(query):
     eprint(query)
     query_notmuch(query)
 
+
+@client.command()
+def warm_up_gpg():
+    # due to https://bugs.g10code.com/gnupg/issue1190 first get gpg-agent warmed up by decrypting a test message.
+    decrypt_test = 0
+
+    while decrypt_test != 1:
+        eprint("generating gpg test string")
+        test_string = short_random_string()
+        eprint("warm_up_gpg test_string:", test_string)
+
+        command = "gpg --yes --trust-model always --throw-keyids --encrypt -o - | gpg --decrypt"
+        gpg_cmd_proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        eprint("writing test_string to gpg_cmd_proc and reading output")
+        gpg_cmd_proc_output_stdout, gpg_cmd_proc_output_stderr = gpg_cmd_proc.communicate(test_string)
+        eprint("gpg_cmd_proct_output_stdout:", gpg_cmd_proc_output_stdout)
+        eprint("gpg_cmd_proct_output_stdout:")
+        gpg_cmd_proc_output_stdout_decoded = gpg_cmd_proc_output_stdout.decode('utf-8')
+        for line in gpg_cmd_proc_output_stdout_decoded.split('\n'):
+            eprint("STDOUT:", line)
+
+        eprint("gpg_cmd_proc_output_stderr:")
+        gpg_cmd_proc_output_stderr_decoded = gpg_cmd_proc_output_stderr.decode('utf-8')
+        for line in gpg_cmd_proc_output_stderr_decoded.split('\n'):
+            eprint("STDERR:", line)
+
+        eprint("gpg_cmd_proc.returncode:", gpg_cmd_proc.returncode)
+
+        if gpg_cmd_proc.returncode != 0:
+            eprint("warm_up_gpg did not return 0, exiting")
+            os._exit(1)
+
+        if test_string not in gpg_cmd_proc_output_stdout:
+            eprint("test_string:", test_string, "is not in gpg_cmd_proc_output_stdout:", gpg_cmd_proc_output_stdout, "Exiting.")
+            os._exit(1)
+        else:
+            eprint("found test string in gpg_cmd_proc_output_stdout, gpg is working")
+            decrypt_test = 1
 
 
 if __name__ == '__main__':
