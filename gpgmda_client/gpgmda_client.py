@@ -57,7 +57,7 @@ def rsync_mail(email_address, gpgMaildir_archive_folder):
         rsync_logfile_handle.write(rsync_p_output[0])
 
 
-def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b"", debug=False):
+def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, debug=False):
     yesall = False
 
     notmuch_config_folder = email_archive_folder + "/_notmuch_config"
@@ -254,14 +254,14 @@ def start_alot(email_address, email_archive_folder):
 
 def load_ssh_key(email_address):
     eprint("load_ssh_key(%s)" % email_address)
-    if b'gmail' in email_address:
+    if 'gmail' in email_address:
         return
 
-    ssh_key = b'/home/user/.ssh/id_rsa__' + email_address   #todo use ~/.gpgmda/config
+    ssh_key = '/home/user/.ssh/id_rsa__' + email_address   #todo use ~/.gpgmda/config
 
-    loaded_ssh_keys_p = subprocess.Popen([b'ssh-add', b'-l'], stdout=subprocess.PIPE)
+    loaded_ssh_keys_p = subprocess.Popen(['ssh-add', '-l'], stdout=subprocess.PIPE)
     loaded_ssh_keys_p_output = loaded_ssh_keys_p.communicate()[0].strip()
-    loaded_ssh_key_list = loaded_ssh_keys_p_output.split(b'\n')
+    loaded_ssh_key_list = loaded_ssh_keys_p_output.split('\n')
 
     eprint("ssh-add -l output:")
     for line in loaded_ssh_key_list:
@@ -275,7 +275,7 @@ def load_ssh_key(email_address):
             break
 
     if found_key != 1:
-        ssh_add_p = subprocess.Popen([b'ssh-add', ssh_key])
+        ssh_add_p = subprocess.Popen(['ssh-add', ssh_key])
         ssh_add_p_output = ssh_add_p.communicate()
         if ssh_add_p.returncode != 0:
             eprint("something went wrong adding the ssh_key, exiting")
@@ -455,14 +455,14 @@ def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_b
                     move_to_badmail(gpgfile)
                     random_id = gpgfile.split(b'/')[-1]
 
-                    if maildir_subfolder == b".sent":
-                        target_file = b"/home/sentuser/gpgMaildir/new/" + random_id
-                        command = b"ssh root@v6y.net rm -v " + target_file
+                    if maildir_subfolder == ".sent":
+                        target_file = "/home/sentuser/gpgMaildir/new/" + random_id
+                        command = "ssh root@v6y.net rm -v " + target_file
                         eprint(command)
                         os.system(command)
-                    elif maildir_subfolder == b"new":
-                        target_file = b"/home/user/gpgMaildir/new/" + random_id
-                        command = b"ssh root@v6y.net rm -v " + target_file    #todo use ~/.gpgmda/config
+                    elif maildir_subfolder == "new":
+                        target_file = "/home/user/gpgMaildir/new/" + random_id
+                        command = "ssh root@v6y.net rm -v " + target_file    #todo use ~/.gpgmda/config
                         eprint(command)
                         os.system(command)
                     else:
@@ -516,7 +516,7 @@ def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badm
         files_in_maildir = list_files(maildir=maildir)
         eprint("len(files_in_gpgmaildir):", len(files_in_gpgmaildir))
         eprint("len(files_in_maildir):", len(files_in_maildir))
-        full_maildir_string = b"\n".join(files_in_maildir)
+        full_maildir_string = "\n".join(files_in_maildir)
 
         for gpgfile in files_in_gpgmaildir:
             #subfolder = file.split(b'/')[-2]
