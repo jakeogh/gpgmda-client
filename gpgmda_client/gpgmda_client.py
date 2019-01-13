@@ -610,7 +610,7 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
 
 
 @client.command()
-@click.argument("email_address", nargs=1)
+@click.argument("email_address", nargs=1, required=True)
 @click.pass_context
 def build_paths(ctx, email_address):
     assert '@' in email_address
