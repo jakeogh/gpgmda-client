@@ -634,7 +634,7 @@ def build_paths(ctx, email_address):
 def address_query(ctx, email_address, query):
     '''search for address string'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    query_notmuch_address_db(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir)
+    query_notmuch_address_db(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir, email_archive_folder=ctx.email_archive_folder)
 
 
 @client.command()
