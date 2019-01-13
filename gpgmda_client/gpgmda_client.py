@@ -621,6 +621,7 @@ def build_paths(ctx, email_address):
     check_or_create_dir(ctx.maildir + "/.sent/")
     return ctx
 
+
 @client.command()
 @click.argument("email_address", nargs=1)
 @click.argument("query", type=str)
