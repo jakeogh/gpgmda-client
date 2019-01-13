@@ -219,7 +219,7 @@ synchronize_flags = false
     notmuch_config_file_location = notmuch_config_folder + "/.notmuch_config"
     if debug:
         eprint("writing notmuch config to:", notmuch_config_file_location)
-    notmuch_config_file_handle = open(notmuch_config_file_location, "wb")
+    notmuch_config_file_handle = open(notmuch_config_file_location, "w")
     notmuch_config_file_handle.write(notmuch_config)
     notmuch_config_file_handle.close()
 
@@ -239,8 +239,8 @@ def start_alot(email_address, email_archive_folder):
     alot_config = subprocess.Popen([gpgmda_program_folder + "/gpgmda-client-make-alot-config", email_address], stdout=subprocess.PIPE).communicate()
     alot_theme = subprocess.Popen([gpgmda_program_folder + "/gpgmda-client-make-alot-theme"], stdout=subprocess.PIPE).communicate()
 
-    alot_config_f = open('/dev/shm/__alot_config_' + email_address, 'wb')
-    alot_theme_f = open('/dev/shm/__alot_theme_' + email_address, 'wb')
+    alot_config_f = open('/dev/shm/__alot_config_' + email_address, 'w')
+    alot_theme_f = open('/dev/shm/__alot_theme_' + email_address, 'w')
 
     alot_config_f.write(alot_config[0])
     alot_theme_f.write(alot_theme[0])
