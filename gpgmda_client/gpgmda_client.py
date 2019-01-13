@@ -551,10 +551,6 @@ def update_notmuch_address_db_build(email_address, email_archive_folder, gpgmail
     run_notmuch("build_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False)
 
 
-def query_notmuch(email_address, query, email_archive_folder, gpgmaildir):
-    run_notmuch("query_notmuch", email_address=email_address, query=query, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir)
-
-
 def query_afew(email_address, query, email_archive_folder, gpgmaildir):
     run_notmuch("query_afew", email_address=email_address, query=query, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir)
 
@@ -712,8 +708,6 @@ def address_db_build(ctx, email_address):
     update_notmuch_address_db_build(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
 
 
-
-
 @client.command()
 @click.argument("email_address", nargs=1)
 @click.argument("query", type=str)
@@ -733,7 +727,7 @@ def notmuch_query(ctx, email_address, query):
     '''execute arbitrary notmuch query'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
-    query_notmuch(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir, email_archive_folder=ctx.email_archive_folder)
+    run_notmuch("query_notmuch", email_address=email_address, query=query, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
 
 
 @client.command()
@@ -742,6 +736,7 @@ def notmuch_query(ctx, email_address, query):
 def show_message_counts(ctx, email_address):
     ctx = ctx.invoke(build_paths, email_address=email_address)
     print(get_maildir_file_counts(gpgmaildir=ctx.gpgmaildir, maildir=ctx.maildir))
+
 
 @client.command()
 def warm_up_gpg():
