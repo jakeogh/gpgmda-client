@@ -22,6 +22,8 @@ version = 0.01
 #with open("README.rst", "rb") as f:
 #    long_descr = f.read().decode("utf-8")
 
+#            'gpgmda-client-send = gpgmda-client.gpgmda-client:gpgmda-client-send',
+
 setup(
     name="gpgmda-client",
     version=version,
@@ -39,7 +41,6 @@ setup(
     entry_points={
         'console_scripts': [
             'gpgmda-client = gpgmda-client.gpgmda-client:gpgmda-client',
-            'gpgmda-client-send = gpgmda-client.gpgmda-client:gpgmda-client-send',
         ],
     },
 #   long_description = long_descr,
@@ -65,3 +66,4 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ]
 )
+
