@@ -3,7 +3,7 @@
 #todo: moved address_replacement and addresses_to_names to ~/.gpgmda/ so this is almost not needed, the only reason it's still here is because $DIR is still used in the alot config file.
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"        # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+#DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"        # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 
 config_dir="$HOME/.gpgmda"
 
@@ -49,10 +49,10 @@ print_cmd = ~/cfg/print/to_text_file
 	[[default]]
 		realname = ${name}
 		address = ${alias_address}
-		sendmail_command = ${DIR}/gpgmda-client-send ${email_address} ${alias_address}
+		sendmail_command = gpgmda-client-send.sh ${email_address} ${alias_address}
 		[[[abook]]]
 			type = shellcommand
-			command = ${DIR}/gpgmda-client ${email_address} --address_query
+			command = gpgmda-client address-query ${email_address}
 			regexp = \"(?P<name>.+)\"\s*<(?P<email>.*.+?@.+?)>
 
 # to send a mail in alot enter the compose command http://alot.readthedocs.org/en/latest/usage/index.html#commands
