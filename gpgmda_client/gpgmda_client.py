@@ -260,7 +260,7 @@ def load_ssh_key(email_address):
     ssh_key = '/home/user/.ssh/id_rsa__' + email_address   #todo use ~/.gpgmda/config
 
     loaded_ssh_keys_p = subprocess.Popen(['ssh-add', '-l'], stdout=subprocess.PIPE)
-    loaded_ssh_keys_p_output = loaded_ssh_keys_p.communicate()[0].strip()
+    loaded_ssh_keys_p_output = loaded_ssh_keys_p.communicate()[0].strip().decode('UTF8')
     loaded_ssh_key_list = loaded_ssh_keys_p_output.split('\n')
 
     eprint("ssh-add -l output:")
