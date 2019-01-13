@@ -329,7 +329,6 @@ def warm_up_gpg():
             eprint("found test string in gpg_cmd_proc_output_stdout, gpg is working")
             decrypt_test = 1
 
-    return True
 
 
 def get_maildir_file_counts():
@@ -716,7 +715,7 @@ def gpgmda_client(ctx, email_address, verbose, read, update_notmuch, download, d
     check_or_create_dir(maildir + "/.sent")
 
     ceprint("calling warm_up_gpg()")
-    ctx.forward(warm_up_gpg)
+    ctx.invoke(warm_up_gpg)
 
     if decrypt:
         check_noupdate_list()
