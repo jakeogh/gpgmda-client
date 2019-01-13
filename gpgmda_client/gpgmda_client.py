@@ -26,7 +26,6 @@ from kcl.printops import eprint
 global debug
 debug = False
 
-
 def check_for_notmuch_database():
     notmuch_database_folder = email_archive_folder + b"/_Maildirs/.notmuch/xapian"
     if not os.path.isdir(notmuch_database_folder):
