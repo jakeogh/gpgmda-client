@@ -319,7 +319,7 @@ def decrypt_list_of_messages(message_list, email_address, delete_badmail, skip_b
     p = Pool(process_count)
     eprint("message_list:", message_list)
     for gpgfile in message_list:    #useful for debugging
-       decrypt_message(email_address=email_address, gpgfile=gpgfile, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail)
+       decrypt_message(email_address=email_address, gpgfile=gpgfile, maildir=maildir, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail)
 
 
 def move_to_badmail(gpgfile):
