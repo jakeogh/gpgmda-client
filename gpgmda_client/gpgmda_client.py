@@ -618,12 +618,13 @@ def check_noupdate_list(email_address):
 @click.command()
 @click.argument("email_address", nargs=1)
 @click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
-def download(email_address, email_archive_type):
+@click.pass_context
+def download(ctx, email_address, email_archive_type):
         check_noupdate_list(email_address=email_address)
 
         if email_archive_type == "gpgMaildir":
             check_or_create_dir(gpgMaildir_archive_folder)
-            warm_up_gpg()
+            ctx.invoke(warm_up_gpg)
             rsync_mail(email_address=email_address)
 
         else:
@@ -722,7 +723,7 @@ def gpgmda_client(ctx, email_address, verbose, read, update_notmuch, download, d
 
         if email_archive_type == "gpgMaildir":
             check_or_create_dir(gpgMaildir_archive_folder)
-            warm_up_gpg()
+            ctx.invoke(warm_up_gpg)
             gpgmaildir_to_maildir(email_address=email_address)
 
         else:
@@ -734,7 +735,7 @@ def gpgmda_client(ctx, email_address, verbose, read, update_notmuch, download, d
 
         if email_archive_type == "gpgMaildir":
             check_or_create_dir(gpgMaildir_archive_folder)
-            warm_up_gpg()
+            ctx.invoke(warm_up_gpg)
 
         elif email_archive_type == "getmail":
             eprint('gpgmda_program_folder/getmail_gmail "${email_address}" || exit 1')
