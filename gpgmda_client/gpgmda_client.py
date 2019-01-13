@@ -17,7 +17,6 @@ from multiprocessing import cpu_count
 from kcl.fileops import empty_file
 from kcl.fileops import file_exists
 from kcl.dirops import path_is_dir
-#from kcl.dirops import create_dir
 from kcl.dirops import check_or_create_dir
 from kcl.dirops import count_files
 from kcl.dirops import list_files
@@ -53,8 +52,10 @@ def rsync_mail(email_address, gpgMaildir_archive_folder):
         eprint("rsync did not return 0, exiting")
 #        os._exit(1)
 
-    with open("/dev/shm/.gpgmda_rsync_last_new_mail_" + email_address, 'wb') as rsync_logfile_handle:
+    rsync_logfile = "/dev/shm/.gpgmda_rsync_last_new_mail_" + email_address
+    with open(rsync_logfile, 'wb') as rsync_logfile_handle:
         rsync_logfile_handle.write(rsync_p_output[0])
+        ceprint("wrote rsync_logfile:", rsync_logfile)
 
 
 def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, debug=False):
@@ -287,7 +288,6 @@ def short_random_string():
     cmd_proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=False)
     cmd_output = cmd_proc.stdout.read().strip() #get rid of newline
     return cmd_output
-
 
 
 def get_maildir_file_counts(gpgmaildir, maildir):
@@ -735,6 +735,12 @@ def notmuch_query(ctx, email_address, query):
     eprint(query)
     query_notmuch(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir, email_archive_folder=ctx.email_archive_folder)
 
+
+@client.command()
+@click.pass_context
+def show_message_counts(ctx, gpgmaildir, maildir)
+    ctx = ctx.invoke(build_paths, email_address=email_address)
+    print(get_maildir_file_counts(gpgmaildir=ctxgpgmaildir, maildir=ctx.maildir))
 
 @client.command()
 def warm_up_gpg():
