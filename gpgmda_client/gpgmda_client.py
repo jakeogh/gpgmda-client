@@ -27,6 +27,7 @@ from kcl.printops import ceprint
 global debug
 debug = False
 
+
 def check_for_notmuch_database():
     notmuch_database_folder = email_archive_folder + b"/_Maildirs/.notmuch/xapian"
     if not os.path.isdir(notmuch_database_folder):
@@ -41,7 +42,6 @@ def rsync_mail(email_address):
         #subprocess.Popen([b'rsync', b'--ignore-existing', b'--size-only', b'-t', b'--whole-file', b'--copy-links', b'--checksum', b'--stats', b'-i', b'-r', b'-vv', email_address + b':gpgMaildir', gpgMaildir_archive_folder + b'/'], stdout=subprocess.PIPE)
     rsync_p = \
         subprocess.Popen(['rsync', '--ignore-existing', '--size-only', '-t', '--whole-file', '--copy-links', '--stats', '-i', '-r', '-vv', email_address + ':gpgMaildir', gpgMaildir_archive_folder + '/'], stdout=subprocess.PIPE)
-        #subprocess.Popen([b'rsync', b'--ignore-existing', b'--size-only', b'-t', b'--whole-file', b'--copy-links', b'--stats', b'-i', b'-r', b'-vv', email_address + b':gpgMaildir', gpgMaildir_archive_folder + b'/'], stdout=subprocess.PIPE)
     rsync_p_output = rsync_p.communicate()
     for line in rsync_p_output[0].split(b'\n'):
 #       eprint(line.decode('utf-8'))
@@ -59,7 +59,8 @@ def rsync_mail(email_address):
 
 def run_notmuch(mode, email_address, query=b"", debug=False):
     yesall = False
-    if debug: eprint("run_notmuch():", mode)
+    if debug:
+        eprint("run_notmuch():", mode)
     if not isinstance(query, bytes):
         query = bytes(query, encoding='UTF8')
 
@@ -216,7 +217,8 @@ synchronize_flags = false
     notmuch_config_folder = email_archive_folder + b"/_notmuch_config"
     check_or_create_dir(notmuch_config_folder)
     notmuch_config_file_location = notmuch_config_folder + b"/.notmuch_config"
-    if debug: eprint("writing notmuch config to:", notmuch_config_file_location)
+    if debug:
+        eprint("writing notmuch config to:", notmuch_config_file_location)
     notmuch_config_file_handle = open(notmuch_config_file_location, "wb")
     notmuch_config_file_handle.write(notmuch_config)
     notmuch_config_file_handle.close()
@@ -330,7 +332,6 @@ def warm_up_gpg():
             decrypt_test = 1
 
 
-
 def get_maildir_file_counts():
     files_in_gpgmaildir = count_files(gpgmaildir)
     files_in_maildir = count_files(maildir)
@@ -339,7 +340,6 @@ def get_maildir_file_counts():
 
 def parse_rsync_log_to_list(email_address):
     rsync_log = b'/dev/shm/.gpgmda_rsync_last_new_mail_' + email_address
-    #try:
     with open(rsync_log, 'rb') as fh:
         rsync_log = fh.readlines()
 
@@ -353,8 +353,6 @@ def parse_rsync_log_to_list(email_address):
                     print("new_gpgmda_file_path:", new_gpgmda_file_path)
                     full_path_list.append(new_gpgmda_file_path)
 
-    #except FileNotFoundError:
-    #    return []
     return full_path_list
 
 
@@ -619,9 +617,6 @@ def check_noupdate_list(email_address):
 @click.group()
 @click.argument("email_address", nargs=1)
 @click.option("--verbose", is_flag=True)
-@click.option("--read", help="read mail without checking for new mail", is_flag=True)
-@click.option("--update-notmuch", help="update notmuch with new mail from (normal, unencrypted) maildir", is_flag=True)
-@click.option("--decrypt", help="decrypt new mail in encrypted maildir to unencrypted maildir", is_flag=True)
 @click.option("--delete-badmail", help="", is_flag=True)
 @click.option("--skip-badmail", help="", is_flag=True)
 @click.option("--move-badmail", help="", is_flag=True)
@@ -629,27 +624,10 @@ def check_noupdate_list(email_address):
 @click.pass_context
 def client(ctx, email_address, verbose, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, email_archive_type):
     start_time = time.time()
-    #parser = argparse.ArgumentParser(formatter_class=SmartFormatter)
-    #parser.add_argument("email_address", help='R|email address')
-
-    #parser.add_argument("--verbose", help="R|enable debug output", action="store_true", default=False)
-    #parser.add_argument("--warm-up-gpg", help="R|warm up gpg", action="store_true", default=False)
-    #parser.add_argument("--read", help="R|read mail without checking for new mail", action="store_true", default=False)
-
-    #parser.add_argument("--update_notmuch", help="R|update notmuch with new mail from (normal, unencrypted) maildir", action="store_true", default=False)
-    #parser.add_argument("--download",       help="R|rsync new mail to encrypted maildir", action="store_true", default=False)
-    #parser.add_argument("--decrypt",        help="R|decrypt new mail in encrypted maildir to unencrypted maildir", action="store_true", default=False)
-    #parser.add_argument("--address_query",  help="R|search for address string", type=str)
-    #parser.add_argument("--address_db_build", help="R|build address database for use with --address_query", action="store_true", default=False)
-    #parser.add_argument("--notmuch_query",  help="R|execute arbitrary notmuch query", type=str)
-    #parser.add_argument("--afew_query",  help="R|execute arbitrary afew query", type=str)
-
     if verbose:
         eprint(time.asctime())
 
-    #email_address = bytes(args.email_address, encoding='UTF8')
-    assert email_address == 'user@v6y.net'
-
+    assert '@' in email_address
     global gpgmda_program_folder
     gpgmda_program_folder = os.path.dirname(bytes(os.path.realpath(__file__), encoding='UTF8'))
     global email_archive_folder
@@ -672,7 +650,6 @@ def client(ctx, email_address, verbose, read, update_notmuch, download, decrypt,
     ceprint("calling warm_up_gpg()")
     ctx.invoke(warm_up_gpg)
 
-
     if verbose:
         eprint(time.asctime())
         eprint('TOTAL TIME IN MINUTES:',)
@@ -683,6 +660,7 @@ def client(ctx, email_address, verbose, read, update_notmuch, download, decrypt,
 #@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
 @click.pass_context
 def read(ctx, email_address):
+    '''read mail without checking for new mail'''
     load_ssh_key(email_address=email_address)     # so mail can be sent without having to unlock the key
     make_notmuch_config(email_address=email_address)
     start_alot(email_address=email_address)
@@ -693,6 +671,7 @@ def read(ctx, email_address):
 @click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
 @click.pass_context
 def decrypt(ctx, email_address, email_archive_type):
+    '''decrypt new mail in encrypted maildir to unencrypted maildir'''
     check_noupdate_list()
 
     if email_archive_type == "gpgMaildir":
@@ -710,6 +689,7 @@ def decrypt(ctx, email_address, email_archive_type):
 @click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
 @click.pass_context
 def update_notmuch(ctx, email_address, email_archive_type):
+    '''update notmuch with new mail from (normal, unencrypted) maildir'''
     check_noupdate_list()
 
     if email_archive_type == "gpgMaildir":
