@@ -571,7 +571,6 @@ def check_noupdate_list(email_address):
             os._exit(1)
 
 
-
 @click.group()
 @click.option("--verbose", is_flag=True)
 @click.option("--delete-badmail", help="", is_flag=True)
