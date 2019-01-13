@@ -296,17 +296,17 @@ def get_maildir_file_counts(gpgmaildir, maildir):
 
 
 def parse_rsync_log_to_list(email_address, gpgMaildir_archive_folder):
-    rsync_log = b'/dev/shm/.gpgmda_rsync_last_new_mail_' + email_address
-    with open(rsync_log, 'rb') as fh:
+    rsync_log = '/dev/shm/.gpgmda_rsync_last_new_mail_' + email_address
+    with open(rsync_log, 'r') as fh:
         rsync_log = fh.readlines()
 
     full_path_list = []
     for line in rsync_log:
         line = line.strip() #remove newlines
-        if b'exists' not in line:
-            if b'gpgMaildir' in line:
-                if line.startswith(b'>f'):
-                    new_gpgmda_file_path = gpgMaildir_archive_folder + b'/' + line.split(b' ')[1]
+        if 'exists' not in line:
+            if 'gpgMaildir' in line:
+                if line.startswith('>f'):
+                    new_gpgmda_file_path = gpgMaildir_archive_folder + '/' + line.split(b' ')[1]
                     print("new_gpgmda_file_path:", new_gpgmda_file_path)
                     full_path_list.append(new_gpgmda_file_path)
 
