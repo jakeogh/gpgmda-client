@@ -238,8 +238,8 @@ def start_alot(email_address, email_archive_folder):
     alot_config_f = open('/dev/shm/__alot_config_' + email_address, 'w')
     alot_theme_f = open('/dev/shm/__alot_theme_' + email_address, 'w')
 
-    alot_config_f.write(alot_config[0])
-    alot_theme_f.write(alot_theme[0])
+    alot_config_f.write(alot_config[0].decode('UTF8'))
+    alot_theme_f.write(alot_theme[0].decode('UTF8'))
 
     alot_config_f.close()
     alot_theme_f.close()
