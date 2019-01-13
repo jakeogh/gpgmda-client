@@ -294,7 +294,7 @@ def short_random_string():
 
 
 
-def get_maildir_file_counts():
+def get_maildir_file_counts(gpgmaildir, maildir):
     files_in_gpgmaildir = count_files(gpgmaildir)
     files_in_maildir = count_files(maildir)
     return {'files_in_gpgmaildir': files_in_gpgmaildir, "files_in_maildir": files_in_maildir}
@@ -338,7 +338,7 @@ def move_to_badmail(gpgfile):
     shutil.move(gpgfile, badmail_path)
 
 
-def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_badmail, stdout=False):
+def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_badmail, maildir, stdout=False):
     if not isinstance(gpgfile, bytes):
         eprint("decrypt_message() takes the gpgfile as bytes")
         os._exit(1)
@@ -476,7 +476,7 @@ def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_b
     return True
 
 
-def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badmail, gpgMaildir_archive_folder):
+def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badmail, gpgMaildir_archive_folder, gpgmaildir, maildir):
     # todo add locking
     eprint("gpgmda_to_maildir using gpgMaildir_archive_folder:", gpgMaildir_archive_folder)
     eprint("Checking for default-recipient in ~/.gnupg/gpg.conf")
@@ -509,15 +509,15 @@ def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badm
         eprint(rsync_last_new_mail_file, "does not exist or is 0 bytes")
 
     eprint("\nchecking if the message counts in the maildir and the gpgmaildir match")
-    maildir_counts_dict = get_maildir_file_counts()
+    maildir_counts_dict = get_maildir_file_counts(gpgmaildir=gpgmaildir, maildir=maildir)
     eprint("maildir_counts_dict:", maildir_counts_dict)
     maildir_file_count = maildir_counts_dict['files_in_maildir']
     gpgmaildir_file_count = maildir_counts_dict['files_in_gpgmaildir']
     if gpgmaildir_file_count > maildir_file_count:
         eprint("files_in_gpgmaildir > files_in_maildir:", gpgmaildir_file_count, '>', maildir_file_count)
         eprint("locating un-decrypted files")
-        files_in_gpgmaildir = list_files(gpgmaildir)
-        files_in_maildir = list_files(maildir)
+        files_in_gpgmaildir = list_files(gpgmaildir=gpgmaildir)
+        files_in_maildir = list_files(maildir=maildir)
         eprint("len(files_in_gpgmaildir):", len(files_in_gpgmaildir))
         eprint("len(files_in_maildir):", len(files_in_maildir))
         full_maildir_string = b"\n".join(files_in_maildir)
@@ -527,7 +527,7 @@ def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badm
             gpghash = gpgfile.split(b'/')[-1]
             if gpghash not in full_maildir_string:
                 eprint("\n\nfound gpgfile that has not been decrypted yet:", gpgfile)
-                decrypt_message(email_address=email_address, gpgfile=gpgfile, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail, stdout=False)
+                decrypt_message(email_address=email_address, gpgfile=gpgfile, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail, maildir=maildir, stdout=False)
     return
 
 
@@ -576,6 +576,7 @@ def check_noupdate_list(email_address):
 
 
 
+
 @click.group()
 @click.option("--verbose", is_flag=True)
 @click.option("--delete-badmail", help="", is_flag=True)
@@ -603,14 +604,6 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
     #check_or_create_dir(gpgmaildir)
 
 
-    Maildir_archive_folder = ctx.email_archive_folder + "/_Maildirs/" + email_address
-    check_or_create_dir(Maildir_archive_folder)
-    global maildir
-    maildir = Maildir_archive_folder + "/Maildir"
-    check_or_create_dir(maildir + "/new")
-    check_or_create_dir(maildir + "/cur")
-    check_or_create_dir(maildir + "/.sent")
-
     ceprint("calling warm_up_gpg()")
     ctx.invoke(warm_up_gpg)
 
@@ -618,6 +611,25 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
         eprint(time.asctime())
         eprint('TOTAL TIME IN MINUTES:',)
         eprint((time.time() - start_time) / 60.0)
+
+
+@client.command()
+@click.argument("email_address", nargs=1)
+@click.pass_context
+def build_paths(ctx, email_address):
+    ctx.gpgMaildir_archive_folder = ctx.gpgMaildir_archive_folder_base_path + email_address
+    check_or_create_dir(ctx.gpgMaildir_archive_folder)
+    ctx.gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
+    check_or_create_dir(ctx.gpgmaildir)
+
+    stdMaildir_archive_folder = ctx.email_archive_folder + "/_Maildirs/" + email_address
+    check_or_create_dir(stdMaildir_archive_folder)
+
+    ctx.maildir = stdMaildir_archive_folder + "/Maildir"
+
+    check_or_create_dir(ctx.maildir + "/new")
+    check_or_create_dir(ctx.maildir + "/cur")
+    check_or_create_dir(ctx.maildir + "/.sent")
 
 @client.command()
 @click.argument("email_address", nargs=1)
@@ -635,13 +647,12 @@ def read(ctx, email_address):
 @click.pass_context
 def decrypt(ctx, email_address, email_archive_type):
     '''decrypt new mail in encrypted maildir to unencrypted maildir'''
-    check_noupdate_list()
+    ctx.invoke(build_paths)
+    check_noupdate_list(email_address=email_address)
 
     if email_archive_type == "gpgMaildir":
-        gpgMaildir_archive_folder = ctx.gpgMaildir_archive_folder_base_path + email_address
-        check_or_create_dir(gpgMaildir_archive_folder)
         ctx.invoke(warm_up_gpg)
-        gpgmaildir_to_maildir(email_address=email_address)
+        gpgmaildir_to_maildir(email_address=email_address, gpgMaildir_archive_folde=ctx.gpgMaildir_archive_folder, gpgmaildir=ctx.gpgmaildir, maildir=ctx.maildir)
 
     else:
         eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
@@ -654,11 +665,10 @@ def decrypt(ctx, email_address, email_archive_type):
 @click.pass_context
 def update_notmuch(ctx, email_address, email_archive_type):
     '''update notmuch with new mail from (normal, unencrypted) maildir'''
-    check_noupdate_list()
+    ctx.invoke(build_paths)
+    check_noupdate_list(email_address=email_address)
 
     if email_archive_type == "gpgMaildir":
-        gpgMaildir_archive_folder = ctx.gpgMaildir_archive_folder_base_path + email_address
-        check_or_create_dir(gpgMaildir_archive_folder)
         ctx.invoke(warm_up_gpg)
 
     elif email_archive_type == "getmail":
@@ -669,11 +679,8 @@ def update_notmuch(ctx, email_address, email_archive_type):
         eprint("unknown folder type", email_archive_type, ", exiting")
 
 
-    gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
-    check_or_create_dir(gpgmaildir)
-
-    update_notmuch_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=gpgmaildir)
-    update_notmuch_address_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=gpgmaildir)
+    update_notmuch_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
+    update_notmuch_address_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
 
 
 @client.command()
@@ -682,13 +689,12 @@ def update_notmuch(ctx, email_address, email_archive_type):
 @click.pass_context
 def download(ctx, email_address, email_archive_type):
     '''rsync new mail to encrypted maildir'''
+    ctx.invoke(build_paths)
     check_noupdate_list(email_address=email_address)
 
     if email_archive_type == "gpgMaildir":
-        gpgMaildir_archive_folder = ctx.gpgMaildir_archive_folder_base_path + email_address
-        check_or_create_dir(gpgMaildir_archive_folder)
         ctx.invoke(warm_up_gpg)
-        rsync_mail(email_address=email_address)
+        rsync_mail(email_address=email_address, gpgMaildir_archive_folder=ctx.gpgMaildir_archive_folder)
 
     else:
         eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
@@ -700,9 +706,8 @@ def download(ctx, email_address, email_archive_type):
 @click.pass_context
 def address_db_build(ctx, email_address):
     '''build address database for use with address_query'''
-    gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
-    check_or_create_dir(gpgmaildir)
-    update_notmuch_address_db_build(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=gpgmaildir)
+    ctx.invoke(build_paths)
+    update_notmuch_address_db_build(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
 
 
 @client.command()
@@ -711,9 +716,8 @@ def address_db_build(ctx, email_address):
 @click.pass_context
 def address_query(ctx, email_address, query):
     '''search for address string'''
-    gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
-    check_or_create_dir(gpgmaildir)
-    query_notmuch_address_db(email_address=email_address, query=query, gpgmaildir=gpgmaildir)
+    ctx.invoke(build_paths)
+    query_notmuch_address_db(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir)
 
 
 @client.command()
@@ -722,10 +726,9 @@ def address_query(ctx, email_address, query):
 @click.pass_context
 def afew_query(ctx, email_address, query):
     '''execute arbitrary afew query'''
-    gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
-    check_or_create_dir(gpgmaildir)
+    ctx.invoke(build_paths)
     eprint(query)
-    query_afew(email_address=email_address, query=query, gpgmaildir=gpgmaildir)
+    query_afew(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir)
 
 
 @client.command()
@@ -734,10 +737,9 @@ def afew_query(ctx, email_address, query):
 @click.pass_context
 def notmuch_query(ctx, email_address, query):
     '''execute arbitrary notmuch query'''
-    gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
-    check_or_create_dir(gpgmaildir)
+    ctx.invoke(build_paths)
     eprint(query)
-    query_notmuch(email_address=email_address, query=query, gpgmaildir=gpgmaildir)
+    query_notmuch(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir)
 
 
 @client.command()
