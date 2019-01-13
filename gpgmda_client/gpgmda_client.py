@@ -126,20 +126,19 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, no
                     eprint(encrypted_file)
                     shutil.move(encrypted_file, os.path.expanduser(non_mail_path))
 
-                    if maildir_subfolder == b".sent":
-                        target_file = b"/home/sentuser/gpgMaildir/new/" + random_id
-                        command = b"ssh root@v6y.net rm -v " + target_file
+                    if maildir_subfolder == ".sent":
+                        target_file = "/home/sentuser/gpgMaildir/new/" + random_id
+                        command = "ssh root@v6y.net rm -v " + target_file
                         eprint(command)
                         os.system(command)
 
-                    elif maildir_subfolder == b"new":
-                        target_file = b"/home/user/gpgMaildir/new/" + random_id
-                        command = b"ssh root@v6y.net rm -v " + target_file    #todo use ~/.gpgmda/config
+                    elif maildir_subfolder == "new":
+                        target_file = "/home/user/gpgMaildir/new/" + random_id
+                        command = "ssh root@v6y.net rm -v " + target_file    #todo use ~/.gpgmda/config
                         eprint(command)
                         os.system(command)
-
                     else:
-                        eprint("unknown exception, exiting")
+                        eprint("unknown maildir_subfolder:", maildir_subfolder, "exiting")
                         os._exit(1)
 
         eprint("notmuch_p.returncode:", notmuch_p.returncode)
