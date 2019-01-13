@@ -572,9 +572,8 @@ def check_noupdate_list(email_address):
 @click.option("--delete-badmail", help="", is_flag=True)
 @click.option("--skip-badmail", help="", is_flag=True)
 @click.option("--move-badmail", help="", is_flag=True)
-@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
 @click.pass_context
-def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archive_type):
+def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail):
     start_time = time.time()
     if verbose:
         eprint(time.asctime())
@@ -590,9 +589,12 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
 
 @client.command()
 @click.argument("email_address", nargs=1, required=True, type=str)
+#@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
 @click.pass_context
 def build_paths(ctx, email_address):
     assert '@' in email_address
+    ctx.email_archive_type = 'gpgMaildir'
+
     ctx.email_archive_folder = "/home/user/__email_folders"
     check_or_create_dir(ctx.email_archive_folder)
 
@@ -638,40 +640,38 @@ def read(ctx, email_address):
 
 @client.command()
 @click.argument("email_address", nargs=1)
-@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
 @click.pass_context
-def decrypt(ctx, email_address, email_archive_type):
+def decrypt(ctx, email_address):
     '''decrypt new mail in encrypted maildir to unencrypted maildir'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(email_address=email_address)
 
-    if email_archive_type == "gpgMaildir":
+    if ctx.email_archive_type == "gpgMaildir":
         ctx.invoke(warm_up_gpg)
         gpgmaildir_to_maildir(email_address=email_address, gpgMaildir_archive_folde=ctx.gpgMaildir_archive_folder, gpgmaildir=ctx.gpgmaildir, maildir=ctx.maildir)
 
     else:
-        eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
+        eprint("Unsupported email_archive_type:", ctx.email_archive_type, "Exiting.")
         os._exit(1)
 
 
 @client.command()
 @click.argument("email_address", nargs=1)
-@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
 @click.pass_context
-def update_notmuch(ctx, email_address, email_archive_type):
+def update_notmuch(ctx, email_address):
     '''update notmuch with new mail from (normal, unencrypted) maildir'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(email_address=email_address)
 
-    if email_archive_type == "gpgMaildir":
+    if ctx.email_archive_type == "gpgMaildir":
         ctx.invoke(warm_up_gpg)
 
-    elif email_archive_type == "getmail":
+    elif ctx.email_archive_type == "getmail":
         eprint('gpgmda_program_folder/getmail_gmail "${email_address}" || exit 1')
         eprint("todo, call /getmail_gmail ${email_address}")
 
     else:
-        eprint("unknown folder type", email_archive_type, ", exiting")
+        eprint("unknown folder type", ctx.email_archive_type, ", exiting")
 
 
     update_notmuch_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir)
@@ -680,19 +680,18 @@ def update_notmuch(ctx, email_address, email_archive_type):
 
 @client.command()
 @click.argument("email_address", nargs=1)
-@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
 @click.pass_context
-def download(ctx, email_address, email_archive_type):
+def download(ctx, email_address):
     '''rsync new mail to encrypted maildir'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(email_address=email_address)
 
-    if email_archive_type == "gpgMaildir":
+    if ctx.email_archive_type == "gpgMaildir":
         ctx.invoke(warm_up_gpg)
         rsync_mail(email_address=email_address, gpgMaildir_archive_folder=ctx.gpgMaildir_archive_folder)
 
     else:
-        eprint("Unsupported email_archive_type:", email_archive_type, "Exiting.")
+        eprint("Unsupported email_archive_type:", ctx.email_archive_type, "Exiting.")
         os._exit(1)
 
 
