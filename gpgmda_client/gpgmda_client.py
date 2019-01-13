@@ -599,8 +599,8 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
     check_or_create_dir(ctx.gpgMaildir_archive_folder_base_path)
 
     #global gpgmaildir
-    gpgmaildir = ctx.gpgMaildir_archive_folder +"email address" + "/gpgMaildir" #wroing
-    check_or_create_dir(gpgmaildir)
+    #gpgmaildir = ctx.gpgMaildir_archive_folder +"email address" + "/gpgMaildir" #wroing
+    #check_or_create_dir(gpgmaildir)
 
 
     Maildir_archive_folder = ctx.email_archive_folder + "/_Maildirs/" + email_address
@@ -700,7 +700,7 @@ def download(ctx, email_address, email_archive_type):
 @click.pass_context
 def address_db_build(ctx, email_address):
     '''build address database for use with address_query'''
-    gpgmaildir = ctx.gpgMaildir_archive_folder + email address + "/gpgMaildir"
+    gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
     check_or_create_dir(gpgmaildir)
     update_notmuch_address_db_build(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=gpgmaildir)
 
@@ -711,7 +711,7 @@ def address_db_build(ctx, email_address):
 @click.pass_context
 def address_query(ctx, email_address, query):
     '''search for address string'''
-    gpgmaildir = ctx.gpgMaildir_archive_folder + email address + "/gpgMaildir"
+    gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
     check_or_create_dir(gpgmaildir)
     query_notmuch_address_db(email_address=email_address, query=query, gpgmaildir=gpgmaildir)
 
@@ -722,7 +722,7 @@ def address_query(ctx, email_address, query):
 @click.pass_context
 def afew_query(ctx, email_address, query):
     '''execute arbitrary afew query'''
-    gpgmaildir = ctx.gpgMaildir_archive_folder + email address + "/gpgMaildir"
+    gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
     check_or_create_dir(gpgmaildir)
     eprint(query)
     query_afew(email_address=email_address, query=query, gpgmaildir=gpgmaildir)
@@ -734,7 +734,7 @@ def afew_query(ctx, email_address, query):
 @click.pass_context
 def notmuch_query(ctx, email_address, query):
     '''execute arbitrary notmuch query'''
-    gpgmaildir = ctx.gpgMaildir_archive_folder + email address + "/gpgMaildir"
+    gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
     check_or_create_dir(gpgmaildir)
     eprint(query)
     query_notmuch(email_address=email_address, query=query, gpgmaildir=gpgmaildir)
