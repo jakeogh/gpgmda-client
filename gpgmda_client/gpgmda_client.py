@@ -69,7 +69,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, no
         #notmuch_p = subprocess.Popen([b'notmuch', b'new'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, env=current_env)
         notmuch_p = subprocess.Popen(notmuch_new_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, env=current_env)
         ceprint("notmuch_p.args:", notmuch_p.args)
-        notmuch_p_output = notmuch_p.communicate().decode("utf8")
+        notmuch_p_output = notmuch_p.communicate()
 
         ceprint("notmuch_p_output:")
         eprint(notmuch_p_output)
@@ -77,13 +77,14 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, no
         ceprint("len(notmuch_p_output[0]):", len(notmuch_p_output[0]))
 
         ceprint("notmuch_p_output[0]:")
-        for line in notmuch_p_output[0].split('\n'):
+        for line in notmuch_p_output[0].split(b'\n'):
             eprint(line.decode('utf-8'))
 
         eprint("notmuch_p_output[1]:")
-        for line in notmuch_p_output[1].split('\n'):
-            eprint(line.decode('utf-8'))
-            if b"Note: Ignoring non-mail file:" in line:
+        for line in notmuch_p_output[1].split(b'\n'):
+            line = line.decode('utf-8')
+            eprint(line)
+            if "Note: Ignoring non-mail file:" in line:
                 non_mail_file = line.split(" ")[-1]
                 eprint("found file that gmime does not like:", non_mail_file)
                 random_id = non_mail_file[-40:]
