@@ -496,7 +496,7 @@ def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badm
             eprint("rsync transferred 0 files, skipping decrypt")
 
         else:
-            rsync_list = parse_rsync_log_to_list(email_address=email_address)
+            rsync_list = parse_rsync_log_to_list(email_address=email_address, gpgMaildir_archive_folder=gpgMaildir_archive_folder)
             eprint("rsync_list:", rsync_list)
             decrypt_list_of_messages(message_list=rsync_list, email_address=email_address, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail)
 
