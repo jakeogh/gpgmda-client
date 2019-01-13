@@ -68,7 +68,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
     check_or_create_dir(notmuch_config_folder)
 
     notmuch_config_file = notmuch_config_folder + "/.notmuch_config"
-    make_notmuch_config(email_address=email_address)
+    make_notmuch_config(email_address=email_address, email_archive_folder=email_archive_folder)
 
     if mode == "update_notmuch_db":
         current_env = os.environ.copy()
@@ -642,8 +642,9 @@ def address_query(ctx, email_address, query):
 @click.pass_context
 def read(ctx, email_address):
     '''read mail without checking for new mail'''
+    ctx = ctx.invoke(build_paths, email_address=email_address)
     load_ssh_key(email_address=email_address)     # so mail can be sent without having to unlock the key
-    make_notmuch_config(email_address=email_address)
+    make_notmuch_config(email_address=email_address, email_archive_folder=ctx.email_archive_folder)
     start_alot(email_address=email_address, email_archive_folder=ctx.email_archive_folder)
 
 
