@@ -334,11 +334,8 @@ def move_to_badmail(gpgfile):
 
 
 def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_badmail, maildir, stdout=False):
-    if not isinstance(gpgfile, bytes):
-        eprint("decrypt_message() takes the gpgfile as bytes")
-        os._exit(1)
     eprint("\ndecrypt_msg() gpgfile:", gpgfile)
-    if b'@' not in email_address:
+    if '@' not in email_address:
         eprint("Invalid email address:", email_address, ", exiting.")
         os._exit(1)
 
@@ -363,7 +360,7 @@ def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_b
         os._exit(1)
 
     #file_previously_decrypted = 0
-    glob_pattern = maildir + b'/' + maildir_subfolder + b'/*.' + gpgfile_name
+    glob_pattern = maildir + '/' + maildir_subfolder + '/*.' + gpgfile_name
     eprint("glob_pattern:", glob_pattern)
     result = glob.glob(glob_pattern)
 
@@ -430,7 +427,7 @@ def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_b
         else:
             eprint("gpg did not produce any stdout, tar skipped file:", gpgfile)
             eprint("looking into:", gpgfile, "further...")
-            os.system(b'/bin/ls -al ' + gpgfile)
+            os.system('/bin/ls -al ' + gpgfile)
             stats = os.stat(gpgfile)
             if stats.st_size <= 1141:
                 eprint("this is likely an empty gpg encrypted file")
@@ -452,7 +449,7 @@ def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_b
 
                 if delete_message_answer.lower() == "yes":
                     move_to_badmail(gpgfile)
-                    random_id = gpgfile.split(b'/')[-1]
+                    random_id = gpgfile.split('/')[-1]
 
                     if maildir_subfolder == ".sent":
                         target_file = "/home/sentuser/gpgMaildir/new/" + random_id
