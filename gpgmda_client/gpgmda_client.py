@@ -210,7 +210,7 @@ tags = unread;inbox;
 [maildir]
 synchronize_flags = false
 """
-    notmuch_config_folder = '/'.join(email_archive_folder, "_notmuch_config"])
+    notmuch_config_folder = '/'.join([email_archive_folder, "_notmuch_config"])
     check_or_create_dir(notmuch_config_folder)
     notmuch_config_file_location = '/'.join([notmuch_config_folder, ".notmuch_config"])
     if debug:
