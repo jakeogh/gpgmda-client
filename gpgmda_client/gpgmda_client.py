@@ -691,7 +691,8 @@ def download(email_address, email_archive_type):
             os._exit(1)
 
 
-@click.command(help="build address database for use with address_query")
+#@click.command(help="build address database for use with address_query")
+@click.command()
 def address_db_build():
     update_notmuch_address_db_build()
 
