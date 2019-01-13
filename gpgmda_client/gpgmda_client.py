@@ -615,7 +615,7 @@ def check_noupdate_list(email_address):
             os._exit(1)
 
 
-@click.command()
+@client.command()
 @click.argument("email_address", nargs=1)
 @click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
 @click.pass_context
@@ -632,20 +632,20 @@ def download(ctx, email_address, email_archive_type):
             os._exit(1)
 
 
-@click.command()
+@client.command()
 def address_db_build():
     '''build address database for use with address_query'''
     update_notmuch_address_db_build()
 
 
-@click.command()
+@client.command()
 @click.argument("query", type=str)
 def address_query(query):
     '''search for address string'''
     query_notmuch_address_db(query)
 
 
-@click.command()
+@client.command()
 @click.argument("query", type=str)
 def afew_query(query):
     '''execute arbitrary afew query'''
@@ -653,7 +653,7 @@ def afew_query(query):
     query_afew(query)
 
 
-@click.command()
+@client.command()
 @click.argument("query", type=str)
 def notmuch_query(query):
     '''execute arbitrary notmuch query'''
@@ -661,6 +661,7 @@ def notmuch_query(query):
     query_notmuch(query)
 
 
+@click.group()
 @click.command()
 @click.argument("email_address", nargs=1)
 @click.option("--verbose", is_flag=True)
@@ -673,7 +674,7 @@ def notmuch_query(query):
 @click.option("--move-badmail", help="", is_flag=True)
 @click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
 @click.pass_context
-def gpgmda_client(ctx, email_address, verbose, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, email_archive_type):
+def client(ctx, email_address, verbose, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, email_archive_type):
     start_time = time.time()
     #parser = argparse.ArgumentParser(formatter_class=SmartFormatter)
     #parser.add_argument("email_address", help='R|email address')
@@ -761,4 +762,4 @@ def gpgmda_client(ctx, email_address, verbose, read, update_notmuch, download, d
 
 
 if __name__ == '__main__':
-    gpgmda_client()
+    client()
