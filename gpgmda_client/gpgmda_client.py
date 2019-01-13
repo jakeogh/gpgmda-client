@@ -613,6 +613,7 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
 @click.argument("email_address", nargs=1)
 @click.pass_context
 def build_paths(ctx, email_address):
+    assert '@' in email_address
     ctx.email_archive_folder = "/home/user/__email_folders"
     check_or_create_dir(ctx.email_archive_folder)
 
