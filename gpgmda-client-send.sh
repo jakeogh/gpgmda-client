@@ -3,8 +3,9 @@
 # pipe stdin to sendmail on the mailserver over ssh
 # note the send from address needs to match the ssh login and therefore the local user on the mailserver
 # this script needs improvement, there is no guarantee it sent... and BCC is stripped
+# also, always_bcc=sentuser is required in main.cf or sent mail wont show up at all. ugly.
 
-# $1 sets the user@emai_server.com that this mail is submitted to via ssh for sending via sendmail
+# $1 sets the user@email_server.com that this mail is submitted to via ssh for sending via sendmail
 # $2 sets the Sender: (not the From:, that is set when you compose the message)
 
 #echo "$1" " " "$2" > /home/user/delthissss 2>&1
@@ -12,4 +13,5 @@
 domain=`echo "${1}" | cut -d '@' -f 2`
 
 #cat - |  ssh "${1}" "cat - | /usr/sbin/sendmail -t -i -f ${2}" || exit 1
-cat - | tee /dev/shm/lastmail | ssh "${1}" "cat - | /usr/sbin/sendmail -N delay,failure,success -t -i -f reply_to_the_from_address@${domain}" || exit 1
+#cat - | tee /dev/shm/lastmail | ssh "${1}" "cat - | /usr/sbin/sendmail -N delay,failure,success -t -i -f reply_to_the_from_address@${domain}" || exit 1
+tee /dev/shm/lastmail | ssh "${1}" "cat - | /usr/sbin/sendmail -N delay,failure,success -t -i -f reply_to_the_from_address@${domain}" || exit 1
