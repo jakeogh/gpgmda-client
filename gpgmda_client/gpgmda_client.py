@@ -592,14 +592,6 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
     global gpgmda_program_folder
     gpgmda_program_folder = os.path.dirname(bytes(os.path.realpath(__file__), encoding='UTF8'))
 
-
-    #ctx.gpgMaildir_archive_folder = ctx.email_archive_folder + "/_gpgMaildirs/" + email_address
-
-    #global gpgmaildir
-    #gpgmaildir = ctx.gpgMaildir_archive_folder +"email address" + "/gpgMaildir" #wroing
-    #check_or_create_dir(gpgmaildir)
-
-
     ceprint("calling warm_up_gpg()")
     ctx.invoke(warm_up_gpg)
 
@@ -614,7 +606,7 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
 @click.pass_context
 def build_paths(ctx, email_address):
     assert '@' in email_address
-    ctx.email_archive_folder = "/home/user/__email_folders"
+    ctx.email_archive_folder = "/home/user/__email_folders/"
     check_or_create_dir(ctx.email_archive_folder)
 
     ctx.gpgMaildir_archive_folder_base_path = ctx.email_archive_folder + "/_gpgMaildirs/"
@@ -623,16 +615,16 @@ def build_paths(ctx, email_address):
     ctx.gpgMaildir_archive_folder = ctx.gpgMaildir_archive_folder_base_path + email_address
     check_or_create_dir(ctx.gpgMaildir_archive_folder)
 
-    ctx.gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir"
+    ctx.gpgmaildir = ctx.gpgMaildir_archive_folder + email_address + "/gpgMaildir/"
     check_or_create_dir(ctx.gpgmaildir)
 
     stdMaildir_archive_folder = ctx.email_archive_folder + "/_Maildirs/" + email_address
     check_or_create_dir(stdMaildir_archive_folder)
 
-    ctx.maildir = stdMaildir_archive_folder + "/Maildir"
-    check_or_create_dir(ctx.maildir + "/new")
-    check_or_create_dir(ctx.maildir + "/cur")
-    check_or_create_dir(ctx.maildir + "/.sent")
+    ctx.maildir = stdMaildir_archive_folder + "/Maildir/"
+    check_or_create_dir(ctx.maildir + "/new/")
+    check_or_create_dir(ctx.maildir + "/cur/")
+    check_or_create_dir(ctx.maildir + "/.sent/")
 
 
 @client.command()
