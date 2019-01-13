@@ -739,9 +739,9 @@ def notmuch_query(ctx, email_address, query):
 @client.command()
 @click.argument("email_address", nargs=1)
 @click.pass_context
-def show_message_counts(ctx):
+def show_message_counts(ctx, email_address):
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    print(get_maildir_file_counts(gpgmaildir=ctxgpgmaildir, maildir=ctx.maildir))
+    print(get_maildir_file_counts(gpgmaildir=ctx.gpgmaildir, maildir=ctx.maildir))
 
 @client.command()
 def warm_up_gpg():
