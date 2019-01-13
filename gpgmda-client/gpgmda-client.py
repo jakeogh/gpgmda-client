@@ -6,16 +6,12 @@
 import click
 import sys
 import os
-#import traceback
-#import argparse
 import time
 import subprocess
 import shutil
 import glob
-from os.path import exists
 
 from multiprocessing import Process     #https://docs.python.org/3/library/multiprocessing.html
-#from multiprocessing import Queue
 from multiprocessing import Pool
 from multiprocessing import cpu_count
 from kcl.fileops import empty_file
