@@ -590,7 +590,7 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
         eprint(time.asctime())
 
     global gpgmda_config_folder
-    gpgmda_config_folder = os.path.expanduser('~/.gpgmda-client/")
+    gpgmda_config_folder = os.path.expanduser('~/.gpgmda-client/')
 
     ceprint("calling warm_up_gpg()")
     ctx.invoke(warm_up_gpg)
