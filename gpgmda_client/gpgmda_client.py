@@ -198,15 +198,15 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
 
 def make_notmuch_config(email_address, email_archive_folder):
-    username = email_address.split(b"@")[0]
+    username = email_address.split("@")[0]
 
-    notmuch_config = b"""
+    notmuch_config = """
 [database]
-path = """ + email_archive_folder + b"""/_Maildirs
+path = """ + email_archive_folder + """/_Maildirs
 
 [user]
-name = """ + username + b"""
-primary_email=""" + email_address + b"""
+name = """ + username + """
+primary_email=""" + email_address + """
 
 [new]
 tags = unread;inbox;
@@ -214,9 +214,9 @@ tags = unread;inbox;
 [maildir]
 synchronize_flags = false
 """
-    notmuch_config_folder = email_archive_folder + b"/_notmuch_config"
+    notmuch_config_folder = email_archive_folder + "/_notmuch_config"
     check_or_create_dir(notmuch_config_folder)
-    notmuch_config_file_location = notmuch_config_folder + b"/.notmuch_config"
+    notmuch_config_file_location = notmuch_config_folder + "/.notmuch_config"
     if debug:
         eprint("writing notmuch config to:", notmuch_config_file_location)
     notmuch_config_file_handle = open(notmuch_config_file_location, "wb")
@@ -236,8 +236,8 @@ def move_terminal_text_up_one_page():
 
 def start_alot(email_address, email_archive_folder):
     check_for_notmuch_database(email_archive_folder=email_archive_folder)
-    alot_config = subprocess.Popen([gpgmda_program_folder + b"/gpgmda-client-make-alot-config", email_address], stdout=subprocess.PIPE).communicate()
-    alot_theme = subprocess.Popen([gpgmda_program_folder + b"/gpgmda-client-make-alot-theme"], stdout=subprocess.PIPE).communicate()
+    alot_config = subprocess.Popen([gpgmda_program_folder + "/gpgmda-client-make-alot-config", email_address], stdout=subprocess.PIPE).communicate()
+    alot_theme = subprocess.Popen([gpgmda_program_folder + "/gpgmda-client-make-alot-theme"], stdout=subprocess.PIPE).communicate()
 
     alot_config_f = open('/dev/shm/__alot_config_' + email_address, 'wb')
     alot_theme_f = open('/dev/shm/__alot_theme_' + email_address, 'wb')
