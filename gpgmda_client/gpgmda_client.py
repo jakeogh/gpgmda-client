@@ -613,7 +613,7 @@ def check_noupdate_list(email_address):
             os._exit(1)
 
 
-def main_func(email_address, verbose, warm_up_gpg, read, update_notmuch, download_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, address_db_build, notmuch_query, address_query, afew_query):
+def main_func(email_address, verbose, warm_up_gpg, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, address_db_build, notmuch_query, address_query, afew_query):
     #email_address = bytes(args.email_address, encoding='UTF8')
     assert email_address == 'user@v6y.net'
 
@@ -726,7 +726,7 @@ def main_func(email_address, verbose, warm_up_gpg, read, update_notmuch, downloa
 @click.option("--notmuch-query",  help="R|execute arbitrary notmuch query", type=str, is_flag=False)
 @click.option("--address-query", help="search for address string", type=str, is_flag=False)
 @click.option("--afew-query",  help="R|execute arbitrary afew query", type=str, is_flag=False)
-def gpgmda_client(email_address, verbose, warm_up_gpg, read, update_notmuch, download_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, address_db_build, notmuch_query, address_query, afew_query):
+def gpgmda_client(email_address, verbose, warm_up_gpg, read, update_notmuch, download, decrypt, delete_badmail, move_badmail, skip_badmail, address_db_build, notmuch_query, address_query, afew_query):
     start_time = time.time()
     #parser = argparse.ArgumentParser(formatter_class=SmartFormatter)
     #parser.add_argument("email_address", help='R|email address')
@@ -746,7 +746,7 @@ def gpgmda_client(email_address, verbose, warm_up_gpg, read, update_notmuch, dow
     #args = parser.parse_args()
     if verbose:
         eprint(time.asctime())
-    main_result = main_func(email_address=email_address, verbose=verbose, warm_up_gpg=warm_up_gpg, read=read, update_notmuch=update_notmuch, download_notmuch=download_notmuch, download=download, decrypt=decrypt, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail, address_db_build=address_db_build, notmuch_query=notmuch_query, address_query=address_query, afew_query=afew_query)
+    main_result = main_func(email_address=email_address, verbose=verbose, warm_up_gpg=warm_up_gpg, read=read, update_notmuch=update_notmuch, download=download, decrypt=decrypt, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail, address_db_build=address_db_build, notmuch_query=notmuch_query, address_query=address_query, afew_query=afew_query)
     if debug: eprint("main_result:", main_result)
     if verbose:
         eprint(time.asctime())
