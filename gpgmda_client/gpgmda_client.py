@@ -283,7 +283,7 @@ def load_ssh_key(email_address):
 
 
 def short_random_string():
-    command = [b"gpg2", b"--gen-random", b"--armor", b"1", b"100"]
+    command = ["gpg2", "--gen-random", "--armor", "1", "100"]
     cmd_proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=False)
     cmd_output = cmd_proc.stdout.read().strip() #get rid of newline
     return cmd_output
@@ -381,14 +381,14 @@ def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_b
     eprint("decrypting:", gpgfile)
     if stdout:
 #       command = "gpg2 -o - --decrypt " + gpgfile + " | tar --transform=s/$/." + gpgfile_name + "/ -xvf -" # hides the tar header
-        command = b"gpg2 -o - --decrypt " + gpgfile
+        command = "gpg2 -o - --decrypt " + gpgfile
         eprint("decrypt_msg() command:", command)
         return_code = os.system(command)
         eprint("return_code:", return_code)
 
     else:
-        gpg_command = [b"gpg2", b"-o", b"-", b"--decrypt", gpgfile]
-        tar_command = [b"tar", b"--transform=s/$/." + gpgfile_name + b"/", b"-C", maildir + b'/' + maildir_subfolder, b"-xvf", b"-"]
+        gpg_command = ["gpg2", "-o", "-", "--decrypt", gpgfile]
+        tar_command = ["tar", "--transform=s/$/." + gpgfile_name + "/", "-C", maildir + '/' + maildir_subfolder, "-xvf", "-"]
         gpg_cmd_proc = subprocess.Popen(gpg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
         eprint("executing gpg_command:", gpg_command)
         gpg_cmd_proc_output_stdout, gpg_cmd_proc_output_stderr = gpg_cmd_proc.communicate()
