@@ -64,10 +64,10 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
     if not isinstance(query, bytes):
         query = bytes(query, encoding='UTF8')
 
-    notmuch_config_folder = email_archive_folder + b"/_notmuch_config"
+    notmuch_config_folder = email_archive_folder + "/_notmuch_config"
     check_or_create_dir(notmuch_config_folder)
 
-    notmuch_config_file = notmuch_config_folder + b"/.notmuch_config"
+    notmuch_config_file = notmuch_config_folder + "/.notmuch_config"
     make_notmuch_config(email_address=email_address)
 
     if mode == "update_notmuch_db":
@@ -170,7 +170,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
     elif mode == "query_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = b"XDG_CONFIG_HOME=" + notmuch_config_folder + b" NOTMUCH_CONFIG=" + notmuch_config_file + b" " + gpgmda_program_folder + b"/nottoomuch-addresses.sh " + query
+        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_program_folder + "/nottoomuch-addresses.sh " + query
         return_code = os.system(command)
         if return_code != 0:
             eprint("\"nottoomuch-addresses.sh\" returned nonzero, exiting")
@@ -178,7 +178,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
     elif mode == "build_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = b"XDG_CONFIG_HOME=" + notmuch_config_folder + b" NOTMUCH_CONFIG=" + notmuch_config_file + b" " + gpgmda_program_folder + b"/nottoomuch-addresses.sh --update --rebuild"
+        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_program_folder + "/nottoomuch-addresses.sh --update --rebuild"
         return_code = os.system(command)
         if return_code != 0:
             eprint("\"nottoomuch-addresses.sh\" returned nonzero, exiting")
@@ -186,7 +186,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
     elif mode == "update_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = b"XDG_CONFIG_HOME=" + notmuch_config_folder + b" NOTMUCH_CONFIG=" + notmuch_config_file + b" " + gpgmda_program_folder + b"/nottoomuch-addresses.sh --update"
+        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_program_folder + "/nottoomuch-addresses.sh --update"
         return_code = os.system(command)
         if return_code != 0:
             eprint("\"nottoomuch-addresses.sh\" returned nonzero, exiting")
