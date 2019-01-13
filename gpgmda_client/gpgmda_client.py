@@ -94,11 +94,11 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, no
                 encrypted_file = gpgmaildir + '/' + maildir_subfolder + '/' + random_id
                 eprint("encrypted_file:", encrypted_file)
                 eprint("head -c 500:")
-                command = b"head -c 500 " + non_mail_file
+                command = "head -c 500 " + non_mail_file
                 os.system(command)
                 if not yesall:
-                    eprint("running nano")
-                    command = b"nano " + non_mail_file
+                    eprint("running vi")
+                    command = "vi " + non_mail_file
                     os.system(command)
 
                     delete_message_answer = input("Would you like to move this message locally to the ~/.gpgmda/non-mail folder and delete it on the server? (yes/no/skipall/yesall): ")
@@ -111,10 +111,10 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, no
                     delete_message_answer = 'yes'
 
                 if delete_message_answer.lower() == "yes":
-                    non_mail_path = b'~/.gpgmda/non-mail'
+                    non_mail_path = '~/.gpgmda/non-mail'
 
-                    os.path.sep = b'/'      #py3: paths _are_ bytes. glob.glob(b'/home') does it right
-                    os.path.altsep = b'/'
+                    os.path.sep = '/'      #py3: paths _are_ bytes. glob.glob(b'/home') does it right
+                    os.path.altsep = '/'
 
                     os.makedirs(os.path.expanduser(non_mail_path), exist_ok=True)
 
