@@ -650,7 +650,7 @@ def decrypt(ctx, email_address):
 
     if ctx.email_archive_type == "gpgMaildir":
         ctx.invoke(warm_up_gpg)
-        gpgmaildir_to_maildir(email_address=email_address, gpgMaildir_archive_folde=ctx.gpgMaildir_archive_folder, gpgmaildir=ctx.gpgmaildir, maildir=ctx.maildir)
+        gpgmaildir_to_maildir(email_address=email_address, gpgMaildir_archive_folder=ctx.gpgMaildir_archive_folder, gpgmaildir=ctx.gpgmaildir, maildir=ctx.maildir)
 
     else:
         eprint("Unsupported email_archive_type:", ctx.email_archive_type, "Exiting.")
