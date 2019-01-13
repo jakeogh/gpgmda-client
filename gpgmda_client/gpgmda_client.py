@@ -232,8 +232,8 @@ def move_terminal_text_up_one_page():
 
 def start_alot(email_address, email_archive_folder):
     check_for_notmuch_database(email_archive_folder=email_archive_folder)
-    alot_config = subprocess.Popen([gpgmda_config_folder + "/gpgmda-client-make-alot-config", email_address], stdout=subprocess.PIPE).communicate()
-    alot_theme = subprocess.Popen([gpgmda_config_folder + "/gpgmda-client-make-alot-theme"], stdout=subprocess.PIPE).communicate()
+    alot_config = subprocess.Popen(["gpgmda-client-make-alot-config", email_address], stdout=subprocess.PIPE).communicate()
+    alot_theme = subprocess.Popen(["gpgmda-client-make-alot-theme"], stdout=subprocess.PIPE).communicate()
 
     alot_config_f = open('/dev/shm/__alot_config_' + email_address, 'w')
     alot_theme_f = open('/dev/shm/__alot_theme_' + email_address, 'w')
@@ -569,7 +569,6 @@ def check_noupdate_list(email_address):
         if email_address in item:
             eprint(email_address + " is listed in .noupdate, exiting")
             os._exit(1)
-
 
 
 
