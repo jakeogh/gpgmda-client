@@ -170,7 +170,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
     elif mode == "query_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_program_folder + "/nottoomuch-addresses.sh " + query
+        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_config_folder + "/nottoomuch-addresses.sh " + query
         return_code = os.system(command)
         if return_code != 0:
             eprint("\"nottoomuch-addresses.sh\" returned nonzero, exiting")
@@ -178,7 +178,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
     elif mode == "build_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_program_folder + "/nottoomuch-addresses.sh --update --rebuild"
+        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_config_folder + "/nottoomuch-addresses.sh --update --rebuild"
         return_code = os.system(command)
         if return_code != 0:
             eprint("\"nottoomuch-addresses.sh\" returned nonzero, exiting")
@@ -186,7 +186,7 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query=b""
 
     elif mode == "update_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_program_folder + "/nottoomuch-addresses.sh --update"
+        command = "XDG_CONFIG_HOME=" + notmuch_config_folder + " NOTMUCH_CONFIG=" + notmuch_config_file + " " + gpgmda_config_folder + "/nottoomuch-addresses.sh --update"
         return_code = os.system(command)
         if return_code != 0:
             eprint("\"nottoomuch-addresses.sh\" returned nonzero, exiting")
@@ -236,8 +236,8 @@ def move_terminal_text_up_one_page():
 
 def start_alot(email_address, email_archive_folder):
     check_for_notmuch_database(email_archive_folder=email_archive_folder)
-    alot_config = subprocess.Popen([gpgmda_program_folder + "/gpgmda-client-make-alot-config", email_address], stdout=subprocess.PIPE).communicate()
-    alot_theme = subprocess.Popen([gpgmda_program_folder + "/gpgmda-client-make-alot-theme"], stdout=subprocess.PIPE).communicate()
+    alot_config = subprocess.Popen([gpgmda_config_folder + "/gpgmda-client-make-alot-config", email_address], stdout=subprocess.PIPE).communicate()
+    alot_theme = subprocess.Popen([gpgmda_config_folder + "/gpgmda-client-make-alot-theme"], stdout=subprocess.PIPE).communicate()
 
     alot_config_f = open('/dev/shm/__alot_config_' + email_address, 'w')
     alot_theme_f = open('/dev/shm/__alot_theme_' + email_address, 'w')
@@ -568,7 +568,7 @@ def query_notmuch_address_db(email_address, query, email_archive_folder, gpgmail
 
 
 def check_noupdate_list(email_address):
-    noupdate_list = open(gpgmda_program_folder + b"/.noupdate", 'r').readlines() #todo move config to ~/.gpgmda
+    noupdate_list = open(gpgmda_config_folder + "/.noupdate", 'r').readlines() #todo move config to ~/.gpgmda
     for item in noupdate_list:
         if email_address in item:
             eprint(email_address + " is listed in .noupdate, exiting")
@@ -589,8 +589,8 @@ def client(ctx, verbose, delete_badmail, move_badmail, skip_badmail, email_archi
     if verbose:
         eprint(time.asctime())
 
-    global gpgmda_program_folder
-    gpgmda_program_folder = os.path.dirname(bytes(os.path.realpath(__file__), encoding='UTF8'))
+    global gpgmda_config_folder
+    gpgmda_config_folder = os.path.expanduser('~/.gpgmda-client/")
 
     ceprint("calling warm_up_gpg()")
     ctx.invoke(warm_up_gpg)
