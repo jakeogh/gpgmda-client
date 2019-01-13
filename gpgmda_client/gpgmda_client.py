@@ -22,6 +22,7 @@ from kcl.dirops import check_or_create_dir
 from kcl.dirops import count_files
 from kcl.dirops import list_files
 from kcl.printops import eprint
+from kcl.printops import ceprint
 
 global debug
 debug = False
