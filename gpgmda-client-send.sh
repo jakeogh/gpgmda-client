@@ -23,5 +23,12 @@ sentuser="sentuser@${domain}"
 
 #bug potential race
 #bug uploading the message twice (cant write it to the remote disk, need to pee |)
-tee /dev/shm/lastmail | ssh "${sentuser}" "cat - | /bin/gpgmda" || exit 1
-cat /dev/shm/lastmail | ssh "${user}" "cat - | /usr/sbin/sendmail -N delay,failure,success -t -i -f reply_to_the_from_address@${domain}" || exit 1
+
+# user@mail0:~$ sudo -u sentuser -g sentuser -i /bin/bash -c "/bin/cat /home/user/testmail | /bin/gpgmda"
+
+tee /dev/shm/lastmail | \
+    sudo -u sentuser -g sentuser -i /bin/bash -c "/bin/cat - | /bin/gpgmda"
+
+#working:
+#tee /dev/shm/lastmail | ssh "${sentuser}" "cat - | /bin/gpgmda" || exit 1
+#cat /dev/shm/lastmail | ssh "${user}" "cat - | /usr/sbin/sendmail -N delay,failure,success -t -i -f reply_to_the_from_address@${domain}" || exit 1
