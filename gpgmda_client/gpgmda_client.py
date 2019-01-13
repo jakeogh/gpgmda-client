@@ -64,14 +64,19 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, no
     if mode == "update_notmuch_db":
         current_env = os.environ.copy()
         current_env["NOTMUCH_CONFIG"] = notmuch_config_file
-        notmuch_p = subprocess.Popen([b'notmuch', b'new'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, env=current_env)
-        eprint(notmuch_p.args)
+        notmuch_new_command = "NOTMUCH_CONFIG=" + notmuch_config_file + " notmuch new"
+        ceprint("notmuch_new_command:", notmuch_new_command)
+        #notmuch_p = subprocess.Popen([b'notmuch', b'new'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, env=current_env)
+        notmuch_p = subprocess.Popen(notmuch_new_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, env=current_env)
+        ceprint("notmuch_p.args:", notmuch_p.args)
         notmuch_p_output = notmuch_p.communicate()
 
-        eprint("notmuch_p_output:")
+        ceprint("notmuch_p_output:")
         eprint(notmuch_p_output)
 
-        eprint("notmuch_p_output[0]:")
+        ceprint("len(notmuch_p_output[0]):", len(notmuch_p_output[0]))
+
+        ceprint("notmuch_p_output[0]:")
         for line in notmuch_p_output[0].split(b'\n'):
             eprint(line.decode('utf-8'))
 
@@ -545,10 +550,6 @@ def update_notmuch_address_db_build(email_address, email_archive_folder, gpgmail
     run_notmuch("build_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False, notmuch_config_file=notmuch_config_file, notmuch_config_folder=notmuch_config_folder)
 
 
-def query_afew(email_address, query, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
-    run_notmuch("query_afew", email_address=email_address, query=query, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, notmuch_config_file=notmuch_config_file, notmuch_config_folder=notmuch_config_folder)
-
-
 def query_notmuch_address_db(email_address, query, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
     run_notmuch("query_address_db", email_address=email_address, query=query, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, notmuch_config_file=notmuch_config_file, notmuch_config_folder=notmuch_config_folder)
 
@@ -712,7 +713,7 @@ def afew_query(ctx, email_address, query):
     '''execute arbitrary afew query'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
-    query_afew(email_address=email_address, query=query, gpgmaildir=ctx.gpgmaildir)
+    run_notmuch("query_afew", email_address=email_address, query=query, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
 
 
 @client.command()
