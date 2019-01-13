@@ -27,9 +27,7 @@ sentuser="sentuser@${domain}"
 # user@mail0:~$ sudo -u sentuser -g sentuser -i /bin/bash -c "/bin/cat /home/user/testmail | /bin/gpgmda"
 
 tee /dev/shm/lastmail | \
-    ssh "${user}" pee \
-    'sudo -u sentuser -g sentuser -i /bin/bash -c "/bin/cat - | /bin/gpgmda"' \
-    "cat - | /usr/sbin/sendmail -N delay,failure,success -t -i -f reply_to_the_from_address@${domain}"
+    ssh "${user}" 'pee sudo -u sentuser -g sentuser -i /bin/bash -c "/bin/cat - | /bin/gpgmda" "cat - | /usr/sbin/sendmail -N delay,failure,success -t -i -f reply_to_the_from_address@${domain}"'
 
 #working:
 #tee /dev/shm/lastmail | ssh "${sentuser}" "cat - | /bin/gpgmda" || exit 1
