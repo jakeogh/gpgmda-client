@@ -111,6 +111,8 @@ alot Docs:
 
 **Similar software:**
 
+https://github.com/SkullTech/drymail
+
 gpgit:
  
 - https://grepular.com/Automatically_Encrypting_all_Incoming_Email
