@@ -1,7 +1,6 @@
 #!/bin/bash
 
 
-
 make_alot_theme()
 {
 cat <<EOF
