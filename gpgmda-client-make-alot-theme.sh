@@ -45,7 +45,7 @@ green = 'dark green'
     notify_error = 'standout','default','%(base3)s','%(red)s','%(base3)s','%(red)s'
     notify_normal = 'default','default','%(blue)s','%(base02)s','%(blue)s','%(base02)s'
     prompt = 'default','default','%(base0)s','%(base02)s','%(base0)s','%(base02)s'
-    tag = 'default','default','%(yellow)s','%(base03)s','%(yellow)s','%(base03)s'
+    tag = 'default','default','%(yellow)s','%(base03)s','%(yellow)s','%(base02)s'
     tag_focus = 'standout','default','%(base03)s','%(yellow)s','%(base03)s','%(yellow)s'
 [help]
     text = 'default','default','%(base0)s','%(base02)s','%(base0)s','%(base02)s'
@@ -65,11 +65,11 @@ green = 'dark green'
     line_focus = 'standout','default','%(base1)s','%(base01)s','%(base1)s','%(base01)s'
     line_odd = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
 [thread]
-    attachment = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
+    attachment = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
     attachment_focus = 'underline','default','%(base02)s','%(yellow)s','%(base02)s','%(yellow)s'
     arrow_bars = 'default','default','%(yellow)s','%(base03)s','%(yellow)s','%(base03)s'
     arrow_heads = 'default','default','%(yellow)s','%(base03)s','%(yellow)s','%(base03)s'
-    body = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
+    body = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
     body_focus = 'default','default','%(base0)s','%(base02)s','%(base0)s','%(base02)s'
     header = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
     header_key = 'default','default','%(red)s','%(base03)s','%(red)s','%(base03)s'
@@ -85,11 +85,11 @@ green = 'dark green'
     header_value = 'default','default','%(blue)s','%(base03)s','%(blue)s','%(base03)s'
 [search]
     [[threadline]]
-        normal = 'default','default','%(base1)s','%(base03)s','%(base1)s','%(base03)s'
+        normal = 'default','default','%(base1)s','%(base03)s','%(base1)s','%(base02)s'
         focus = 'standout','default','%(base02)s','%(base01)s','%(base02)s','%(base01)s'
         parts = date,mailcount,tags,authors,subject
         [[[date]]]
-            normal = 'default','default','%(yellow)s','%(base03)s','%(yellow)s','%(base03)s'
+            normal = 'default','default','%(yellow)s','%(base03)s','%(yellow)s','%(base02)s'
             focus = 'standout','default','%(base02)s,bold','%(base01)s','%(base02)s,bold','%(base01)s'
             alignment = right
             width = fit, 9, 9
@@ -111,7 +111,7 @@ green = 'dark green'
             normal = 'default','default','%(base01)s','%(base03)s','%(base01)s','%(base03)s'
             focus = 'standout','default','%(base02)s','%(base01)s','%(base02)s','%(base01)s'
     [[threadline-unread]]
-        normal = 'default','default','%(base1)s,bold','%(base03)s','%(base1)s,bold','%(base03)s'
+        normal = 'default','default','%(base1)s,bold','%(base03)s','%(base1)s,bold','%(base02)s'
         tagged_with = 'unread'
         [[[date]]]
             normal = 'default','default','%(yellow)s,bold','%(base03)s','%(yellow)s,bold','%(base03)s'
