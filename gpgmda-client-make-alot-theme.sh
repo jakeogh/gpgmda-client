@@ -55,15 +55,15 @@ green = 'dark green'
 [namedqueries]
     line_even = 'default','default','%(base0)s','%(base02)s','%(base0)s','%(base02)s'
     line_focus = 'standout','default','%(base1)s','%(base01)s','%(base1)s','%(base01)s'
-    line_odd = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
+    line_odd = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
 [taglist]
     line_even = 'default','default','%(base0)s','%(base02)s','%(base0)s','%(base02)s'
     line_focus = 'standout','default','%(base1)s','%(base01)s','%(base1)s','%(base01)s'
-    line_odd = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
+    line_odd = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
 [bufferlist]
     line_even = 'default','default','%(base0)s','%(base02)s','%(base0)s','%(base02)s'
     line_focus = 'standout','default','%(base1)s','%(base01)s','%(base1)s','%(base01)s'
-    line_odd = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
+    line_odd = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
 [thread]
     attachment = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
     attachment_focus = 'underline','default','%(base02)s','%(yellow)s','%(base02)s','%(yellow)s'
