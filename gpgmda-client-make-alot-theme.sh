@@ -41,7 +41,7 @@ green = 'dark green'
 
 [global]
     footer = 'standout','default','%(base0)s','%(base02)s','%(base0)s','%(base02)s'
-    body = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
+    body = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
     notify_error = 'standout','default','%(base3)s','%(red)s','%(base3)s','%(red)s'
     notify_normal = 'default','default','%(blue)s','%(base02)s','%(blue)s','%(base02)s'
     prompt = 'default','default','%(base0)s','%(base02)s','%(base0)s','%(base02)s'
