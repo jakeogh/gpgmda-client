@@ -67,8 +67,8 @@ green = 'dark green'
 [thread]
     attachment = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
     attachment_focus = 'underline','default','%(base02)s','%(yellow)s','%(base02)s','%(yellow)s'
-    arrow_bars = 'default','default','%(yellow)s','%(base03)s','%(yellow)s','%(base03)s'
-    arrow_heads = 'default','default','%(yellow)s','%(base03)s','%(yellow)s','%(base03)s'
+    arrow_bars = 'default','default','%(yellow)s','%(base03)s','%(yellow)s','%(base02)s'
+    arrow_heads = 'default','default','%(yellow)s','%(base03)s','%(yellow)s','%(base02)s'
     body = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
     body_focus = 'default','default','%(base0)s','%(base02)s','%(base0)s','%(base02)s'
     header = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
@@ -77,9 +77,9 @@ green = 'dark green'
     [[summary]]
       even = 'default','default','%(base0)s','%(base02)s','%(base0)s','%(base02)s'
       focus = 'standout','default','%(base1)s','%(base01)s','%(base1)s','%(base01)s'
-      odd = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
+      odd = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
 [envelope]
-    body = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
+    body = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
     header = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
     header_key = 'default','default','%(red)s','%(base03)s','%(red)s','%(base03)s'
     header_value = 'default','default','%(blue)s','%(base03)s','%(blue)s','%(base03)s'
@@ -94,21 +94,21 @@ green = 'dark green'
             alignment = right
             width = fit, 9, 9
         [[[mailcount]]]
-            normal = 'default','default','%(blue)s','%(base03)s','%(blue)s','%(base03)s'
+            normal = 'default','default','%(blue)s','%(base03)s','%(blue)s','%(base02)s'
             focus = 'standout','default','%(base02)s','%(base01)s','%(base02)s','%(base01)s'
         [[[tags]]]
-            normal = 'default','default','%(cyan)s','%(base03)s','%(cyan)s','%(base03)s'
+            normal = 'default','default','%(cyan)s','%(base03)s','%(cyan)s','%(base02)s'
             focus = 'standout','default','%(base02)s','%(base01)s','%(base02)s','%(base01)s'
         [[[authors]]]
-            normal = 'default,underline','default','%(blue)s','%(base03)s','%(blue)s','%(base03)s'
+            normal = 'default,underline','default','%(blue)s','%(base03)s','%(blue)s','%(base02)s'
             focus = 'standout','default','%(base02)s','%(base01)s','%(base02)s','%(base01)s'
             width = 'fit',0,30
         [[[subject]]]
-            normal = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base03)s'
+            normal = 'default','default','%(base0)s','%(base03)s','%(base0)s','%(base02)s'
             focus = 'standout','default','%(base02)s,bold','%(base01)s','%(base02)s,bold','%(base01)s'
             width = 'weight',1
         [[[content]]]
-            normal = 'default','default','%(base01)s','%(base03)s','%(base01)s','%(base03)s'
+            normal = 'default','default','%(base01)s','%(base03)s','%(base01)s','%(base02)s'
             focus = 'standout','default','%(base02)s','%(base01)s','%(base02)s','%(base01)s'
     [[threadline-unread]]
         normal = 'default','default','%(base1)s,bold','%(base03)s','%(base1)s,bold','%(base02)s'
@@ -124,7 +124,7 @@ green = 'dark green'
         [[[subject]]]
             normal = 'default','default','%(base2)s','%(base03)s','%(base2)s','%(base03)s'
         [[[content]]]
-            normal = 'default','default','%(base01)s,bold','%(base03)s','%(base01)s,bold','%(base03)s'
+            normal = 'default','default','%(base01)s,bold','%(base03)s','%(base01)s,bold','%(base02)s'
 
 
 EOF
