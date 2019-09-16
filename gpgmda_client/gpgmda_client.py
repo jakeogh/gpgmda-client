@@ -19,7 +19,7 @@ from kcl.fileops import file_exists
 from kcl.dirops import path_is_dir
 from kcl.dirops import check_or_create_dir
 from kcl.dirops import count_files
-from kcl.dirops import list_files
+from getdents import files
 from kcl.printops import eprint
 from kcl.printops import ceprint
 
