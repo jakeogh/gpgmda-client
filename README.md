@@ -19,7 +19,7 @@ https://github.com/jakeogh/gpgmda-client
 
 - gpgmda: https://github.com/jakeogh/gpgmda (server side)
 - python3: http://python.org
-- bash: https://www.gnu.org/software/bash/
+- bash: https://www.gnu.org/software/bash
 - gnupg: http://gnupg.org
 - ssh: http://openssh.org
 - rsync: http://rsync.samba.org

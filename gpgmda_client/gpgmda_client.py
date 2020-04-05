@@ -11,11 +11,11 @@ import subprocess
 import shutil
 import glob
 
-from multiprocessing import Process     #https://docs.python.org/3/library/multiprocessing.html
+#from multiprocessing import Process     #https://docs.python.org/3/library/multiprocessing.html
 from multiprocessing import Pool
 from multiprocessing import cpu_count
 from kcl.fileops import empty_file
-from kcl.fileops import file_exists
+from kcl.pathops import path_exists
 from kcl.dirops import path_is_dir
 from kcl.dirops import check_or_create_dir
 from kcl.dirops import count_files
@@ -40,17 +40,28 @@ def rsync_mail(email_address, gpgMaildir_archive_folder):
     #rsync_p = \
         #subprocess.Popen([b'rsync', b'--ignore-existing', b'--size-only', b'-t', b'--whole-file', b'--copy-links', b'--checksum', b'--stats', b'-i', b'-r', b'-vv', email_address + b':gpgMaildir', gpgMaildir_archive_folder + b'/'], stdout=subprocess.PIPE)
     rsync_p = \
-        subprocess.Popen(['rsync', '--ignore-existing', '--size-only', '-t', '--whole-file', '--copy-links', '--stats', '-i', '-r', '-vv', email_address + ':gpgMaildir', gpgMaildir_archive_folder + '/'], stdout=subprocess.PIPE)
+        subprocess.Popen(['rsync',
+                          '--ignore-existing',
+                          '--size-only',
+                          '-t',
+                          '--whole-file',
+                          '--copy-links',
+                          '--stats',
+                          '-i',
+                          '-r',
+                          '-vv',
+                          email_address + ':gpgMaildir',
+                          gpgMaildir_archive_folder + '/'], stdout=subprocess.PIPE)
     rsync_p_output = rsync_p.communicate()
+
     for line in rsync_p_output[0].split(b'\n'):
-#       eprint(line.decode('utf-8'))
         if b'exists' not in line:
             eprint(line)
 
     eprint("rsync_p.returncode:", rsync_p.returncode)
     if rsync_p.returncode != 0:
         eprint("rsync did not return 0, exiting")
-#        os._exit(1)
+        os._exit(1)
 
     rsync_logfile = "/dev/shm/.gpgmda_rsync_last_new_mail_" + email_address
     with open(rsync_logfile, 'wb') as rsync_logfile_handle:
@@ -58,15 +69,21 @@ def rsync_mail(email_address, gpgMaildir_archive_folder):
         ceprint("wrote rsync_logfile:", rsync_logfile)
 
 
-def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, notmuch_config_file, notmuch_config_folder):
+def run_notmuch(mode,
+                email_address,
+                email_archive_folder,
+                gpgmaildir,
+                query,
+                notmuch_config_file,
+                notmuch_config_folder):
     yesall = False
 
     if mode == "update_notmuch_db":
         current_env = os.environ.copy()
         current_env["NOTMUCH_CONFIG"] = notmuch_config_file
+
         notmuch_new_command = ["notmuch", "--config=" + notmuch_config_file, "new"]
         ceprint("notmuch_new_command:", notmuch_new_command)
-        #notmuch_p = subprocess.Popen([b'notmuch', b'new'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, env=current_env)
         notmuch_p = subprocess.Popen(notmuch_new_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, env=current_env)
         ceprint("notmuch_p.args:", notmuch_p.args)
         notmuch_p_output = notmuch_p.communicate()
@@ -101,7 +118,8 @@ def run_notmuch(mode, email_address, email_archive_folder, gpgmaildir, query, no
                     command = "vi " + non_mail_file
                     os.system(command)
 
-                    delete_message_answer = input("Would you like to move this message locally to the ~/.gpgmda/non-mail folder and delete it on the server? (yes/no/skipall/yesall): ")
+                    delete_message_answer = \
+                        input("Would you like to move this message locally to the ~/.gpgmda/non-mail folder and delete it on the server? (yes/no/skipall/yesall): ")
 
                     if delete_message_answer.lower() == "yesall":
                         yesall = True
@@ -339,7 +357,7 @@ def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_b
         eprint("Invalid email address:", email_address, ", exiting.")
         os._exit(1)
 
-    if not file_exists(gpgfile):
+    if not path_exists(gpgfile):
         eprint(gpgfile, "No such file or directory. Exiting.")
         os._exit(1)
 
@@ -481,7 +499,7 @@ def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badm
     rsync_last_new_mail_file = '/dev/shm/.gpgmda_rsync_last_new_mail_' + email_address
     eprint("checking to see if", rsync_last_new_mail_file, "exists and is greater than 0 bytes")
     rsync_files_transferred = 0
-    if file_exists(rsync_last_new_mail_file):
+    if path_exists(rsync_last_new_mail_file):
         with open(rsync_last_new_mail_file, 'r') as fh:
             for line in fh.readlines():
                 if 'Number of regular files transferred:' in line:
@@ -508,8 +526,8 @@ def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badm
     if gpgmaildir_file_count > maildir_file_count:
         eprint("files_in_gpgmaildir > files_in_maildir:", gpgmaildir_file_count, '>', maildir_file_count)
         eprint("locating un-decrypted files")
-        files_in_gpgmaildir = list_files(gpgmaildir=gpgmaildir)
-        files_in_maildir = list_files(maildir=maildir)
+        files_in_gpgmaildir = files(gpgmaildir)
+        files_in_maildir = files(maildir)
         eprint("len(files_in_gpgmaildir):", len(files_in_gpgmaildir))
         eprint("len(files_in_maildir):", len(files_in_maildir))
         full_maildir_string = "\n".join(files_in_maildir)
