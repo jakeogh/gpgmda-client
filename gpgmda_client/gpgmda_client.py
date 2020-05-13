@@ -37,8 +37,6 @@ def check_for_notmuch_database(email_archive_folder):
 def rsync_mail(email_address, gpgMaildir_archive_folder):
     load_ssh_key(email_address=email_address)
     eprint("running rsync")
-    #rsync_p = \
-        #subprocess.Popen([b'rsync', b'--ignore-existing', b'--size-only', b'-t', b'--whole-file', b'--copy-links', b'--checksum', b'--stats', b'-i', b'-r', b'-vv', email_address + b':gpgMaildir', gpgMaildir_archive_folder + b'/'], stdout=subprocess.PIPE)
     rsync_p = \
         subprocess.Popen(['rsync',
                           '--ignore-existing',
@@ -84,7 +82,11 @@ def run_notmuch(mode,
 
         notmuch_new_command = ["notmuch", "--config=" + notmuch_config_file, "new"]
         ceprint("notmuch_new_command:", notmuch_new_command)
-        notmuch_p = subprocess.Popen(notmuch_new_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, env=current_env)
+        notmuch_p = subprocess.Popen(notmuch_new_command,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     shell=False,
+                                     env=current_env)
         ceprint("notmuch_p.args:", notmuch_p.args)
         notmuch_p_output = notmuch_p.communicate()
 
@@ -337,7 +339,12 @@ def decrypt_list_of_messages(message_list, email_address, maildir, delete_badmai
     p = Pool(process_count)
     eprint("message_list:", message_list)
     for gpgfile in message_list:    #useful for debugging
-       decrypt_message(email_address=email_address, gpgfile=gpgfile, maildir=maildir, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail)
+       decrypt_message(email_address=email_address,
+                       gpgfile=gpgfile,
+                       maildir=maildir,
+                       delete_badmail=delete_badmail,
+                       skip_badmail=skip_badmail,
+                       move_badmail=move_badmail)
 
 
 def move_to_badmail(gpgfile):
@@ -513,7 +520,12 @@ def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badm
         else:
             rsync_list = parse_rsync_log_to_list(email_address=email_address, gpgMaildir_archive_folder=gpgMaildir_archive_folder)
             eprint("rsync_list:", rsync_list)
-            decrypt_list_of_messages(message_list=rsync_list, email_address=email_address, maildir=maildir, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail)
+            decrypt_list_of_messages(message_list=rsync_list,
+                                     email_address=email_address,
+                                     maildir=maildir,
+                                     delete_badmail=delete_badmail,
+                                     skip_badmail=skip_badmail,
+                                     move_badmail=move_badmail)
 
     else:
         eprint(rsync_last_new_mail_file, "does not exist or is 0 bytes")
@@ -537,13 +549,19 @@ def gpgmaildir_to_maildir(email_address, delete_badmail, skip_badmail, move_badm
             gpghash = gpgfile.split(b'/')[-1]
             if gpghash not in full_maildir_string:
                 eprint("\n\nfound gpgfile that has not been decrypted yet:", gpgfile)
-                decrypt_message(email_address=email_address, gpgfile=gpgfile, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail, maildir=maildir, stdout=False)
+                decrypt_message(email_address=email_address,
+                                gpgfile=gpgfile,
+                                delete_badmail=delete_badmail,
+                                skip_badmail=skip_badmail,
+                                move_badmail=move_badmail,
+                                maildir=maildir,
+                                stdout=False)
     return
 
 
-def search_list_of_strings_for_substring(list, substring):
+def search_list_of_strings_for_substring(list_to_search, substring):
     item_found = ''
-    for item in list:
+    for item in list_to_search:
         try:
             if substring in item:
                 item_found = item
@@ -554,19 +572,37 @@ def search_list_of_strings_for_substring(list, substring):
 
 
 def update_notmuch_db(email_address, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
-    run_notmuch("update_notmuch_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False, notmuch_config_file=notmuch_config_file, notmuch_config_folder=notmuch_config_folder)
+    run_notmuch("update_notmuch_db",
+                email_address=email_address,
+                email_archive_folder=email_archive_folder,
+                gpgmaildir=gpgmaildir,
+                query=False,
+                notmuch_config_file=notmuch_config_file,
+                notmuch_config_folder=notmuch_config_folder)
 
 
 def update_notmuch_address_db(email_address, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
-    run_notmuch("update_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False, notmuch_config_file=notmuch_config_file, notmuch_config_folder=notmuch_config_folder)
+    run_notmuch("update_address_db",
+                email_address=email_address,
+                email_archive_folder=email_archive_folder,
+                gpgmaildir=gpgmaildir,
+                query=False,
+                notmuch_config_file=notmuch_config_file,
+                notmuch_config_folder=notmuch_config_folder)
 
 
 def update_notmuch_address_db_build(email_address, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
-    run_notmuch("build_address_db", email_address=email_address, email_archive_folder=email_archive_folder, gpgmaildir=gpgmaildir, query=False, notmuch_config_file=notmuch_config_file, notmuch_config_folder=notmuch_config_folder)
+    run_notmuch("build_address_db",
+                email_address=email_address,
+                email_archive_folder=email_archive_folder,
+                gpgmaildir=gpgmaildir,
+                query=False,
+                notmuch_config_file=notmuch_config_file,
+                notmuch_config_folder=notmuch_config_folder)
 
 
 def check_noupdate_list(email_address):
-    noupdate_list = open(gpgmda_config_folder + "/.noupdate", 'r').readlines() #todo move config to ~/.gpgmda
+    noupdate_list = open(gpgmda_config_folder + "/.noupdate", 'r').readlines()  # todo move config to ~/.gpgmda
     for item in noupdate_list:
         if email_address in item:
             eprint(email_address + " is listed in .noupdate, exiting")
