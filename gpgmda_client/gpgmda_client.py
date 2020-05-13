@@ -228,7 +228,10 @@ primary_email=""" + email_address + """
 tags = unread;inbox;
 
 [maildir]
-synchronize_flags = false
+synchronize_flags = False
+
+[global]
+quit_on_last_bclose = True
 """
     notmuch_config_folder = '/'.join([email_archive_folder, "_notmuch_config"])
     check_or_create_dir(notmuch_config_folder)
@@ -268,8 +271,17 @@ def start_alot(email_address, email_archive_folder):
     eprint("starting alot",)
     os.system(' '.join(['alot', '--version']))
     move_terminal_text_up_one_page()        # so alot does not overwrite the last messages on the terminal
-    #alot_p = os.system(b' '.join([b'/home/cfg/python/debugging/pudb2.7', b'/usr/bin/alot', b'-C', b'256', b'--debug-level=debug', b'--logfile=/dev/shm/__alot_log', b'--notmuch-config', notmuch_config_folder + b'/.notmuch_config', b'--mailindex-path', email_archive_folder + b'/_Maildirs', b'-c', b'/dev/shm/__alot_config_' + email_address]))
-    alot_p = os.system(' '.join(['/usr/bin/alot', '-C', '256', '--debug-level=debug', '--logfile=/dev/shm/__alot_log', '--notmuch-config', notmuch_config_folder + '/.notmuch_config', '--mailindex-path', email_archive_folder + '/_Maildirs', '-c', '/dev/shm/__alot_config_' + email_address]))
+    alot_p = os.system(' '.join(['/usr/bin/alot',
+                                 '-C',
+                                 '256',
+                                 '--debug-level=debug',
+                                 '--logfile=/dev/shm/__alot_log',
+                                 '--notmuch-config',
+                                 notmuch_config_folder + '/.notmuch_config',
+                                 '--mailindex-path',
+                                 email_archive_folder + '/_Maildirs',
+                                 '-c',
+                                 '/dev/shm/__alot_config_' + email_address]))
 
 
 def load_ssh_key(email_address):
@@ -277,7 +289,7 @@ def load_ssh_key(email_address):
     if 'gmail' in email_address:
         return
 
-    ssh_key = '/home/user/.ssh/id_rsa__' + email_address   #todo use ~/.gpgmda/config
+    ssh_key = '/home/user/.ssh/id_rsa__' + email_address   # todo use ~/.gpgmda/config
 
     loaded_ssh_keys_p = subprocess.Popen(['ssh-add', '-l'], stdout=subprocess.PIPE)
     loaded_ssh_keys_p_output = loaded_ssh_keys_p.communicate()[0].strip().decode('UTF8')
@@ -339,12 +351,12 @@ def decrypt_list_of_messages(message_list, email_address, maildir, delete_badmai
     p = Pool(process_count)
     eprint("message_list:", message_list)
     for gpgfile in message_list:    #useful for debugging
-       decrypt_message(email_address=email_address,
-                       gpgfile=gpgfile,
-                       maildir=maildir,
-                       delete_badmail=delete_badmail,
-                       skip_badmail=skip_badmail,
-                       move_badmail=move_badmail)
+        decrypt_message(email_address=email_address,
+                        gpgfile=gpgfile,
+                        maildir=maildir,
+                        delete_badmail=delete_badmail,
+                        skip_badmail=skip_badmail,
+                        move_badmail=move_badmail)
 
 
 def move_to_badmail(gpgfile):
@@ -401,7 +413,7 @@ def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_b
 
     eprint("decrypting:", gpgfile)
     if stdout:
-#       command = "gpg2 -o - --decrypt " + gpgfile + " | tar --transform=s/$/." + gpgfile_name + "/ -xvf -" # hides the tar header
+        #command = "gpg2 -o - --decrypt " + gpgfile + " | tar --transform=s/$/." + gpgfile_name + "/ -xvf -" # hides the tar header
         command = "gpg2 -o - --decrypt " + gpgfile
         eprint("decrypt_msg() command:", command)
         return_code = os.system(command)
@@ -462,7 +474,8 @@ def decrypt_message(email_address, gpgfile, delete_badmail, skip_badmail, move_b
 
             elif not skip_badmail:
                 if delete_badmail is False:
-                    delete_message_answer = input("Would you like to move this message locally to the ~/.gpgmda/badmail folder and delete it off the server? (yes/no/yesall/skipall/moveall): ")
+                    delete_message_answer = \
+                        input("Would you like to move this message locally to the ~/.gpgmda/badmail folder and delete it off the server? (yes/no/yesall/skipall/moveall): ")
                     if delete_message_answer.lower() == "yesall":
                         delete_badmail = True
                     if delete_message_answer.lower() == "skipall":
@@ -669,7 +682,13 @@ def build_paths(ctx, email_address):
 def address_query(ctx, email_address, query):
     '''search for address string'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    run_notmuch("query_address_db", email_address=email_address, query=query, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
+    run_notmuch("query_address_db",
+                email_address=email_address,
+                query=query,
+                email_archive_folder=ctx.email_archive_folder,
+                gpgmaildir=ctx.gpgmaildir,
+                notmuch_config_file=ctx.notmuch_config_file,
+                notmuch_config_folder=ctx.notmuch_config_folder)
 
 
 @client.command()
@@ -696,8 +715,13 @@ def decrypt(ctx, email_address, delete_badmail, move_badmail, skip_badmail):
 
     if ctx.email_archive_type == "gpgMaildir":
         ctx.invoke(warm_up_gpg)
-        gpgmaildir_to_maildir(email_address=email_address, gpgMaildir_archive_folder=ctx.gpgMaildir_archive_folder, gpgmaildir=ctx.gpgmaildir, maildir=ctx.maildir, delete_badmail=delete_badmail, skip_badmail=skip_badmail, move_badmail=move_badmail)
-
+        gpgmaildir_to_maildir(email_address=email_address,
+                              gpgMaildir_archive_folder=ctx.gpgMaildir_archive_folder,
+                              gpgmaildir=ctx.gpgmaildir,
+                              maildir=ctx.maildir,
+                              delete_badmail=delete_badmail,
+                              skip_badmail=skip_badmail,
+                              move_badmail=move_badmail)
     else:
         eprint("Unsupported email_archive_type:", ctx.email_archive_type, "Exiting.")
         os._exit(1)
@@ -721,8 +745,16 @@ def update_notmuch(ctx, email_address):
     else:
         eprint("unknown folder type", ctx.email_archive_type, ", exiting")
 
-    update_notmuch_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
-    update_notmuch_address_db(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
+    update_notmuch_db(email_address=email_address,
+                      email_archive_folder=ctx.email_archive_folder,
+                      gpgmaildir=ctx.gpgmaildir,
+                      notmuch_config_file=ctx.notmuch_config_file,
+                      notmuch_config_folder=ctx.notmuch_config_folder)
+    update_notmuch_address_db(email_address=email_address,
+                              email_archive_folder=ctx.email_archive_folder,
+                              gpgmaildir=ctx.gpgmaildir,
+                              notmuch_config_file=ctx.notmuch_config_file,
+                              notmuch_config_folder=ctx.notmuch_config_folder)
 
 
 @client.command()
@@ -748,7 +780,11 @@ def download(ctx, email_address):
 def address_db_build(ctx, email_address):
     '''build address database for use with address_query'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    update_notmuch_address_db_build(email_address=email_address, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
+    update_notmuch_address_db_build(email_address=email_address,
+                                    email_archive_folder=ctx.email_archive_folder,
+                                    gpgmaildir=ctx.gpgmaildir,
+                                    notmuch_config_file=ctx.notmuch_config_file,
+                                    notmuch_config_folder=ctx.notmuch_config_folder)
 
 
 @client.command()
@@ -759,7 +795,13 @@ def afew_query(ctx, email_address, query):
     '''execute arbitrary afew query'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
-    run_notmuch("query_afew", email_address=email_address, query=query, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
+    run_notmuch("query_afew",
+                email_address=email_address,
+                query=query,
+                email_archive_folder=ctx.email_archive_folder,
+                gpgmaildir=ctx.gpgmaildir,
+                notmuch_config_file=ctx.notmuch_config_file,
+                notmuch_config_folder=ctx.notmuch_config_folder)
 
 
 @client.command()
@@ -770,7 +812,13 @@ def notmuch_query(ctx, email_address, query):
     '''execute arbitrary notmuch query'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
-    run_notmuch("query_notmuch", email_address=email_address, query=query, email_archive_folder=ctx.email_archive_folder, gpgmaildir=ctx.gpgmaildir, notmuch_config_file=ctx.notmuch_config_file, notmuch_config_folder=ctx.notmuch_config_folder)
+    run_notmuch("query_notmuch",
+                email_address=email_address,
+                query=query,
+                email_archive_folder=ctx.email_archive_folder,
+                gpgmaildir=ctx.gpgmaildir,
+                notmuch_config_file=ctx.notmuch_config_file,
+                notmuch_config_folder=ctx.notmuch_config_folder)
 
 
 @client.command()
