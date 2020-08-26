@@ -807,7 +807,6 @@ def afew_query(ctx, email_address, query):
                 notmuch_config_folder=ctx.notmuch_config_folder)
 
 
-    @client.command()
 @click.argument("email_address", nargs=1)
 @click.argument("query", type=str, help=NOTMUCH_QUERY_HELP)
 @click.pass_context
