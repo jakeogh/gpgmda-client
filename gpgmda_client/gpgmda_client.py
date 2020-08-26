@@ -26,7 +26,8 @@ from kcl.printops import ceprint
 global debug
 debug = False
 
-global NOTMUCH_QUERY_HELP = "notmuch search --output=files 'thread:000000000003c194'"
+global NOTMUCH_QUERY_HELP
+NOTMUCH_QUERY_HELP = "notmuch search --output=files 'thread:000000000003c194'"
 
 
 def check_for_notmuch_database(email_archive_folder):
