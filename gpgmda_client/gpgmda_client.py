@@ -808,10 +808,10 @@ def afew_query(ctx, email_address, query):
 
 
 @click.argument("email_address", nargs=1)
-@click.argument("query", type=str, help=NOTMUCH_QUERY_HELP)
+@click.argument("query", type=str)
 @click.pass_context
 def notmuch_query(ctx, email_address, query):
-    '''execute arbitrary notmuch query'''
+    '''execute arbitrary notmuch query ''' + NOTMUCH_QUERY_HELP
     ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
     run_notmuch("query_notmuch",
