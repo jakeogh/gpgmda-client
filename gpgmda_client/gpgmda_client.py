@@ -26,8 +26,8 @@ from kcl.printops import ceprint
 global debug
 debug = False
 
-global NOTMUCH_QUERY_HELP
-NOTMUCH_QUERY_HELP = "notmuch search --output=files 'thread:000000000003c194'"
+#global NOTMUCH_QUERY_HELP
+#NOTMUCH_QUERY_HELP = "notmuch search --output=files 'thread:000000000003c194'"
 
 
 def check_for_notmuch_database(email_archive_folder):
@@ -807,11 +807,12 @@ def afew_query(ctx, email_address, query):
                 notmuch_config_folder=ctx.notmuch_config_folder)
 
 
+@client.command()
 @click.argument("email_address", nargs=1)
 @click.argument("query", type=str)
 @click.pass_context
 def notmuch_query(ctx, email_address, query):
-    '''execute arbitrary notmuch query ''' + NOTMUCH_QUERY_HELP
+    '''execute arbitrary notmuch query notmuch search --output=files "thread:000000000003c194"'''
     ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
     run_notmuch("query_notmuch",
