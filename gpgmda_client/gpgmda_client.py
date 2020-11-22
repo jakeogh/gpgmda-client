@@ -640,7 +640,6 @@ def gpgmaildir_to_maildir(*,
         full_maildir_string = "\n".join(files_in_maildir)
 
         for gpgfile in files_in_gpgmaildir:
-            #subfolder = file.split(b'/')[-2]
             gpghash = gpgfile.split(b'/')[-1]
             if gpghash not in full_maildir_string:
                 ic('found gpgfile that has not been decrypted yet:', gpgfile)
@@ -653,7 +652,6 @@ def gpgmaildir_to_maildir(*,
                                 stdout=False)
     else:
         ic('files_in_gpgmaildir <= files_in_maildir, looks good')
-    return
 
 
 def search_list_of_strings_for_substring(*,
@@ -808,7 +806,9 @@ def decrypt(ctx, email_address, delete_badmail, move_badmail, skip_badmail):
                               maildir=ctx.maildir,
                               delete_badmail=delete_badmail,
                               skip_badmail=skip_badmail,
-                              move_badmail=move_badmail)
+                              move_badmail=move_badmail,)
+
+        ic('done with gpgmaildir_to_maildir()')
     else:
         ic('Unsupported:', ctx.email_archive_type, 'Exiting.')
         sys.exit(1)
