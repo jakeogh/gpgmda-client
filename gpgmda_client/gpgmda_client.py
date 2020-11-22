@@ -392,7 +392,7 @@ def decrypt_list_of_messages(*,
     process_count = cpu_count()
     p = Pool(process_count)
     ic(message_list)
-    for gpgfile in message_list:    #useful for debugging
+    for index, gpgfile in enumerate(message_list):    #useful for debugging
         decrypt_message(email_address=email_address,
                         gpgfile=gpgfile,
                         maildir=maildir,
@@ -400,7 +400,7 @@ def decrypt_list_of_messages(*,
                         skip_badmail=skip_badmail,
                         move_badmail=move_badmail,)
 
-    ic('done:', len(message_list))
+    ic('done:', index)
 
 
 def move_to_badmail(gpgfile):
@@ -910,10 +910,10 @@ def warm_up_gpg():
         gpg_cmd_proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         ic('writing test_string to gpg_cmd_proc and reading output')
         gpg_cmd_proc_output_stdout, gpg_cmd_proc_output_stderr = gpg_cmd_proc.communicate(test_string)
-        ic(gpg_cmd_proc_output_stdout)
+        #ic(gpg_cmd_proc_output_stdout)
         gpg_cmd_proc_output_stdout_decoded = gpg_cmd_proc_output_stdout.decode('utf-8')
         for line in gpg_cmd_proc_output_stdout_decoded.split('\n'):
-            eprint("STDOUT:", line)
+            ic('STDOUT:', line)
 
         ic('gpg_cmd_proc_output_stderr:')
         gpg_cmd_proc_output_stderr_decoded = gpg_cmd_proc_output_stderr.decode('utf-8')
