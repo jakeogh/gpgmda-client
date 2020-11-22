@@ -1,6 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
+# pylint: disable=C0111  # docstrings are always outdated and wrong
+# pylint: disable=W0511  # todo is encouraged
+# pylint: disable=C0301  # line too long
+# pylint: disable=R0902  # too many instance attributes
+# pylint: disable=C0302  # too many lines in module
+# pylint: disable=C0103  # single letter var names, func name too descriptive
+# pylint: disable=R0911  # too many return statements
+# pylint: disable=R0912  # too many branches
+# pylint: disable=R0915  # too many statements
+# pylint: disable=R0913  # too many arguments
+# pylint: disable=R1702  # too many nested blocks
+# pylint: disable=R0914  # too many local variables
+# pylint: disable=R0903  # too few public methods
+# pylint: disable=E1101  # no member for base
+# pylint: disable=W0201  # attribute defined outside __init__
+# pylint: disable=R0916  # Too many boolean expressions in if statement
+
+
 # todo: locking to prevent multiple instances of mail_update
 
 import glob
@@ -632,6 +650,8 @@ def gpgmaildir_to_maildir(*,
                                 move_badmail=move_badmail,
                                 maildir=maildir,
                                 stdout=False)
+    else:
+        ic('files_in_gpgmaildir <= files_in_maildir, looks good')
     return
 
 
@@ -775,6 +795,7 @@ def read(ctx, email_address):
 @click.pass_context
 def decrypt(ctx, email_address, delete_badmail, move_badmail, skip_badmail):
     '''decrypt new mail in encrypted maildir to unencrypted maildir'''
+    ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(email_address=email_address)
 
@@ -797,6 +818,7 @@ def decrypt(ctx, email_address, delete_badmail, move_badmail, skip_badmail):
 @click.pass_context
 def update_notmuch(ctx, email_address):
     '''update notmuch with new mail from (normal, unencrypted) maildir'''
+    ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(email_address=email_address)
 
@@ -828,6 +850,7 @@ def update_notmuch(ctx, email_address):
 @click.pass_context
 def download(ctx, email_address):
     '''rsync new mail to encrypted maildir'''
+    ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(email_address=email_address)
 
@@ -846,6 +869,7 @@ def download(ctx, email_address):
 @click.pass_context
 def address_db_build(ctx, email_address):
     '''build address database for use with address_query'''
+    ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
     update_notmuch_address_db_build(email_address=email_address,
                                     email_archive_folder=ctx.email_archive_folder,
@@ -860,6 +884,7 @@ def address_db_build(ctx, email_address):
 @click.pass_context
 def afew_query(ctx, email_address, query):
     '''execute arbitrary afew query'''
+    ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
     run_notmuch(mode="query_afew",
@@ -877,6 +902,7 @@ def afew_query(ctx, email_address, query):
 @click.pass_context
 def notmuch_query(ctx, email_address, query):
     '''execute arbitrary notmuch query notmuch search --output=files "thread:000000000003c194"'''
+    ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
     eprint(query)
     run_notmuch(mode="query_notmuch",
@@ -899,6 +925,7 @@ def show_message_counts(ctx, email_address):
 @client.command()
 def warm_up_gpg():
     '''make sure gpg is working'''
+    ic()
     # due to https://bugs.g10code.com/gnupg/issue1190 first get gpg-agent warmed up by decrypting a test message.
     decrypt_test = 0
 
