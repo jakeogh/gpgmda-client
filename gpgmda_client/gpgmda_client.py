@@ -407,12 +407,12 @@ def decrypt_list_of_messages(*,
 
     ic()
     ic(message_list)
-    message_list = filter(None, message_list)   #remove empty items
-    process_count = min(cpu_count(), len(message_list))
-    ic(process_count)
+    #process_count = min(cpu_count(), len(message_list))
+    message_list_filter = filter(None, message_list)   #remove empty items
+    #ic(process_count)
     #p = Pool(process_count)
     index = 0
-    for index, gpgfile in enumerate(message_list):    #useful for debugging
+    for index, gpgfile in enumerate(message_list_filter):    #useful for debugging
         decrypt_message(email_address=email_address,
                         gpgfile=gpgfile,
                         maildir=maildir,
