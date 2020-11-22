@@ -588,6 +588,7 @@ def gpgmaildir_to_maildir(*,
                           maildir,):
 
     # todo add locking
+    ic()
     ic('gpgmda_to_maildir using:', gpgMaildir_archive_folder)
     ic('Checking for default-recipient in ~/.gnupg/gpg.conf')
     command = "grep \"^default-recipient\" ~/.gnupg/gpg.conf"
