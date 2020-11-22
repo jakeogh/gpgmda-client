@@ -392,6 +392,7 @@ def decrypt_list_of_messages(*,
     process_count = cpu_count()
     p = Pool(process_count)
     ic(message_list)
+    index = 0
     for index, gpgfile in enumerate(message_list):    #useful for debugging
         decrypt_message(email_address=email_address,
                         gpgfile=gpgfile,
