@@ -406,10 +406,11 @@ def decrypt_list_of_messages(*,
                              move_badmail,):
 
     ic()
-    message_list = filter(None, message_list)   #remove empty items
-    process_count = cpu_count()
-    p = Pool(process_count)
     ic(message_list)
+    message_list = filter(None, message_list)   #remove empty items
+    process_count = min(cpu_count(), len(message_list))
+    ic(process_count)
+    #p = Pool(process_count)
     index = 0
     for index, gpgfile in enumerate(message_list):    #useful for debugging
         decrypt_message(email_address=email_address,
@@ -605,7 +606,7 @@ def gpgmaildir_to_maildir(*,
             for line in fh.readlines():
                 if 'Number of regular files transferred:' in line:
                     eprint(line)
-                    rsync_files_transferred = line.split(':')[1].strip()
+                    rsync_files_transferred = int(line.split(':')[1].strip())
                     ic(rsync_files_transferred)
                     break
         if rsync_files_transferred == 0:
