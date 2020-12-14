@@ -647,11 +647,14 @@ def gpgmaildir_to_maildir(*,
         files_in_maildir = [dent.pathlib for dent in files(maildir)]
         ic('len(files_in_gpgmaildir):', len(files_in_gpgmaildir))
         ic('len(files_in_maildir):', len(files_in_maildir))
-        full_maildir_string = "\n".join(files_in_maildir)
+        hashes_in_gpgmaildir = [path.name for path in files_in_gpgmaildir]
+        hashes_in_maildir = [path.name for path in files_in_maildir]
+        #full_maildir_string = "\n".join(files_in_maildir)
 
         for gpgfile in files_in_gpgmaildir:
-            gpghash = gpgfile.split(b'/')[-1]
-            if gpghash not in full_maildir_string:
+            #gpghash = gpgfile.split(b'/')[-1]
+            gpghash = gpgfile.name
+            if gpghash not in hashes_in_maildir:
                 ic('found gpgfile that has not been decrypted yet:', gpgfile)
                 decrypt_message(email_address=email_address,
                                 gpgfile=gpgfile,
