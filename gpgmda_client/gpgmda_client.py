@@ -643,8 +643,8 @@ def gpgmaildir_to_maildir(*,
     if gpgmaildir_file_count > maildir_file_count:
         ic('files_in_gpgmaildir > files_in_maildir:', gpgmaildir_file_count, '>', maildir_file_count)
         ic('locating un-decrypted files')
-        files_in_gpgmaildir = list(files(gpgmaildir))
-        files_in_maildir = list(files(maildir))
+        files_in_gpgmaildir = [dent.pathlib for dent in files(gpgmaildir)]
+        files_in_maildir = [dent.pathlib for dent in files(maildir)]
         ic('len(files_in_gpgmaildir):', len(files_in_gpgmaildir))
         ic('len(files_in_maildir):', len(files_in_maildir))
         full_maildir_string = "\n".join(files_in_maildir)
