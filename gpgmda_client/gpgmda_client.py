@@ -372,8 +372,8 @@ def get_maildir_file_counts(*,
                             gpgmaildir,
                             maildir,):
     ic()
-    files_in_gpgmaildir = len(files(gpgmaildir))
-    files_in_maildir = len(files(maildir))
+    files_in_gpgmaildir = len(list(files(gpgmaildir)))
+    files_in_maildir = len(list(files(maildir)))
     return {'files_in_gpgmaildir': files_in_gpgmaildir,
             "files_in_maildir": files_in_maildir}
 
