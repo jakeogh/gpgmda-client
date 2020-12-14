@@ -28,12 +28,13 @@ import subprocess
 import sys
 import time
 #from multiprocessing import Process     #https://docs.python.org/3/library/multiprocessing.html
-from multiprocessing import Pool, cpu_count
+#from multiprocessing import Pool, cpu_count
+from pathlib import Path
 
 import click
 from getdents import files
 from icecream import ic
-from kcl.dirops import check_or_create_dir, count_files, path_is_dir
+from kcl.dirops import check_or_create_dir, path_is_dir
 from kcl.fileops import empty_file
 from kcl.pathops import path_exists
 from kcl.printops import ceprint, eprint
@@ -371,9 +372,10 @@ def get_maildir_file_counts(*,
                             gpgmaildir,
                             maildir,):
     ic()
-    files_in_gpgmaildir = count_files(gpgmaildir)
-    files_in_maildir = count_files(maildir)
-    return {'files_in_gpgmaildir': files_in_gpgmaildir, "files_in_maildir": files_in_maildir}
+    files_in_gpgmaildir = len(files(gpgmaildir))
+    files_in_maildir = len(files(maildir))
+    return {'files_in_gpgmaildir': files_in_gpgmaildir,
+            "files_in_maildir": files_in_maildir}
 
 
 def parse_rsync_log_to_list(*,
@@ -386,7 +388,7 @@ def parse_rsync_log_to_list(*,
 
     full_path_list = []
     for line in rsync_log:
-        line = line.strip() #remove newlines
+        line = line.strip()  # remove newlines
         if 'exists' not in line:
             if 'gpgMaildir' in line:
                 if line.startswith('>f'):
@@ -394,7 +396,12 @@ def parse_rsync_log_to_list(*,
                     ic(new_gpgmda_file_path)
                     full_path_list.append(new_gpgmda_file_path)
 
-    return full_path_list
+    message_list = []
+    for line in full_path_list:
+        assert len(line) > 0
+        message_list.append(Path(line))
+
+    return message_list
 
 
 def decrypt_list_of_messages(*,
@@ -408,11 +415,11 @@ def decrypt_list_of_messages(*,
     ic()
     ic(message_list)
     #process_count = min(cpu_count(), len(message_list))
-    message_list_filter = filter(None, message_list)   #remove empty items
+    #message_list_filter = filter(None, message_list)   #remove empty items
     #ic(process_count)
     #p = Pool(process_count)
     index = 0
-    for index, gpgfile in enumerate(message_list_filter):    #useful for debugging
+    for index, gpgfile in enumerate(message_list):    #useful for debugging
         decrypt_message(email_address=email_address,
                         gpgfile=gpgfile,
                         maildir=maildir,
@@ -443,6 +450,8 @@ def decrypt_message(*,
                     move_badmail,
                     maildir,
                     stdout=False,):
+
+    assert isinstance(gpgfile, Path)
 
     ic('decrypt_msg():', gpgfile)
     if '@' not in email_address:
