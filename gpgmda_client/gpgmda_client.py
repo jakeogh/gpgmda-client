@@ -661,7 +661,7 @@ def gpgmaildir_to_maildir(*,
         ic('len(files_in_maildir):', len(files_in_maildir))
         ic(len(files_in_gpgmaildir) - len(files_in_maildir))
         ic('building hash lists')
-        hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
+        #hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
         hashes_in_maildir = [path.name.split('.')[-1] for path in files_in_maildir]
         #full_maildir_string = "\n".join(files_in_maildir)
 
@@ -698,7 +698,12 @@ def search_list_of_strings_for_substring(*,
     return item_found
 
 
-def update_notmuch_db(email_address, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
+def update_notmuch_db(*,
+                      email_address,
+                      email_archive_folder,
+                      gpgmaildir,
+                      notmuch_config_file,
+                      notmuch_config_folder,):
     run_notmuch(mode="update_notmuch_db",
                 email_address=email_address,
                 email_archive_folder=email_archive_folder,
@@ -708,7 +713,12 @@ def update_notmuch_db(email_address, email_archive_folder, gpgmaildir, notmuch_c
                 notmuch_config_folder=notmuch_config_folder)
 
 
-def update_notmuch_address_db(email_address, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
+def update_notmuch_address_db(*,
+                              email_address,
+                              email_archive_folder,
+                              gpgmaildir,
+                              notmuch_config_file,
+                              notmuch_config_folder,):
     run_notmuch(mode="update_address_db",
                 email_address=email_address,
                 email_archive_folder=email_archive_folder,
@@ -718,7 +728,12 @@ def update_notmuch_address_db(email_address, email_archive_folder, gpgmaildir, n
                 notmuch_config_folder=notmuch_config_folder)
 
 
-def update_notmuch_address_db_build(email_address, email_archive_folder, gpgmaildir, notmuch_config_file, notmuch_config_folder):
+def update_notmuch_address_db_build(*,
+                                    email_address,
+                                    email_archive_folder,
+                                    gpgmaildir,
+                                    notmuch_config_file,
+                                    notmuch_config_folder,):
     run_notmuch(mode="build_address_db",
                 email_address=email_address,
                 email_archive_folder=email_archive_folder,
@@ -991,7 +1006,3 @@ def warm_up_gpg():
         else:
             ic('found test string in gpg_cmd_proc_output_stdout, gpg is working')
             decrypt_test = 1
-
-
-if __name__ == '__main__':
-    client()
