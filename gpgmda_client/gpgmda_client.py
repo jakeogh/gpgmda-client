@@ -420,7 +420,7 @@ def decrypt_list_of_messages(*,
                              verbose=False,):
 
     ic()
-    ic(message_list)
+    #ic(message_list)
     ic(len(skip_hashes))
     index = 0
     for index, gpgfile in enumerate(message_list):    #useful for debugging
