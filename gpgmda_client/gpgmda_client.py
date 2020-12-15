@@ -604,6 +604,9 @@ def decrypt_message(*,
             if stats.st_size <= 1668:
                 ic('this is likely an empty gpg encrypted file')
                 raise EmptyGPGMailFile
+            else:
+                ic(stats.st_size, gpgfile)
+                assert False
 
             assert False
     return True
