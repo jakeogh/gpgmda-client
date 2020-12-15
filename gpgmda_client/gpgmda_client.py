@@ -295,7 +295,8 @@ def move_terminal_text_up_one_page():
 
 def start_alot(*,
                email_address,
-               email_archive_folder,):
+               email_archive_folder,
+               verbose=False,):
 
     ic()
     check_for_notmuch_database(email_archive_folder=email_archive_folder)
@@ -326,6 +327,8 @@ def start_alot(*,
                                  email_archive_folder + '/_Maildirs',
                                  '-c',
                                  '/dev/shm/__alot_config_' + email_address]))
+    if verbose:
+        ic(alot_p)
 
 
 def load_ssh_key(email_address):
@@ -355,6 +358,7 @@ def load_ssh_key(email_address):
         ssh_add_p_output = ssh_add_p.communicate()
         if ssh_add_p.returncode != 0:
             ic('something went wrong adding the ssh_key, exiting')
+            ic(ssh_add_p_output)
             sys.exit(1)
 
 
