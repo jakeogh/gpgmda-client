@@ -451,7 +451,6 @@ def decrypt_message(*,
 
     assert isinstance(gpgfile, Path)
 
-    print('', file=sys.stderr)
     ic('decrypt_msg():', gpgfile)
     if '@' not in email_address:
         ic('Invalid email address:', email_address, ', exiting.')
@@ -654,6 +653,9 @@ def gpgmaildir_to_maildir(*,
             #gpghash = gpgfile.split(b'/')[-1]
             gpghash = gpgfile.name
             if gpghash not in hashes_in_maildir:
+                print('', file=sys.stderr)
+                ic(gpghash)
+                ic(hashes_in_maildir[0:10])
                 ic('found gpgfile that has not been decrypted yet:', gpgfile)
                 decrypt_message(email_address=email_address,
                                 gpgfile=gpgfile,
