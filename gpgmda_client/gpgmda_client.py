@@ -567,7 +567,8 @@ def decrypt_message(*,
 
                 if delete_message_answer.lower() == "yes":
                     move_to_badmail(gpgfile)
-                    random_id = gpgfile.split('/')[-1]
+                    random_id = gpgfile.name
+                    ic(random_id)
 
                     if maildir_subfolder == ".sent":
                         target_file = "/home/sentuser/gpgMaildir/new/" + random_id
