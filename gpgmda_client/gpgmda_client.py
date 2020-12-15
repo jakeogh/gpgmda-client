@@ -646,8 +646,8 @@ def gpgmaildir_to_maildir(*,
         files_in_maildir = [dent.pathlib for dent in files(maildir)]
         ic('len(files_in_gpgmaildir):', len(files_in_gpgmaildir))
         ic('len(files_in_maildir):', len(files_in_maildir))
-        hashes_in_gpgmaildir = [path.name for path in files_in_gpgmaildir]
-        hashes_in_maildir = [path.name for path in files_in_maildir]
+        hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
+        hashes_in_maildir = [path.name.split('.')[-1] for path in files_in_maildir]
         #full_maildir_string = "\n".join(files_in_maildir)
 
         for gpgfile in files_in_gpgmaildir:
