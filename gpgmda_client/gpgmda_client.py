@@ -464,7 +464,8 @@ def decrypt_message(*,
     gpgfile_folder_path = gpgfile.parent
     ic(gpgfile_folder_path)
 
-    maildir_subfolder = os.path.basename(gpgfile_folder_path)
+    #maildir_subfolder = os.path.basename(gpgfile_folder_path)
+    maildir_subfolder = gpgfile_folder_path.name
     ic(maildir_subfolder)
     assert maildir_subfolder in ['new', '.sent']
 
