@@ -46,6 +46,10 @@ debug = False
 #NOTMUCH_QUERY_HELP = "notmuch search --output=files 'thread:000000000003c194'"
 
 
+class EmptyGPGMailFile(ValueError):
+    pass
+
+
 def check_for_notmuch_database(email_archive_folder):
     notmuch_database_folder = email_archive_folder + "/_Maildirs/.notmuch/xapian"
     if not os.path.isdir(notmuch_database_folder):
@@ -421,12 +425,19 @@ def decrypt_list_of_messages(*,
     #p = Pool(process_count)
     index = 0
     for index, gpgfile in enumerate(message_list):    #useful for debugging
-        decrypt_message(email_address=email_address,
-                        gpgfile=gpgfile,
-                        maildir=maildir,
-                        delete_badmail=delete_badmail,
-                        skip_badmail=skip_badmail,
-                        move_badmail=move_badmail,)
+        try:
+            decrypt_message(email_address=email_address,
+                            gpgfile=gpgfile,
+                            maildir=maildir,
+                            delete_badmail=delete_badmail,
+                            skip_badmail=skip_badmail,
+                            move_badmail=move_badmail,)
+        except EmptyGPGMailFile as e:
+            ic(e)
+            deal_with_badmail(gpgfile=gpgfile,
+                              move_badmail=move_badmail,
+                              skip_badmail=skip_badmail,
+                              delete_badmail=delete_badmail,)
 
     ic('done:', index)
 
@@ -440,18 +451,14 @@ def move_to_badmail(gpgfile):
     shutil.move(gpgfile, badmail_path)
 
 
-def deal_with_badmail(gpgfile,
+def deal_with_badmail(*,
+                      gpgfile,
                       move_badmail,
                       skip_badmail,
-                      delete_badmail,
-                      maildir_subfolder,):
+                      delete_badmail,):
 
-    ic('gpg did not produce any stdout, tar skipped file:', gpgfile)
-    ic('looking into:', gpgfile, 'further...')
-    os.system('/bin/ls -al ' + gpgfile.as_posix())
-    stats = os.stat(gpgfile)
-    if stats.st_size <= 1668:
-        ic('this is likely an empty gpg encrypted file')
+    maildir_subfolder = gpgfile.parent.name
+    ic(maildir_subfolder)
 
     if move_badmail:
         move_to_badmail(gpgfile)
@@ -516,7 +523,6 @@ def decrypt_message(*,
     gpgfile_folder_path = gpgfile.parent
     ic(gpgfile_folder_path)
 
-    #maildir_subfolder = os.path.basename(gpgfile_folder_path)
     maildir_subfolder = gpgfile_folder_path.name
     ic(maildir_subfolder)
     assert maildir_subfolder in ['new', '.sent']
@@ -591,12 +597,15 @@ def decrypt_message(*,
                 ic('tar did not return 0')
                 return False
         else:
-            deal_with_badmail(gpgfile=gpgfile,
-                              move_badmail=move_badmail,
-                              skip_badmail=skip_badmail,
-                              delete_badmail=delete_badmail,
-                              maildir_subfolder=maildir_subfolder,)
-            return False
+            ic('gpg did not produce any stdout, tar skipped file:', gpgfile)
+            ic('looking into:', gpgfile, 'further...')
+            os.system('/bin/ls -al ' + gpgfile.as_posix())
+            stats = os.stat(gpgfile)
+            if stats.st_size <= 1668:
+                ic('this is likely an empty gpg encrypted file')
+                raise EmptyGPGMailFile
+
+            assert False
     return True
 
 
@@ -673,13 +682,20 @@ def gpgmaildir_to_maildir(*,
                 ic(gpghash)
                 #ic(hashes_in_maildir[0:10])
                 ic('found gpgfile that has not been decrypted yet:', gpgfile)
-                decrypt_message(email_address=email_address,
-                                gpgfile=gpgfile,
-                                delete_badmail=delete_badmail,
-                                skip_badmail=skip_badmail,
-                                move_badmail=move_badmail,
-                                maildir=maildir,
-                                stdout=False)
+                try:
+                    decrypt_message(email_address=email_address,
+                                    gpgfile=gpgfile,
+                                    delete_badmail=delete_badmail,
+                                    skip_badmail=skip_badmail,
+                                    move_badmail=move_badmail,
+                                    maildir=maildir,
+                                    stdout=False)
+                except EmptyGPGMailFile as e:
+                    ic(e)
+                    deal_with_badmail(gpgfile=gpgfile,
+                                      move_badmail=move_badmail,
+                                      skip_badmail=skip_badmail,
+                                      delete_badmail=delete_badmail,)
     else:
         ic('files_in_gpgmaildir <= files_in_maildir, looks good')
 
