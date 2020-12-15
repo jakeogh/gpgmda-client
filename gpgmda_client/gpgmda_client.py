@@ -440,6 +440,55 @@ def move_to_badmail(gpgfile):
     shutil.move(gpgfile, badmail_path)
 
 
+def deal_with_badmail(gpgfile,
+                      move_badmail,
+                      skip_badmail,
+                      delete_badmail,
+                      maildir_subfolder,):
+
+    ic('gpg did not produce any stdout, tar skipped file:', gpgfile)
+    ic('looking into:', gpgfile, 'further...')
+    os.system('/bin/ls -al ' + gpgfile.as_posix())
+    stats = os.stat(gpgfile)
+    if stats.st_size <= 1668:
+        ic('this is likely an empty gpg encrypted file')
+
+    if move_badmail:
+        move_to_badmail(gpgfile)
+
+    elif not skip_badmail:
+        if delete_badmail is False:
+            delete_message_answer = \
+                input("Would you like to move this message locally to the ~/.gpgmda/badmail folder and delete it off the server? (yes/no/yesall/skipall/moveall): ")
+            if delete_message_answer.lower() == "yesall":
+                delete_badmail = True
+            if delete_message_answer.lower() == "skipall":
+                skip_badmail = True
+            if delete_message_answer.lower() == "moveall":
+                move_badmail = True
+        if delete_badmail:
+            delete_message_answer = "yes"
+
+        if delete_message_answer.lower() == "yes":
+            move_to_badmail(gpgfile)
+            random_id = gpgfile.name
+            ic(random_id)
+
+            if maildir_subfolder == ".sent":
+                target_file = "/home/sentuser/gpgMaildir/new/" + random_id
+                command = "ssh root@v6y.net rm -v " + target_file
+                ic(command)
+                os.system(command)
+            elif maildir_subfolder == "new":
+                target_file = "/home/user/gpgMaildir/new/" + random_id
+                command = "ssh root@v6y.net rm -v " + target_file    #todo use ~/.gpgmda/config
+                ic(command)
+                os.system(command)
+            else:
+                ic('unknown exception, exiting')
+                sys.exit(1)
+
+
 def decrypt_message(*,
                     email_address,
                     gpgfile,
@@ -542,47 +591,11 @@ def decrypt_message(*,
                 ic('tar did not return 0')
                 return False
         else:
-            ic('gpg did not produce any stdout, tar skipped file:', gpgfile)
-            ic('looking into:', gpgfile, 'further...')
-            os.system('/bin/ls -al ' + gpgfile.as_posix())
-            stats = os.stat(gpgfile)
-            if stats.st_size <= 1141:
-                ic('this is likely an empty gpg encrypted file')
-
-            if move_badmail:
-                move_to_badmail(gpgfile)
-
-            elif not skip_badmail:
-                if delete_badmail is False:
-                    delete_message_answer = \
-                        input("Would you like to move this message locally to the ~/.gpgmda/badmail folder and delete it off the server? (yes/no/yesall/skipall/moveall): ")
-                    if delete_message_answer.lower() == "yesall":
-                        delete_badmail = True
-                    if delete_message_answer.lower() == "skipall":
-                        skip_badmail = True
-                    if delete_message_answer.lower() == "moveall":
-                        move_badmail = True
-                if delete_badmail:
-                    delete_message_answer = "yes"
-
-                if delete_message_answer.lower() == "yes":
-                    move_to_badmail(gpgfile)
-                    random_id = gpgfile.name
-                    ic(random_id)
-
-                    if maildir_subfolder == ".sent":
-                        target_file = "/home/sentuser/gpgMaildir/new/" + random_id
-                        command = "ssh root@v6y.net rm -v " + target_file
-                        ic(command)
-                        os.system(command)
-                    elif maildir_subfolder == "new":
-                        target_file = "/home/user/gpgMaildir/new/" + random_id
-                        command = "ssh root@v6y.net rm -v " + target_file    #todo use ~/.gpgmda/config
-                        ic(command)
-                        os.system(command)
-                    else:
-                        ic('unknown exception, exiting')
-                        sys.exit(1)
+            deal_with_badmail(gpgfile=gpgfile,
+                              move_badmail=move_badmail,
+                              skip_badmail=skip_badmail,
+                              delete_badmail=delete_badmail,
+                              maildir_subfolder=maildir_subfolder,)
             return False
     return True
 
@@ -646,6 +659,8 @@ def gpgmaildir_to_maildir(*,
         files_in_maildir = [dent.pathlib for dent in files(maildir)]
         ic('len(files_in_gpgmaildir):', len(files_in_gpgmaildir))
         ic('len(files_in_maildir):', len(files_in_maildir))
+        ic(len(files_in_gpgmaildir) - len(files_in_maildir))
+        ic('building hash lists')
         hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
         hashes_in_maildir = [path.name.split('.')[-1] for path in files_in_maildir]
         #full_maildir_string = "\n".join(files_in_maildir)
@@ -656,7 +671,7 @@ def gpgmaildir_to_maildir(*,
             if gpghash not in hashes_in_maildir:
                 print('', file=sys.stderr)
                 ic(gpghash)
-                ic(hashes_in_maildir[0:10])
+                #ic(hashes_in_maildir[0:10])
                 ic('found gpgfile that has not been decrypted yet:', gpgfile)
                 decrypt_message(email_address=email_address,
                                 gpgfile=gpgfile,
