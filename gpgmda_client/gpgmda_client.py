@@ -451,14 +451,39 @@ def move_to_badmail(gpgfile):
     shutil.move(gpgfile, badmail_path)
 
 
+def move_badmail_and_delete_off_server(*,
+                                       gpgfile,
+                                       verbose=False,):
+    if verbose:
+        ic(gpgfile)
+
+    maildir_subfolder = gpgfile.parent.name
+    ic(maildir_subfolder)
+    move_to_badmail(gpgfile)
+    random_id = gpgfile.name
+    ic(random_id)
+
+    if maildir_subfolder == ".sent":
+        target_file = "/home/sentuser/gpgMaildir/new/" + random_id
+        command = "ssh root@v6y.net rm -v " + target_file
+        ic(command)
+        os.system(command)
+    elif maildir_subfolder == "new":
+        target_file = "/home/user/gpgMaildir/new/" + random_id
+        command = "ssh root@v6y.net rm -v " + target_file    #todo use ~/.gpgmda/config
+        ic(command)
+        os.system(command)
+    else:
+        ic('unknown exception, exiting')
+        sys.exit(1)
+
+
 def deal_with_badmail(*,
                       gpgfile,
                       move_badmail,
                       skip_badmail,
-                      delete_badmail,):
-
-    maildir_subfolder = gpgfile.parent.name
-    ic(maildir_subfolder)
+                      delete_badmail,
+                      verbose=False,):
 
     if move_badmail:
         move_to_badmail(gpgfile)
@@ -477,23 +502,7 @@ def deal_with_badmail(*,
             delete_message_answer = "yes"
 
         if delete_message_answer.lower() == "yes":
-            move_to_badmail(gpgfile)
-            random_id = gpgfile.name
-            ic(random_id)
-
-            if maildir_subfolder == ".sent":
-                target_file = "/home/sentuser/gpgMaildir/new/" + random_id
-                command = "ssh root@v6y.net rm -v " + target_file
-                ic(command)
-                os.system(command)
-            elif maildir_subfolder == "new":
-                target_file = "/home/user/gpgMaildir/new/" + random_id
-                command = "ssh root@v6y.net rm -v " + target_file    #todo use ~/.gpgmda/config
-                ic(command)
-                os.system(command)
-            else:
-                ic('unknown exception, exiting')
-                sys.exit(1)
+            move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
 
 
 def decrypt_message(*,
