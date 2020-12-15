@@ -413,25 +413,29 @@ def decrypt_list_of_messages(*,
                              message_list,
                              email_address,
                              maildir,
+                             skip_hashes,
                              delete_badmail,
                              skip_badmail,
-                             move_badmail,):
+                             move_badmail,
+                             verbose=False,):
 
     ic()
     ic(message_list)
-    #process_count = min(cpu_count(), len(message_list))
-    #message_list_filter = filter(None, message_list)   #remove empty items
-    #ic(process_count)
-    #p = Pool(process_count)
+    ic(len(skip_hashes))
     index = 0
     for index, gpgfile in enumerate(message_list):    #useful for debugging
+        gpghash = gpgfile.name
+        if gpghash in skip_hashes:
+            if verbose:
+                ic('skipping:', gpgfile)
+            continue
+
+        print('', file=sys.stderr)
+        ic(index, 'found gpgfile that has not been decrypted yet:', gpgfile)
         try:
             decrypt_message(email_address=email_address,
                             gpgfile=gpgfile,
-                            maildir=maildir,
-                            delete_badmail=delete_badmail,
-                            skip_badmail=skip_badmail,
-                            move_badmail=move_badmail,)
+                            maildir=maildir,)
         except EmptyGPGMailFile as e:
             ic(e)
             deal_with_badmail(gpgfile=gpgfile,
@@ -508,9 +512,6 @@ def deal_with_badmail(*,
 def decrypt_message(*,
                     email_address,
                     gpgfile,
-                    delete_badmail,
-                    skip_badmail,
-                    move_badmail,
                     maildir,
                     stdout=False,):
 
@@ -625,7 +626,8 @@ def gpgmaildir_to_maildir(*,
                           move_badmail,
                           gpgMaildir_archive_folder,
                           gpgmaildir,
-                          maildir,):
+                          maildir,
+                          verbose=False,):
 
     # todo add locking
     ic()
@@ -655,12 +657,7 @@ def gpgmaildir_to_maildir(*,
             rsync_list = parse_rsync_log_to_list(email_address=email_address,
                                                  gpgMaildir_archive_folder=gpgMaildir_archive_folder)
             ic(rsync_list)
-            decrypt_list_of_messages(message_list=rsync_list,
-                                     email_address=email_address,
-                                     maildir=maildir,
-                                     delete_badmail=delete_badmail,
-                                     skip_badmail=skip_badmail,
-                                     move_badmail=move_badmail,)
+            iterator = rsync_list
 
     else:
         ic(rsync_last_new_mail_file, 'does not exist or is 0 bytes')
@@ -681,32 +678,19 @@ def gpgmaildir_to_maildir(*,
         ic('building hash lists')
         #hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
         hashes_in_maildir = [path.name.split('.')[-1] for path in files_in_maildir]
-        #full_maildir_string = "\n".join(files_in_maildir)
+        iterator = files_in_gpgmaildir
 
-        for gpgfile in files_in_gpgmaildir:
-            #gpghash = gpgfile.split(b'/')[-1]
-            gpghash = gpgfile.name
-            if gpghash not in hashes_in_maildir:
-                print('', file=sys.stderr)
-                ic(gpghash)
-                #ic(hashes_in_maildir[0:10])
-                ic('found gpgfile that has not been decrypted yet:', gpgfile)
-                try:
-                    decrypt_message(email_address=email_address,
-                                    gpgfile=gpgfile,
-                                    delete_badmail=delete_badmail,
-                                    skip_badmail=skip_badmail,
-                                    move_badmail=move_badmail,
-                                    maildir=maildir,
-                                    stdout=False)
-                except EmptyGPGMailFile as e:
-                    ic(e)
-                    deal_with_badmail(gpgfile=gpgfile,
-                                      move_badmail=move_badmail,
-                                      skip_badmail=skip_badmail,
-                                      delete_badmail=delete_badmail,)
     else:
         ic('files_in_gpgmaildir <= files_in_maildir, looks good')
+
+    decrypt_list_of_messages(message_list=iterator,
+                             skip_hashes=hashes_in_maildir,
+                             email_address=email_address,
+                             maildir=maildir,
+                             delete_badmail=delete_badmail,
+                             skip_badmail=skip_badmail,
+                             move_badmail=move_badmail,
+                             verbose=verbose,)
 
 
 def search_list_of_strings_for_substring(*,
