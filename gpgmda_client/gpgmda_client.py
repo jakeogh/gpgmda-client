@@ -37,7 +37,7 @@ from icecream import ic
 from kcl.dirops import check_or_create_dir, path_is_dir
 from kcl.fileops import empty_file
 from kcl.pathops import path_exists
-from kcl.printops import ceprint, eprint
+from kcl.printops import eprint
 
 global debug
 debug = False
@@ -76,7 +76,7 @@ def rsync_mail(*,
 
     for line in rsync_p_output[0].split(b'\n'):
         if b'exists' not in line:
-            eprint(line)
+            ic(line)
 
     ic(rsync_p.returncode)
     if rsync_p.returncode != 0:
@@ -106,7 +106,7 @@ def run_notmuch(*,
         current_env["NOTMUCH_CONFIG"] = notmuch_config_file
 
         notmuch_new_command = ["notmuch", "--config=" + notmuch_config_file, "new"]
-        ceprint("notmuch_new_command:", notmuch_new_command)
+        ic(notmuch_new_command)
         notmuch_p = subprocess.Popen(notmuch_new_command,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
@@ -156,37 +156,34 @@ def run_notmuch(*,
                     delete_message_answer = 'yes'
 
                 if delete_message_answer.lower() == "yes":
-                    non_mail_path = '~/.gpgmda/non-mail'
+                    non_mail_path = Path('~/.gpgmda/non-mail').expanduser()
 
-                    os.path.sep = '/'      #py3: paths _are_ bytes. glob.glob(b'/home') does it right
-                    os.path.altsep = '/'
-
-                    os.makedirs(os.path.expanduser(non_mail_path), exist_ok=True)
+                    os.makedirs(non_mail_path, exist_ok=True)
 
                     ic('Processing files for local move and delete:')
 
-                    eprint(non_mail_file)
-                    shutil.move(non_mail_file, os.path.expanduser(non_mail_path))
+                    ic(non_mail_file)
+                    shutil.move(non_mail_file, non_mail_path)
 
-                    eprint(encrypted_file)
-                    shutil.move(encrypted_file, os.path.expanduser(non_mail_path))
+                    ic(encrypted_file)
+                    shutil.move(encrypted_file, non_mail_path)
 
                     if maildir_subfolder == ".sent":
                         target_file = "/home/sentuser/gpgMaildir/new/" + random_id
                         command = "ssh root@v6y.net rm -v " + target_file
-                        eprint(command)
+                        ic(command)
                         os.system(command)
 
                     elif maildir_subfolder == "new":
                         target_file = "/home/user/gpgMaildir/new/" + random_id
-                        command = "ssh root@v6y.net rm -v " + target_file    #todo use ~/.gpgmda/config
-                        eprint(command)
+                        command = "ssh root@v6y.net rm -v " + target_file    # todo use ~/.gpgmda/config
+                        ic(command)
                         os.system(command)
                     else:
                         eprint("unknown maildir_subfolder:", maildir_subfolder, "exiting")
                         sys.exit(1)
 
-        eprint("notmuch_p.returncode:", notmuch_p.returncode)
+        ic(notmuch_p.returncode)
         if notmuch_p.returncode != 0:
             eprint("notmuch new did not return 0, exiting")
             sys.exit(1)
@@ -194,7 +191,7 @@ def run_notmuch(*,
     elif mode == "query_notmuch":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
         command = "NOTMUCH_CONFIG=" + notmuch_config_file + " notmuch " + query
-        eprint("command:", command)
+        ic(command)
         return_code = os.system(command)
         if return_code != 0:
             eprint("\"notmuch " + query + "\" returned nonzero, exiting")
@@ -203,7 +200,7 @@ def run_notmuch(*,
     elif mode == "query_afew":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
         command = "afew" + " --notmuch-config=" + notmuch_config_file + " " + query
-        eprint("command:", command)
+        ic(command)
         return_code = os.system(command)
         if return_code != 0:
             eprint("\"notmuch " + query + "\" returned nonzero, exiting")
@@ -344,7 +341,7 @@ def load_ssh_key(email_address):
 
     ic('ssh-add -l output:')
     for line in loaded_ssh_key_list:
-        eprint(line)
+        ic(line)
 
     ic('looking for key:', ssh_key)
     found_key = 0
@@ -432,14 +429,11 @@ def decrypt_list_of_messages(*,
 
 def move_to_badmail(gpgfile):
     ic()
-    badmail_path = os.path.expanduser(b'~/.gpgmda/badmail')
-    #print("type(badmail_path):", type(badmail_path))
-    os.makedirs(os.path.expanduser(badmail_path), exist_ok=True)
+    badmail_path = Path('~/.gpgmda/badmail').expanduser()
+    ic(badmail_path)
+    os.makedirs(badmail_path, exist_ok=True)
     ic('Processing files for local move and delete gpgfile:', gpgfile)
-
-    os.path.sep = b'/'      #py3: paths _are_ bytes. glob.glob(b'/home') does it right
-    os.path.altsep = b'/'
-    shutil.move(gpgfile.as_posix(), badmail_path)
+    shutil.move(gpgfile, badmail_path)
 
 
 def decrypt_message(*,
@@ -453,6 +447,7 @@ def decrypt_message(*,
 
     assert isinstance(gpgfile, Path)
 
+    print('', file=sys.stderr)
     ic('decrypt_msg():', gpgfile)
     if '@' not in email_address:
         ic('Invalid email address:', email_address, ', exiting.')
@@ -466,20 +461,19 @@ def decrypt_message(*,
         ic('FOUND ZERO LENGTH FILE, EXITING. CHECK THE MAILSERVER LOGS (and manually delete it):', gpgfile)
         sys.exit(1)
 
-    gpgfile_name = os.path.basename(gpgfile)
-    ic(gpgfile_name)
-
-    gpgfile_folder_path = os.path.dirname(gpgfile)
+    gpgfile_folder_path = gpgfile.parent
     ic(gpgfile_folder_path)
 
     maildir_subfolder = os.path.basename(gpgfile_folder_path)
     ic(maildir_subfolder)
+    assert maildir_subfolder.as_posix() in ['new', '.sent']
+
     if not path_is_dir(maildir):
         ic(maildir, 'does not exist. Exiting.')
         sys.exit(1)
 
     #file_previously_decrypted = 0
-    glob_pattern = maildir + '/' + maildir_subfolder + '/*.' + gpgfile_name
+    glob_pattern = maildir + '/' + maildir_subfolder + '/*.' + gpgfile.name
     ic(glob_pattern)
     result = glob.glob(glob_pattern)
 
@@ -495,7 +489,7 @@ def decrypt_message(*,
 
     ic('decrypting:', gpgfile)
     if stdout:
-        #command = "gpg2 -o - --decrypt " + gpgfile + " | tar --transform=s/$/." + gpgfile_name + "/ -xvf -" # hides the tar header
+        #command = "gpg2 -o - --decrypt " + gpgfile + " | tar --transform=s/$/." + gpgfile.name + "/ -xvf -" # hides the tar header
         command = "gpg2 -o - --decrypt " + gpgfile
         ic('decrypt_msg():', command)
         return_code = os.system(command)
@@ -503,7 +497,7 @@ def decrypt_message(*,
 
     else:
         gpg_command = ["gpg2", "-o", "-", "--decrypt", gpgfile]
-        tar_command = ["tar", "--transform=s/$/." + gpgfile_name + "/", "-C", maildir + '/' + maildir_subfolder, "-xvf", "-"]
+        tar_command = ["tar", "--transform=s/$/." + gpgfile.name + "/", "-C", maildir + '/' + maildir_subfolder, "-xvf", "-"]
         gpg_cmd_proc = subprocess.Popen(gpg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
         ic(gpg_command)
         gpg_cmd_proc_output_stdout, gpg_cmd_proc_output_stderr = gpg_cmd_proc.communicate()
@@ -574,12 +568,12 @@ def decrypt_message(*,
                     if maildir_subfolder == ".sent":
                         target_file = "/home/sentuser/gpgMaildir/new/" + random_id
                         command = "ssh root@v6y.net rm -v " + target_file
-                        eprint(command)
+                        ic(command)
                         os.system(command)
                     elif maildir_subfolder == "new":
                         target_file = "/home/user/gpgMaildir/new/" + random_id
                         command = "ssh root@v6y.net rm -v " + target_file    #todo use ~/.gpgmda/config
-                        eprint(command)
+                        ic(command)
                         os.system(command)
                     else:
                         ic('unknown exception, exiting')
@@ -614,7 +608,7 @@ def gpgmaildir_to_maildir(*,
         with open(rsync_last_new_mail_file, 'r') as fh:
             for line in fh.readlines():
                 if 'Number of regular files transferred:' in line:
-                    eprint(line)
+                    ic(line)
                     rsync_files_transferred = int(line.split(':')[1].strip())
                     ic(rsync_files_transferred)
                     break
@@ -725,7 +719,7 @@ def check_noupdate_list(email_address):
 def client(ctx, verbose):
     start_time = time.time()
     if verbose:
-        eprint(time.asctime())
+        ic(time.asctime())
 
     global gpgmda_config_folder
     gpgmda_config_folder = os.path.expanduser('~/.gpgmda/')
@@ -900,7 +894,7 @@ def afew_query(ctx, email_address, query):
     '''execute arbitrary afew query'''
     ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    eprint(query)
+    ic(query)
     run_notmuch(mode="query_afew",
                 email_address=email_address,
                 query=query,
@@ -918,7 +912,7 @@ def notmuch_query(ctx, email_address, query):
     '''execute arbitrary notmuch query notmuch search --output=files "thread:000000000003c194"'''
     ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    eprint(query)
+    ic(query)
     run_notmuch(mode="query_notmuch",
                 email_address=email_address,
                 query=query,
