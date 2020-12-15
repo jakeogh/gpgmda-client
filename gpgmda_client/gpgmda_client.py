@@ -491,11 +491,11 @@ def deal_with_badmail(*,
 
         if delete_message_answer.startswith("yes"):
             move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
+        if delete_message_answer == "yesall":
+            return "yesall"
     else:
         move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
 
-    if delete_message_answer == "yesall":
-        return "yesall"
 
 
 def decrypt_message(*,
