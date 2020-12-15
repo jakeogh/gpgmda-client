@@ -466,7 +466,7 @@ def decrypt_message(*,
 
     maildir_subfolder = os.path.basename(gpgfile_folder_path)
     ic(maildir_subfolder)
-    assert maildir_subfolder.as_posix() in ['new', '.sent']
+    assert maildir_subfolder in ['new', '.sent']
 
     if not path_is_dir(maildir):
         ic(maildir, 'does not exist. Exiting.')
