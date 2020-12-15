@@ -546,7 +546,7 @@ def decrypt_message(*,
         else:
             ic('gpg did not produce any stdout, tar skipped file:', gpgfile)
             ic('looking into:', gpgfile, 'further...')
-            os.system('/bin/ls -al ' + gpgfile)
+            os.system('/bin/ls -al ' + gpgfile.as_posix())
             stats = os.stat(gpgfile)
             if stats.st_size <= 1141:
                 ic('this is likely an empty gpg encrypted file')
