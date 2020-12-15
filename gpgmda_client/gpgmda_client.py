@@ -415,6 +415,7 @@ def decrypt_list_of_messages(*,
                              verbose=False,):
 
     ic()
+    yesall = False
     #ic(message_list)
     ic(len(skip_hashes))
     index = 0
@@ -433,7 +434,11 @@ def decrypt_list_of_messages(*,
                             maildir=maildir,)
         except EmptyGPGMailFile as e:
             ic(e)
-            deal_with_badmail(gpgfile=gpgfile,)
+            answer = deal_with_badmail(gpgfile=gpgfile,
+                                       yesall=yesall,
+                                       verbose=verbose,)
+            if answer == "yesall":
+                yesall = True
 
     ic('done:', index)
 
@@ -476,23 +481,21 @@ def move_badmail_and_delete_off_server(*,
 
 def deal_with_badmail(*,
                       gpgfile,
+                      yesall=False,
                       verbose=False,):
 
-    delete_message_answer = \
-        input("Would you like to move this message locally to the ~/.gpgmda/badmail folder and delete it off the server? (yes/no/yesall/skipall/moveall): ")
-    delete_message_answer = delete_message_answer.lower()
-    if delete_message_answer == "yesall":
-        #delete__badmail = True
-        pass
-    if delete_message_answer == "skipall":
-        #skip__badmail = True
-        pass
-    if delete_message_answer == "moveall":
-        #move__badmail = True
-        pass
+    if not yesall:
+        delete_message_answer = \
+            input("Would you like to move this message locally to the ~/.gpgmda/badmail folder and delete it off the server? (yes/no/yesall): ")
+        delete_message_answer = delete_message_answer.lower()
 
-    if delete_message_answer == "yes":
+        if delete_message_answer.startswith("yes"):
+            move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
+    else:
         move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
+
+    if delete_message_answer == "yesall":
+        return "yesall"
 
 
 def decrypt_message(*,
