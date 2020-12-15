@@ -39,9 +39,6 @@ from kcl.fileops import empty_file
 from kcl.pathops import path_exists
 from kcl.printops import eprint
 
-global debug
-debug = False
-
 #global NOTMUCH_QUERY_HELP
 #NOTMUCH_QUERY_HELP = "notmuch search --output=files 'thread:000000000003c194'"
 
@@ -255,7 +252,8 @@ def run_notmuch(*,
 
 def make_notmuch_config(*,
                         email_address,
-                        email_archive_folder,):
+                        email_archive_folder,
+                        verbose=False,):
 
     ic()
     username = email_address.split("@")[0]
@@ -280,7 +278,7 @@ quit_on_last_bclose = True
     notmuch_config_folder = '/'.join([email_archive_folder, "_notmuch_config"])
     check_or_create_dir(notmuch_config_folder)
     notmuch_config_file_location = '/'.join([notmuch_config_folder, ".notmuch_config"])
-    if debug:
+    if verbose:
         ic('writing notmuch config to:', notmuch_config_file_location)
     notmuch_config_file_handle = open(notmuch_config_file_location, "w")
     notmuch_config_file_handle.write(notmuch_config)
@@ -414,20 +412,17 @@ def decrypt_list_of_messages(*,
                              email_address,
                              maildir,
                              skip_hashes,
-                             delete_badmail,
-                             skip_badmail,
-                             move_badmail,
                              verbose=False,):
 
     ic()
     #ic(message_list)
     ic(len(skip_hashes))
     index = 0
-    for index, gpgfile in enumerate(message_list):    #useful for debugging
+    for index, gpgfile in enumerate(message_list):
         gpghash = gpgfile.name
         if gpghash in skip_hashes:
             if verbose:
-                ic('skipping:', gpgfile)
+                ic(index, 'skipping:', gpgfile)
             continue
 
         print('', file=sys.stderr)
@@ -438,10 +433,7 @@ def decrypt_list_of_messages(*,
                             maildir=maildir,)
         except EmptyGPGMailFile as e:
             ic(e)
-            deal_with_badmail(gpgfile=gpgfile,
-                              move_badmail=move_badmail,
-                              skip_badmail=skip_badmail,
-                              delete_badmail=delete_badmail,)
+            deal_with_badmail(gpgfile=gpgfile,)
 
     ic('done:', index)
 
@@ -484,35 +476,30 @@ def move_badmail_and_delete_off_server(*,
 
 def deal_with_badmail(*,
                       gpgfile,
-                      move_badmail,
-                      skip_badmail,
-                      delete_badmail,
                       verbose=False,):
 
-    if move_badmail:
-        move_to_badmail(gpgfile)
+    delete_message_answer = \
+        input("Would you like to move this message locally to the ~/.gpgmda/badmail folder and delete it off the server? (yes/no/yesall/skipall/moveall): ")
+    delete_message_answer = delete_message_answer.lower()
+    if delete_message_answer == "yesall":
+        #delete__badmail = True
+        pass
+    if delete_message_answer == "skipall":
+        #skip__badmail = True
+        pass
+    if delete_message_answer == "moveall":
+        #move__badmail = True
+        pass
 
-    elif not skip_badmail:
-        if delete_badmail is False:
-            delete_message_answer = \
-                input("Would you like to move this message locally to the ~/.gpgmda/badmail folder and delete it off the server? (yes/no/yesall/skipall/moveall): ")
-            if delete_message_answer.lower() == "yesall":
-                delete_badmail = True
-            if delete_message_answer.lower() == "skipall":
-                skip_badmail = True
-            if delete_message_answer.lower() == "moveall":
-                move_badmail = True
-        if delete_badmail:
-            delete_message_answer = "yes"
-
-        if delete_message_answer.lower() == "yes":
-            move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
+    if delete_message_answer == "yes":
+        move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
 
 
 def decrypt_message(*,
                     email_address,
                     gpgfile,
                     maildir,
+                    verbose=False,
                     stdout=False,):
 
     assert isinstance(gpgfile, Path)
@@ -571,7 +558,7 @@ def decrypt_message(*,
         ic(gpg_command)
         gpg_cmd_proc_output_stdout, gpg_cmd_proc_output_stderr = gpg_cmd_proc.communicate()
 
-        if debug:
+        if verbose:
             ic('gpg_cmd_proc_output_stdout:')
             gpg_cmd_proc_output_stdout_decoded = gpg_cmd_proc_output_stdout.decode('utf-8')
             for line in gpg_cmd_proc_output_stdout_decoded.split('\n'):
@@ -621,9 +608,6 @@ def decrypt_message(*,
 
 def gpgmaildir_to_maildir(*,
                           email_address,
-                          delete_badmail,
-                          skip_badmail,
-                          move_badmail,
                           gpgMaildir_archive_folder,
                           gpgmaildir,
                           maildir,
@@ -687,9 +671,6 @@ def gpgmaildir_to_maildir(*,
                              skip_hashes=hashes_in_maildir,
                              email_address=email_address,
                              maildir=maildir,
-                             delete_badmail=delete_badmail,
-                             skip_badmail=skip_badmail,
-                             move_badmail=move_badmail,
                              verbose=verbose,)
 
 
@@ -842,11 +823,9 @@ def read(ctx, email_address):
 
 @client.command()
 @click.argument("email_address", nargs=1)
-@click.option("--delete-badmail", help="", is_flag=True)
-@click.option("--skip-badmail", help="", is_flag=True)
-@click.option("--move-badmail", help="", is_flag=True)
 @click.pass_context
-def decrypt(ctx, email_address, delete_badmail, move_badmail, skip_badmail):
+def decrypt(ctx,
+            email_address,):
     '''decrypt new mail in encrypted maildir to unencrypted maildir'''
     ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
@@ -857,10 +836,7 @@ def decrypt(ctx, email_address, delete_badmail, move_badmail, skip_badmail):
         gpgmaildir_to_maildir(email_address=email_address,
                               gpgMaildir_archive_folder=ctx.gpgMaildir_archive_folder,
                               gpgmaildir=ctx.gpgmaildir,
-                              maildir=ctx.maildir,
-                              delete_badmail=delete_badmail,
-                              skip_badmail=skip_badmail,
-                              move_badmail=move_badmail,)
+                              maildir=ctx.maildir,)
 
         ic('done with gpgmaildir_to_maildir()')
     else:
