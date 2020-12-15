@@ -439,7 +439,7 @@ def move_to_badmail(gpgfile):
 
     os.path.sep = b'/'      #py3: paths _are_ bytes. glob.glob(b'/home') does it right
     os.path.altsep = b'/'
-    shutil.move(gpgfile, badmail_path)
+    shutil.move(gpgfile.as_posix(), badmail_path)
 
 
 def decrypt_message(*,
