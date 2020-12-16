@@ -621,6 +621,7 @@ def gpgmaildir_to_maildir(*,
 
     # todo add locking
     ic()
+    iterator = None
     ic('gpgmda_to_maildir using:', gpgMaildir_archive_folder)
     ic('Checking for default-recipient in ~/.gnupg/gpg.conf')
     command = "grep \"^default-recipient\" ~/.gnupg/gpg.conf"
@@ -675,11 +676,12 @@ def gpgmaildir_to_maildir(*,
     else:
         ic('files_in_gpgmaildir <= files_in_maildir, looks good')
 
-    decrypt_list_of_messages(message_list=iterator,
-                             skip_hashes=skip_hashes,
-                             email_address=email_address,
-                             maildir=maildir,
-                             verbose=verbose,)
+    if iterator:
+        decrypt_list_of_messages(message_list=iterator,
+                                 skip_hashes=skip_hashes,
+                                 email_address=email_address,
+                                 maildir=maildir,
+                                 verbose=verbose,)
 
 
 def search_list_of_strings_for_substring(*,
