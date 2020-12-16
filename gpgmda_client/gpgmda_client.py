@@ -648,6 +648,7 @@ def gpgmaildir_to_maildir(*,
                                                  gpgMaildir_archive_folder=gpgMaildir_archive_folder)
             ic(rsync_list)
             iterator = rsync_list
+            skip_hashes = []
 
     else:
         ic(rsync_last_new_mail_file, 'does not exist or is 0 bytes')
@@ -668,13 +669,14 @@ def gpgmaildir_to_maildir(*,
         ic('building hash lists')
         #hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
         hashes_in_maildir = [path.name.split('.')[-1] for path in files_in_maildir]
+        skip_hashes = hashes_in_maildir
         iterator = files_in_gpgmaildir
 
     else:
         ic('files_in_gpgmaildir <= files_in_maildir, looks good')
 
     decrypt_list_of_messages(message_list=iterator,
-                             skip_hashes=hashes_in_maildir,
+                             skip_hashes=skip_hashes,
                              email_address=email_address,
                              maildir=maildir,
                              verbose=verbose,)
