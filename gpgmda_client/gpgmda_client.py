@@ -142,9 +142,9 @@ def run_notmuch(*,
                 command = "head -c 500 " + non_mail_file
                 os.system(command)
                 if not yesall:
-                    ic('running vi')
-                    command = "vi " + non_mail_file
-                    os.system(command)
+                    #ic('running vi')
+                    #command = "vi " + non_mail_file
+                    #os.system(command)
 
                     delete_message_answer = \
                         input("Would you like to move this message locally to the ~/.gpgmda/non-mail folder and delete it on the server? (yes/no/skipall/yesall): ")
