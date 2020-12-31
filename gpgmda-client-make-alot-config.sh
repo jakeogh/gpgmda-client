@@ -60,8 +60,6 @@ hooksfile = ~/.config/alot/hooks.py
 # type
 # :compose [ENTER]
 
-#[general]
-
 [bindings]
     j = move down
     k = move up
@@ -89,19 +87,13 @@ hooksfile = ~/.config/alot/hooks.py
     'g g' = move first
 
 
-    [[bufferlist]]
-        x = close
-        select = openfocussed
+#    [[bufferlist]]
+#        select = openfocussed
 
     [[search]]
         a = toggletags unread
         S = toggletags spam; untag unread
         s = ""
-        & = toggletags killed
-        ! = toggletags flagged
-        l = retagprompt
-        O = refineprompt
-        | = refineprompt
 
     [[envelope]]
         a = prompt 'attach ~/'
