@@ -44,6 +44,7 @@ timestamp_format = "%Y-%m-%d %I:%m%p %Z [%c]"
 auto_remove_unread = True
 # remove_unread_on_summary_touch = True
 print_cmd = /home/cfg/print/to/text_file
+hooksfile = ~/.config/alot/hooks.py
 
 [accounts]
 	[[default]]
@@ -59,8 +60,7 @@ print_cmd = /home/cfg/print/to/text_file
 # type
 # :compose [ENTER]
 
-[general]
-    hooksfile = ~/.config/alot/hooks.py
+#[general]
 
 [bindings]
     j = move down
