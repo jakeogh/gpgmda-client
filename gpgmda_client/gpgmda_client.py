@@ -141,7 +141,13 @@ def run_notmuch(*,
                 ic('head -c 500:')
                 command = "head -c 500 " + non_mail_file
                 os.system(command)
+                with open(non_mail_file, 'rb') as fh:
+                    data = fh.read()
+                if data == b'metastable':
+                    ic('metastable test message... fixme')
+
                 if not yesall:
+
                     #ic('running vi')
                     #command = "vi " + non_mail_file
                     #os.system(command)
