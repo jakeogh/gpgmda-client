@@ -324,17 +324,36 @@ def start_alot(*,
     ic('starting alot')
     os.system(' '.join(['alot', '--version']))
     move_terminal_text_up_one_page()        # so alot does not overwrite the last messages on the terminal
-    alot_p = os.system(' '.join(['/usr/bin/alot',
-                                 '-C',
-                                 '256',
-                                 '--debug-level=debug',
-                                 '--logfile=/dev/shm/__alot_log',
-                                 '--notmuch-config',
-                                 notmuch_config_folder + '/.notmuch_config',
-                                 '--mailindex-path',
-                                 email_archive_folder + '/_Maildirs',
-                                 '-c',
-                                 '/dev/shm/__alot_config_' + email_address]))
+    alot_config_file = '/dev/shm/__alot_config_' + email_address
+    if verbose:
+        ic(alot_config_file)
+    alot_command = ' '.join(['/usr/bin/alot',
+                             '-C',
+                             '256',
+                             '--debug-level=debug',
+                             '--logfile=/dev/shm/__alot_log',
+                             '--notmuch-config',
+                             notmuch_config_folder + '/.notmuch_config',
+                             '--mailindex-path',
+                             email_archive_folder + '/_Maildirs',
+                             '-c',
+                             alot_config_file])
+
+    if verbose:
+        ic(alot_command)
+    alot_p = os.system(alot_command)
+
+    #alot_p = os.system(' '.join(['/usr/bin/alot',
+    #                             '-C',
+    #                             '256',
+    #                             '--debug-level=debug',
+    #                             '--logfile=/dev/shm/__alot_log',
+    #                             '--notmuch-config',
+    #                             notmuch_config_folder + '/.notmuch_config',
+    #                             '--mailindex-path',
+    #                             email_archive_folder + '/_Maildirs',
+    #                             '-c',
+    #                             alot_config_file]))
     if verbose:
         ic(alot_p)
 
@@ -501,7 +520,6 @@ def deal_with_badmail(*,
             return "yesall"
     else:
         move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
-
 
 
 def decrypt_message(*,
@@ -761,6 +779,9 @@ def check_noupdate_list(email_address):
 @click.option("--verbose", is_flag=True)
 @click.pass_context
 def client(ctx, verbose):
+    ctx.ensure_object(dict)
+    ctx.obj['verbose'] = verbose
+
     start_time = time.time()
     if verbose:
         ic(time.asctime())
@@ -834,7 +855,9 @@ def read(ctx, email_address):
     ctx = ctx.invoke(build_paths, email_address=email_address)
     load_ssh_key(email_address=email_address)     # so mail can be sent without having to unlock the key
     make_notmuch_config(email_address=email_address, email_archive_folder=ctx.email_archive_folder)
-    start_alot(email_address=email_address, email_archive_folder=ctx.email_archive_folder)
+    start_alot(email_address=email_address,
+               email_archive_folder=ctx.email_archive_folder,
+               verbose=ctx.obj['verbose'],)
 
 
 @client.command()

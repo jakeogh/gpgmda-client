@@ -11,21 +11,21 @@ email_address="${1}"
 
 if [[ -s "${config_dir}/addresses_to_names" ]]
 then
-#        echo "grepping ${config_dir}/addresses_to_names for a name"
-        name=$(grep -i "${email_address}" "${config_dir}"/addresses_to_names | cut -d '=' -f 2 | head -n 1) || name="${email_address}"
-#        echo "$name"
+    #echo "grepping ${config_dir}/addresses_to_names for a name"
+    name=$(grep -i "${email_address}" "${config_dir}"/addresses_to_names | cut -d '=' -f 2 | head -n 1) || name="${email_address}"
+    #echo "$name"
 else
-        name="${email_address}"
+    name="${email_address}"
 fi
 
 
 if [[ -s "${config_dir}/address_replacement" ]]
 then
-#        echo "grepping ${config_dir}/address_replacement"
-        alias_address=$(grep -i "${email_address}" "${config_dir}"/address_replacement | cut -d '=' -f 2 | head -n 1) || alias_address="${email_address}"
-#        echo "$alias_address"
+    #echo "grepping ${config_dir}/address_replacement"
+    alias_address=$(grep -i "${email_address}" "${config_dir}"/address_replacement | cut -d '=' -f 2 | head -n 1) || alias_address="${email_address}"
+    #echo "$alias_address"
 else
-        alias_address="${email_address}"
+    alias_address="${email_address}"
 fi
 
 
@@ -60,7 +60,7 @@ print_cmd = /home/cfg/print/to/text_file
 # :compose [ENTER]
 
 [general]
-	hooksfile = ~/.config/alot/hooks.py
+    hooksfile = ~/.config/alot/hooks.py
 
 [bindings]
     j = move down
@@ -137,11 +137,8 @@ print_cmd = /home/cfg/print/to/text_file
         r = reply
         | = prompt 'pipeto '
 
-
-
 EOF
 }
-
 
 
 #    [[search]]
