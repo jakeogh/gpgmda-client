@@ -92,7 +92,7 @@ hooksfile = ~/.config/alot/hooks.py
 
     [[search]]
         a = toggletags unread
-        S = toggletags spam; untag unread
+#        S = toggletags spam; untag unread
 #        s = ""
 
 #    [[envelope]]
