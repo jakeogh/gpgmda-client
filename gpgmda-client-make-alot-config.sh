@@ -95,8 +95,8 @@ hooksfile = ~/.config/alot/hooks.py
         S = toggletags spam; untag unread
         s = ""
 
-    [[envelope]]
-        H = toggleheaders
+#    [[envelope]]
+#        H = toggleheaders
 
 #    [[taglist]]
 
