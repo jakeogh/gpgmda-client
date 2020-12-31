@@ -61,37 +61,18 @@ hooksfile = ~/.config/alot/hooks.py
 # :compose [ENTER]
 
 [bindings]
-    j = move down
-    k = move up
-    ' ' = move page down
-    q = cancel
-    enter = select
-    @ = refresh
-    ? = help bindings
-    I = search tag:inbox AND NOT tag:killed
     Z = search NOT tag:inbox
     A = search NOT tag:killed
     L = taglist
-    shift tab = bprevious
-    U = search tag:unread
-    tab = bnext
-    \ = prompt 'search '
-    d = bclose
-    $ = flush
     n = compose
-    o = prompt 'search '
     esc = exit
-    ';' = bufferlist
-    ':' = prompt
-    G = move last
-    'g g' = move first
 
 
 #    [[bufferlist]]
 #        select = openfocussed
 
-    [[search]]
-        a = toggletags unread
+#    [[search]]
+#        a = toggletags unread
 #        S = toggletags spam; untag unread
 #        s = ""
 
@@ -101,7 +82,7 @@ hooksfile = ~/.config/alot/hooks.py
 #    [[taglist]]
 
     [[thread]]
-        h = togglesource
+#       h = togglesource
 #       A = save --all --autopath
         F = forward --attach
 #       s = save --autopath
