@@ -36,8 +36,8 @@ cat <<EOF
 
 # config section for sending mail
 
-themes_dir = /dev/shm
-theme = __alot_theme_${email_address}
+#themes_dir = /dev/shm
+#theme = __alot_theme_${email_address}
 editor_cmd = /home/cfg/appwrappers/vi
 notify_timeout = 3
 timestamp_format = "%Y-%m-%d %I:%m%p %Z [%c]"
