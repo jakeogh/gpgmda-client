@@ -96,17 +96,17 @@ hooksfile = ~/.config/alot/hooks.py
         s = ""
 
     [[envelope]]
-        a = prompt 'attach ~/'
-        y = send
-        P = save
-        s = 'refine Subject'
-        t = 'refine To'
-        b = 'refine Bcc'
-        c = 'refine Cc'
-        select = edit
+#        a = prompt 'attach ~/'
+#        y = send
+#        P = save
+#        s = 'refine Subject'
+#        t = 'refine To'
+#        b = 'refine Bcc'
+#        c = 'refine Cc'
+#        select = edit
         H = toggleheaders
 
-    [[taglist]]
+#    [[taglist]]
 
     [[thread]]
         C = fold *
