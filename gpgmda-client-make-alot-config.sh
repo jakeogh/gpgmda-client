@@ -47,14 +47,14 @@ print_cmd = /home/cfg/print/to/text_file
 hooksfile = ~/.config/alot/hooks.py
 
 [accounts]
-	[[default]]
-		realname = ${name}
-		address = ${alias_address}
-		sendmail_command = gpgmda-client-send.sh ${email_address} ${alias_address}
-		[[[abook]]]
-			type = shellcommand
-			command = gpgmda-client address-query ${email_address}
-			regexp = \"(?P<name>.+)\"\s*<(?P<email>.*.+?@.+?)>
+    [[default]]
+        realname = ${name}
+        address = ${alias_address}
+        sendmail_command = gpgmda-client-send.sh ${email_address} ${alias_address}
+        [[[abook]]]
+            type = shellcommand
+            command = gpgmda-client address-query ${email_address}
+            regexp = \"(?P<name>.+)\"\s*<(?P<email>.*.+?@.+?)>
 
 # to send a mail in alot enter the compose command http://alot.readthedocs.org/en/latest/usage/index.html#commands
 # type
