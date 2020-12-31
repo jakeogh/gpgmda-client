@@ -81,10 +81,10 @@ hooksfile = ~/.config/alot/hooks.py
 
 #    [[taglist]]
 
-    [[thread]]
+#    [[thread]]
 #       h = togglesource
 #       A = save --all --autopath
-        F = forward --attach
+#       F = forward --attach
 #       s = save --autopath
 
 EOF
