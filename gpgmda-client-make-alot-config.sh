@@ -42,7 +42,7 @@ editor_cmd = /home/cfg/appwrappers/vi
 notify_timeout = 3
 timestamp_format = "%Y-%m-%d %I:%m%p %Z [%c]"
 auto_remove_unread = True
-remove_unread_on_summary_touch = True
+# remove_unread_on_summary_touch = True
 print_cmd = /home/cfg/print/to/text_file
 
 [accounts]
