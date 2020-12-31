@@ -93,7 +93,7 @@ hooksfile = ~/.config/alot/hooks.py
     [[search]]
         a = toggletags unread
         S = toggletags spam; untag unread
-        s = ""
+#        s = ""
 
 #    [[envelope]]
 #        H = toggleheaders
@@ -102,9 +102,9 @@ hooksfile = ~/.config/alot/hooks.py
 
     [[thread]]
         h = togglesource
-        A = save --all --autopath
+#       A = save --all --autopath
         F = forward --attach
-        #s = save --autopath
+#       s = save --autopath
 
 EOF
 }
