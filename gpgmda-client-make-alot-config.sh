@@ -96,38 +96,15 @@ hooksfile = ~/.config/alot/hooks.py
         s = ""
 
     [[envelope]]
-#        a = prompt 'attach ~/'
-#        y = send
-#        P = save
-#        s = 'refine Subject'
-#        t = 'refine To'
-#        b = 'refine Bcc'
-#        c = 'refine Cc'
-#        select = edit
         H = toggleheaders
 
 #    [[taglist]]
 
     [[thread]]
-        C = fold *
-        E = unfold *
-        c = fold
-        e = unfold
-        < = fold
-        > = unfold
-        H = toggleheaders
         h = togglesource
-        P = print --all --separately --add_tags
-        S = save --all
         A = save --all --autopath
-        g = reply --all
-        f = forward
         F = forward --attach
-        p = print --add_tags
-        n = editnew
-        s = save --autopath
-        r = reply
-        | = prompt 'pipeto '
+        #s = save --autopath
 
 EOF
 }
