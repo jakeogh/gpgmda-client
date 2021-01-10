@@ -398,10 +398,12 @@ def short_random_string():
 
 def get_maildir_file_counts(*,
                             gpgmaildir,
-                            maildir,):
+                            maildir,
+                            verbose: bool,
+                            debug: bool,):
     ic()
-    files_in_gpgmaildir = len(list(files(gpgmaildir)))
-    files_in_maildir = len(list(files(maildir)))
+    files_in_gpgmaildir = len(list(files(gpgmaildir, verbose=verbose, debug=debug,)))
+    files_in_maildir = len(list(files(maildir, verbose=verbose, debug=debug,)))
     return {'files_in_gpgmaildir': files_in_gpgmaildir,
             "files_in_maildir": files_in_maildir}
 
@@ -641,7 +643,8 @@ def gpgmaildir_to_maildir(*,
                           gpgMaildir_archive_folder,
                           gpgmaildir,
                           maildir,
-                          verbose=False,):
+                          verbose: bool,
+                          debug: bool,):
 
     # todo add locking
     ic()
@@ -679,15 +682,15 @@ def gpgmaildir_to_maildir(*,
         ic(rsync_last_new_mail_file, 'does not exist or is 0 bytes')
 
     ic('checking if the message counts in the maildir and the gpgmaildir match')
-    maildir_counts_dict = get_maildir_file_counts(gpgmaildir=gpgmaildir, maildir=maildir)
+    maildir_counts_dict = get_maildir_file_counts(gpgmaildir=gpgmaildir, maildir=maildir, verbose=verbose, debug=debug,)
     ic(maildir_counts_dict)
     maildir_file_count = maildir_counts_dict['files_in_maildir']
     gpgmaildir_file_count = maildir_counts_dict['files_in_gpgmaildir']
     if gpgmaildir_file_count > maildir_file_count:
         ic('files_in_gpgmaildir > files_in_maildir:', gpgmaildir_file_count, '>', maildir_file_count)
         ic('locating un-decrypted files')
-        files_in_gpgmaildir = [dent.pathlib for dent in files(gpgmaildir)]
-        files_in_maildir = [dent.pathlib for dent in files(maildir)]
+        files_in_gpgmaildir = [dent.pathlib for dent in files(gpgmaildir, verbose=verbose, debug=debug,)]
+        files_in_maildir = [dent.pathlib for dent in files(maildir, verbose=verbose, debug=debug,)]
         ic('len(files_in_gpgmaildir):', len(files_in_gpgmaildir))
         ic('len(files_in_maildir):', len(files_in_maildir))
         ic(len(files_in_gpgmaildir) - len(files_in_maildir))
@@ -862,9 +865,13 @@ def read(ctx, email_address):
 
 @client.command()
 @click.argument("email_address", nargs=1)
+@click.option('--verbose', is_flag=True)
+@click.option('--debug', is_flag=True)
 @click.pass_context
 def decrypt(ctx,
-            email_address,):
+            email_address,
+            verbose,
+            debug,):
     '''decrypt new mail in encrypted maildir to unencrypted maildir'''
     ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
@@ -875,7 +882,9 @@ def decrypt(ctx,
         gpgmaildir_to_maildir(email_address=email_address,
                               gpgMaildir_archive_folder=ctx.gpgMaildir_archive_folder,
                               gpgmaildir=ctx.gpgmaildir,
-                              maildir=ctx.maildir,)
+                              maildir=ctx.maildir,
+                              verbose=verbose,
+                              debug=debug,)
 
         ic('done with gpgmaildir_to_maildir()')
     else:
@@ -986,10 +995,12 @@ def notmuch_query(ctx, email_address, query):
 
 @client.command()
 @click.argument("email_address", nargs=1)
+@click.option('--verbose', is_flag=True)
+@click.option('--debug', is_flag=True)
 @click.pass_context
-def show_message_counts(ctx, email_address):
+def show_message_counts(ctx, email_address, verbose, debug,):
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    print(get_maildir_file_counts(gpgmaildir=ctx.gpgmaildir, maildir=ctx.maildir))
+    print(get_maildir_file_counts(gpgmaildir=ctx.gpgmaildir, maildir=ctx.maildir, verbose=verbose, debug=debug))
 
 
 @client.command()
