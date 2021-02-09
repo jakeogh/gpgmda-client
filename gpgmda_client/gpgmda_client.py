@@ -423,7 +423,7 @@ def parse_rsync_log_to_list(*,
         if 'exists' not in line:
             if 'gpgMaildir' in line:
                 if line.startswith('>f'):
-                    new_gpgmda_file_path = gpgMaildir_archive_folder + '/' + line.split(' ')[1]
+                    new_gpgmda_file_path = gpgMaildir_archive_folder / Path(line.split(' ')[1])
                     ic(new_gpgmda_file_path)
                     full_path_list.append(new_gpgmda_file_path)
 
