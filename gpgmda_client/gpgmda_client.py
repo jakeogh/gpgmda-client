@@ -639,7 +639,7 @@ def decrypt_message(*,
             stats = os.stat(gpgfile)
             if stats.st_size <= 1668:
                 ic('this is likely an empty gpg encrypted file')
-                search_server_logs_command = ['ssh', 'root@v6y.net', 'zgrep', gpgfile.name, '/var/log/\*']
+                search_server_logs_command = ['ssh', 'root@v6y.net', '"', 'zgrep', gpgfile.name, '/var/log/*', '"']
                 search_server_logs_command = ' '.join(search_server_logs_command)
                 ic(search_server_logs_command)
                 os.system(' '.join(search_server_logs_command))
