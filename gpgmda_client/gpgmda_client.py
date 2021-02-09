@@ -258,8 +258,8 @@ def run_notmuch(*,
 
 
 def make_notmuch_config(*,
-                        email_address,
-                        email_archive_folder,
+                        email_address: str,
+                        email_archive_folder: Path,
                         verbose=False,):
 
     ic()
@@ -267,7 +267,7 @@ def make_notmuch_config(*,
 
     notmuch_config = """
 [database]
-path = """ + email_archive_folder + """/_Maildirs
+path = """ + email_archive_folder.as_posix() + """/_Maildirs
 
 [user]
 name = """ + username + """
@@ -282,9 +282,9 @@ synchronize_flags = False
 [global]
 quit_on_last_bclose = True
 """
-    notmuch_config_folder = '/'.join([email_archive_folder, "_notmuch_config"])
+    notmuch_config_folder = email_archive_folder / Path("_notmuch_config")
     check_or_create_dir(notmuch_config_folder)
-    notmuch_config_file_location = '/'.join([notmuch_config_folder, ".notmuch_config"])
+    notmuch_config_file_location = notmuch_config_folder / Path(".notmuch_config")
     if verbose:
         ic('writing notmuch config to:', notmuch_config_file_location)
     notmuch_config_file_handle = open(notmuch_config_file_location, "w")
