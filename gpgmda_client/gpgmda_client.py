@@ -716,7 +716,8 @@ def gpgmaildir_to_maildir(*,
     maildir_file_count = maildir_counts_dict['files_in_maildir']
     gpgmaildir_file_count = maildir_counts_dict['files_in_gpgmaildir']
     #files_in_gpgmaildir = None
-    if gpgmaildir_file_count > maildir_file_count:  # not a good check.
+    #if gpgmaildir_file_count > maildir_file_count:  # not a good check.
+    if gpgmaildir_file_count != maildir_file_count:  # not a good check.
         ic('files_in_gpgmaildir > files_in_maildir:', gpgmaildir_file_count, '>', maildir_file_count)
         ic('locating un-decrypted files')
         files_in_gpgmaildir = [dent.pathlib for dent in files(gpgmaildir, verbose=verbose, debug=debug,)]
@@ -728,12 +729,12 @@ def gpgmaildir_to_maildir(*,
         ic('building hash lists')
         #hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
         hashes_in_maildir = [path.name.split('.')[-1] for path in files_in_maildir]
+        ic(len(hashes_in_maildir))
         skip_hashes = hashes_in_maildir
-        #iterator = files_in_gpgmaildir
+        iterator = files_in_gpgmaildir
 
     else:
         ic('files_in_gpgmaildir <= files_in_maildir, looks good')
-
 
     if iterator:  # used in 2 places above
         decrypt_list_of_messages(message_list=iterator,
