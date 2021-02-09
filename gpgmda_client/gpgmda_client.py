@@ -132,16 +132,17 @@ def run_notmuch(*,
             #line = line.decode('utf-8')
             ic(line)
             if "Note: Ignoring non-mail file:" in line:
-                non_mail_file = line.split(" ")[-1]
+                non_mail_file = Path(line.split(" ")[-1])
                 ic('found file that gmime does not like:', non_mail_file)
-                random_id = non_mail_file[-40:]
+                random_id = Path(non_mail_file.as_posix()[-40:])
                 ic(random_id)
-                maildir_subfolder = non_mail_file.split('/')[-2]
+                maildir_subfolder = Path(non_mail_file.parent.parent)
                 ic(maildir_subfolder)
-                encrypted_file = gpgmaildir + '/' + maildir_subfolder + '/' + random_id
+                assert maildir_subfolder.as_posix() in ['new', '.sent']
+                encrypted_file = gpgmaildir / maildir_subfolder / Path(random_id)
                 ic(encrypted_file)
                 ic('head -c 500:')
-                command = "head -c 500 " + non_mail_file
+                command = "head -c 500 " + non_mail_file.as_posix()
                 os.system(command)
                 with open(non_mail_file, 'rb') as fh:
                     data = fh.read()
@@ -172,24 +173,24 @@ def run_notmuch(*,
                     ic('Processing files for local move and delete:')
 
                     ic(non_mail_file)
-                    shutil.move(non_mail_file, non_mail_path)
+                    sh.mv(non_mail_file, non_mail_path)
 
                     ic(encrypted_file)
-                    shutil.move(encrypted_file, non_mail_path)
+                    sh.mv(encrypted_file, non_mail_path)
 
                     if maildir_subfolder == ".sent":
-                        target_file = "/home/sentuser/gpgMaildir/new/" + random_id
-                        command = "ssh root@v6y.net rm -v " + target_file
+                        target_file = Path("/home/sentuser/gpgMaildir/new/") / random_id
+                        command = "ssh root@v6y.net rm -v " + target_file.as_posix()
                         ic(command)
                         os.system(command)
 
                     elif maildir_subfolder == "new":
-                        target_file = "/home/user/gpgMaildir/new/" + random_id
-                        command = "ssh root@v6y.net rm -v " + target_file    # todo use ~/.gpgmda/config
+                        target_file = Path("/home/user/gpgMaildir/new/") / random_id
+                        command = "ssh root@v6y.net rm -v " + target_file.as_posix()    # todo use ~/.gpgmda/config
                         ic(command)
                         os.system(command)
                     else:
-                        eprint("unknown maildir_subfolder:", maildir_subfolder, "exiting")
+                        eprint("unknown maildir_subfolder:", maildir_subfolder.as_posix(), "exiting")
                         sys.exit(1)
 
         ic(notmuch_p.returncode)
@@ -199,7 +200,7 @@ def run_notmuch(*,
 
     elif mode == "query_notmuch":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = "NOTMUCH_CONFIG=" + notmuch_config_file + " notmuch " + query
+        command = "NOTMUCH_CONFIG=" + notmuch_config_file.as_posix() + " notmuch " + query
         ic(command)
         return_code = os.system(command)
         if return_code != 0:
@@ -208,7 +209,7 @@ def run_notmuch(*,
 
     elif mode == "query_afew":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = "afew" + " --notmuch-config=" + notmuch_config_file + " " + query
+        command = "afew" + " --notmuch-config=" + notmuch_config_file.as_posix() + " " + query
         ic(command)
         return_code = os.system(command)
         if return_code != 0:
@@ -218,9 +219,9 @@ def run_notmuch(*,
     elif mode == "query_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
         command = "XDG_CONFIG_HOME=" + \
-                  notmuch_config_folder + \
+                  notmuch_config_folder.as_posix() + \
                   " NOTMUCH_CONFIG=" + \
-                  notmuch_config_file + " " + \
+                  notmuch_config_file.as_posix() + " " + \
                   "nottoomuch-addresses.sh " + \
                   query
         return_code = os.system(command)
@@ -231,9 +232,9 @@ def run_notmuch(*,
     elif mode == "build_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
         command = "XDG_CONFIG_HOME=" + \
-                  notmuch_config_folder + \
+                  notmuch_config_folder.as_posix() + \
                   " NOTMUCH_CONFIG=" + \
-                  notmuch_config_file + \
+                  notmuch_config_file.as_posix() + \
                   " " + \
                   "nottoomuch-addresses.sh --update --rebuild"
         return_code = os.system(command)
@@ -244,9 +245,9 @@ def run_notmuch(*,
     elif mode == "update_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
         command = "XDG_CONFIG_HOME=" + \
-                  notmuch_config_folder + \
+                  notmuch_config_folder.as_posix() + \
                   " NOTMUCH_CONFIG=" + \
-                  notmuch_config_file + " " + \
+                  notmuch_config_file.as_posix() + " " + \
                   "nottoomuch-addresses.sh --update"
         return_code = os.system(command)
         if return_code != 0:
