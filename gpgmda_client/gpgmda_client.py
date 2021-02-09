@@ -639,14 +639,13 @@ def decrypt_message(*,
             stats = os.stat(gpgfile)
             if stats.st_size <= 1668:
                 ic('this is likely an empty gpg encrypted file')
-                search_server_logs_command = ['ssh', 'root@v6y.net', 'zgrep', gpgfile.name, '/var/log/messages*']
+                search_server_logs_command = ['ssh', 'root@v6y.net', 'zgrep', '-r', gpgfile.name, '/var/log/']
                 os.system(' '.join(search_server_logs_command))
                 raise EmptyGPGMailFile
 
             ic(stats.st_size, gpgfile)
             assert False
 
-            assert False
     return True
 
 
