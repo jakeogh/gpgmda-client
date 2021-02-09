@@ -645,7 +645,7 @@ def decrypt_message(*,
                 search_server_logs_command += " | ssh root@v6y.net bash"
                 ic(search_server_logs_command)
                 #sys.exit(1)
-                os.system(' '.join(search_server_logs_command))
+                os.system(search_server_logs_command)
                 raise EmptyGPGMailFile
 
             ic(stats.st_size, gpgfile)
