@@ -23,7 +23,7 @@
 
 import glob
 import os
-import shutil
+#import shutil
 import subprocess
 import sys
 import time
@@ -348,17 +348,6 @@ def start_alot(*,
         ic(alot_command)
     alot_p = os.system(alot_command)
 
-    #alot_p = os.system(' '.join(['/usr/bin/alot',
-    #                             '-C',
-    #                             '256',
-    #                             '--debug-level=debug',
-    #                             '--logfile=/dev/shm/__alot_log',
-    #                             '--notmuch-config',
-    #                             notmuch_config_folder + '/.notmuch_config',
-    #                             '--mailindex-path',
-    #                             email_archive_folder + '/_Maildirs',
-    #                             '-c',
-    #                             alot_config_file]))
     if verbose:
         ic(alot_p)
 
@@ -422,6 +411,7 @@ def parse_rsync_log_to_list(*,
         rsync_log = fh.readlines()
 
     full_path_list = []
+    line = None
     for line in rsync_log:
         line = line.strip()  # remove newlines
         if 'exists' not in line:
@@ -432,9 +422,10 @@ def parse_rsync_log_to_list(*,
                     full_path_list.append(new_gpgmda_file_path)
 
     message_list = []
-    for path in full_path_list:
-        assert len(path.as_posix()) > 0
-        message_list.append(line)
+    if line:
+        for path in full_path_list:
+            assert len(path.as_posix()) > 0
+            message_list.append(line)
 
     return message_list
 
