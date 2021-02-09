@@ -437,7 +437,7 @@ def parse_rsync_log_to_list(*,
 
 
 def decrypt_list_of_messages(*,
-                             message_list,
+                             message_list: list,
                              email_address: str,
                              maildir: Path,
                              skip_hashes: list,
@@ -722,6 +722,7 @@ def gpgmaildir_to_maildir(*,
         ic('files_in_gpgmaildir > files_in_maildir:', gpgmaildir_file_count, '>', maildir_file_count)
         ic('locating un-decrypted files')
         files_in_gpgmaildir = [dent.pathlib for dent in files(gpgmaildir, verbose=verbose, debug=debug,)]
+        assert isinstance(files_in_gpgmaildir[0], Path)
         files_in_maildir = [dent.pathlib for dent in files(maildir, verbose=verbose, debug=debug,)]
         ic('len(files_in_gpgmaildir):', len(files_in_gpgmaildir))
         ic('len(files_in_maildir):', len(files_in_maildir))
@@ -730,13 +731,13 @@ def gpgmaildir_to_maildir(*,
         #hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
         hashes_in_maildir = [path.name.split('.')[-1] for path in files_in_maildir]
         skip_hashes = hashes_in_maildir
-        iterator = files_in_gpgmaildir
+        #iterator = files_in_gpgmaildir
 
     else:
         ic('files_in_gpgmaildir <= files_in_maildir, looks good')
 
     if iterator:
-        decrypt_list_of_messages(message_list=iterator,
+        decrypt_list_of_messages(message_list=files_in_gpgmaildir,
                                  skip_hashes=skip_hashes,
                                  email_address=email_address,
                                  maildir=maildir,
