@@ -34,7 +34,8 @@ from pathlib import Path
 import click
 from getdents import files
 from icecream import ic
-from kcl.dirops import check_or_create_dir, path_is_dir
+from kcl.dirops import check_or_create_dir
+from kcl.dirops import path_is_dir
 from kcl.fileops import empty_file
 from kcl.pathops import path_exists
 from kcl.printops import eprint
@@ -436,10 +437,11 @@ def parse_rsync_log_to_list(*,
 
 def decrypt_list_of_messages(*,
                              message_list,
-                             email_address,
-                             maildir,
-                             skip_hashes,
-                             verbose=False,):
+                             email_address: str,
+                             maildir: Path,
+                             skip_hashes: list,
+                             verbose: bool,
+                             debug: bool,):
 
     ic()
     yesall = False
@@ -458,12 +460,15 @@ def decrypt_list_of_messages(*,
         try:
             decrypt_message(email_address=email_address,
                             gpgfile=gpgfile,
-                            maildir=maildir,)
+                            maildir=maildir,
+                            verbose=verbose,
+                            debug=debug,)
         except EmptyGPGMailFile as e:
             ic(e)
             answer = deal_with_badmail(gpgfile=gpgfile,
                                        yesall=yesall,
-                                       verbose=verbose,)
+                                       verbose=verbose,
+                                       debug=debug,)
             if answer == "yesall":
                 yesall = True
 
@@ -507,29 +512,32 @@ def move_badmail_and_delete_off_server(*,
 
 
 def deal_with_badmail(*,
-                      gpgfile,
-                      yesall=False,
-                      verbose=False,):
+                      gpgfile: Path,
+                      yesall: bool,
+                      verbose: bool,
+                      debug: bool):
+    if yesall:
+        move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
+        return "yesall"
 
-    if not yesall:
-        delete_message_answer = \
-            input("Would you like to move this message locally to the ~/.gpgmda/badmail folder and delete it off the server? (yes/no/yesall): ")
-        delete_message_answer = delete_message_answer.lower()
+    delete_message_answer = \
+        input("Would you like to move this message locally to the ~/.gpgmda/badmail folder and delete it off the server? (yes/no/yesall): ")
+    delete_message_answer = delete_message_answer.lower()
 
-        if delete_message_answer.startswith("yes"):
-            move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
+    if delete_message_answer.startswith("yes"):
+        move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
         if delete_message_answer == "yesall":
             return "yesall"
-    else:
-        move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
+    return "no"
 
 
 def decrypt_message(*,
-                    email_address,
-                    gpgfile,
-                    maildir,
-                    verbose=False,
-                    stdout=False,):
+                    email_address: str,
+                    gpgfile: Path,
+                    maildir: Path,
+                    verbose: bool,
+                    debug: bool,
+                    stdout: bool = False,):
 
     assert isinstance(gpgfile, Path)
 
@@ -558,7 +566,7 @@ def decrypt_message(*,
         sys.exit(1)
 
     #file_previously_decrypted = 0
-    glob_pattern = maildir + '/' + maildir_subfolder + '/*.' + gpgfile.name
+    glob_pattern = maildir.as_posix() + '/' + maildir_subfolder + '/*.' + gpgfile.name
     ic(glob_pattern)
     result = glob.glob(glob_pattern)
 
@@ -575,14 +583,14 @@ def decrypt_message(*,
     ic('decrypting:', gpgfile)
     if stdout:
         #command = "gpg2 -o - --decrypt " + gpgfile + " | tar --transform=s/$/." + gpgfile.name + "/ -xvf -" # hides the tar header
-        command = "gpg2 -o - --decrypt " + gpgfile
+        command = "gpg2 -o - --decrypt " + gpgfile.as_posix()
         ic('decrypt_msg():', command)
         return_code = os.system(command)
         ic(return_code)
 
     else:
-        gpg_command = ["gpg2", "-o", "-", "--decrypt", gpgfile]
-        tar_command = ["tar", "--transform=s/$/." + gpgfile.name + "/", "-C", maildir + '/' + maildir_subfolder, "-xvf", "-"]
+        gpg_command = ["gpg2", "-o", "-", "--decrypt", gpgfile.as_posix()]
+        tar_command = ["tar", "--transform=s/$/." + gpgfile.name + "/", "-C", maildir.as_posix() + '/' + maildir_subfolder, "-xvf", "-"]
         gpg_cmd_proc = subprocess.Popen(gpg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
         ic(gpg_command)
         gpg_cmd_proc_output_stdout, gpg_cmd_proc_output_stderr = gpg_cmd_proc.communicate()
@@ -629,10 +637,12 @@ def decrypt_message(*,
             stats = os.stat(gpgfile)
             if stats.st_size <= 1668:
                 ic('this is likely an empty gpg encrypted file')
+                search_server_logs_command = ['ssh', 'root@v6y.net', 'zgrep', gpgfile.name, '/var/log/messages*']
+                os.system(' '.join(search_server_logs_command))
                 raise EmptyGPGMailFile
-            else:
-                ic(stats.st_size, gpgfile)
-                assert False
+
+            ic(stats.st_size, gpgfile)
+            assert False
 
             assert False
     return True
@@ -708,7 +718,8 @@ def gpgmaildir_to_maildir(*,
                                  skip_hashes=skip_hashes,
                                  email_address=email_address,
                                  maildir=maildir,
-                                 verbose=verbose,)
+                                 verbose=verbose,
+                                 debug=debug,)
 
 
 def search_list_of_strings_for_substring(*,
