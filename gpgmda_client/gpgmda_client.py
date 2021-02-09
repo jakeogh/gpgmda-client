@@ -444,6 +444,7 @@ def decrypt_list_of_messages(*,
                              debug: bool,):
 
     ic()
+    assert isinstance(maildir, Path)
     yesall = False
     #ic(message_list)
     ic(len(skip_hashes))
@@ -540,6 +541,7 @@ def decrypt_message(*,
                     stdout: bool = False,):
 
     assert isinstance(gpgfile, Path)
+    assert isinstance(maildir, Path)
 
     ic('decrypt_msg():', gpgfile)
     if '@' not in email_address:
@@ -649,15 +651,18 @@ def decrypt_message(*,
 
 
 def gpgmaildir_to_maildir(*,
-                          email_address,
-                          gpgMaildir_archive_folder,
-                          gpgmaildir,
-                          maildir,
+                          email_address: str,
+                          gpgMaildir_archive_folder: Path,
+                          gpgmaildir: Path,
+                          maildir: Path,
                           verbose: bool,
                           debug: bool,):
 
     # todo add locking
     ic()
+    assert isinstance(maildir, Path)
+    assert isinstance(gpgmaildir, Path)
+    assert isinstance(gpgMaildir_archive_folder, Path)
     iterator = None
     ic('gpgmda_to_maildir using:', gpgMaildir_archive_folder)
     ic('Checking for default-recipient in ~/.gnupg/gpg.conf')
@@ -781,8 +786,12 @@ def update_notmuch_address_db_build(*,
                 notmuch_config_folder=notmuch_config_folder)
 
 
-def check_noupdate_list(email_address):
-    noupdate_list = open(gpgmda_config_folder + "/.noupdate", 'r').readlines()  # todo move config to ~/.gpgmda
+def check_noupdate_list(*,
+                        gpgmda_config_folder: Path,
+                        email_address: str,
+                        verbose: bool,
+                        debug: bool,):
+    noupdate_list = open(gpgmda_config_folder / Path(".noupdate"), 'r').readlines()  # todo move config to ~/.gpgmda
     for item in noupdate_list:
         if email_address in item:
             eprint(email_address + " is listed in .noupdate, exiting")
@@ -800,8 +809,8 @@ def client(ctx, verbose):
     if verbose:
         ic(time.asctime())
 
-    global gpgmda_config_folder
     gpgmda_config_folder = os.path.expanduser('~/.gpgmda/')
+    ctx.obj['gpgmda_config_folder'] = gpgmda_config_folder
 
     if verbose:
         ic(time.asctime())
@@ -817,30 +826,30 @@ def build_paths(ctx, email_address):
     assert '@' in email_address
     ctx.email_archive_type = 'gpgMaildir'
 
-    ctx.email_archive_folder = "/home/user/__email_folders"
+    ctx.email_archive_folder = Path("/home/user/__email_folders")
     check_or_create_dir(ctx.email_archive_folder)
 
-    ctx.gpgMaildir_archive_folder_base_path = '/'.join([ctx.email_archive_folder, "_gpgMaildirs"])
+    ctx.gpgMaildir_archive_folder_base_path = ctx.email_archive_folder / Path("_gpgMaildirs")
     check_or_create_dir(ctx.gpgMaildir_archive_folder_base_path)
 
-    ctx.gpgMaildir_archive_folder = '/'.join([ctx.gpgMaildir_archive_folder_base_path, email_address])
+    ctx.gpgMaildir_archive_folder = ctx.gpgMaildir_archive_folder_base_path / Path(email_address)
     check_or_create_dir(ctx.gpgMaildir_archive_folder)
 
-    ctx.gpgmaildir = '/'.join([ctx.gpgMaildir_archive_folder, "gpgMaildir"])
+    ctx.gpgmaildir = Path(ctx.gpgMaildir_archive_folder) / Path("gpgMaildir")
     check_or_create_dir(ctx.gpgmaildir)
 
-    stdMaildir_archive_folder = '/'.join([ctx.email_archive_folder, "_Maildirs", email_address])
+    stdMaildir_archive_folder = ctx.email_archive_folder / Path("_Maildirs") / Path(email_address)
     check_or_create_dir(stdMaildir_archive_folder)
 
-    ctx.maildir = '/'.join([stdMaildir_archive_folder, "Maildir"])
-    check_or_create_dir(ctx.maildir + "/new/")
-    check_or_create_dir(ctx.maildir + "/cur/")
-    check_or_create_dir(ctx.maildir + "/.sent/")
+    ctx.maildir = stdMaildir_archive_folder / Path("Maildir")
+    check_or_create_dir(ctx.maildir / Path("new"))
+    check_or_create_dir(ctx.maildir / Path("cur"))
+    check_or_create_dir(ctx.maildir / Path(".sent"))
 
-    ctx.notmuch_config_folder = '/'.join([ctx.email_archive_folder, "_notmuch_config"])
+    ctx.notmuch_config_folder = ctx.email_archive_folder / Path("_notmuch_config")
     check_or_create_dir(ctx.notmuch_config_folder)
 
-    ctx.notmuch_config_file = '/'.join([ctx.notmuch_config_folder, ".notmuch_config"])
+    ctx.notmuch_config_file = ctx.notmuch_config_folder / Path(".notmuch_config")
     make_notmuch_config(email_address=email_address, email_archive_folder=ctx.email_archive_folder)
     return ctx
 
@@ -880,13 +889,16 @@ def read(ctx, email_address):
 @click.option('--debug', is_flag=True)
 @click.pass_context
 def decrypt(ctx,
-            email_address,
-            verbose,
-            debug,):
+            email_address: str,
+            verbose: bool,
+            debug: bool,):
     '''decrypt new mail in encrypted maildir to unencrypted maildir'''
     ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    check_noupdate_list(email_address=email_address)
+    check_noupdate_list(gpgmda_config_folder=ctx.gpgmda_config_folder,
+                        email_address=email_address,
+                        verbose=verbose,
+                        debug=debug,)
 
     if ctx.email_archive_type == "gpgMaildir":
         ctx.invoke(warm_up_gpg)
@@ -905,12 +917,20 @@ def decrypt(ctx,
 
 @client.command()
 @click.argument("email_address", nargs=1)
+@click.option('--verbose', is_flag=True)
+@click.option('--debug', is_flag=True)
 @click.pass_context
-def update_notmuch(ctx, email_address):
+def update_notmuch(ctx,
+                   email_address: str,
+                   verbose: bool,
+                   debug: bool,):
     '''update notmuch with new mail from (normal, unencrypted) maildir'''
     ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    check_noupdate_list(email_address=email_address)
+    check_noupdate_list(gpgmda_config_folder=ctx.gpgmda_config_folder,
+                        email_address=email_address,
+                        verbose=verbose,
+                        debug=debug,)
 
     if ctx.email_archive_type == "gpgMaildir":
         ctx.invoke(warm_up_gpg)
@@ -937,12 +957,20 @@ def update_notmuch(ctx, email_address):
 
 @client.command()
 @click.argument("email_address", nargs=1)
+@click.option('--verbose', is_flag=True)
+@click.option('--debug', is_flag=True)
 @click.pass_context
-def download(ctx, email_address):
+def download(ctx,
+             email_address: str,
+             verbose: bool,
+             debug: bool,):
     '''rsync new mail to encrypted maildir'''
     ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    check_noupdate_list(email_address=email_address)
+    check_noupdate_list(gpgmda_config_folder=ctx.gpgmda_config_folder,
+                        email_address=email_address,
+                        verbose=verbose,
+                        debug=debug,)
 
     if ctx.email_archive_type == "gpgMaildir":
         ctx.invoke(warm_up_gpg)
