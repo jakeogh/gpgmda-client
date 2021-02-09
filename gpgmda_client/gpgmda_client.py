@@ -810,7 +810,8 @@ def client(ctx, verbose):
         ic(time.asctime())
 
     gpgmda_config_folder = os.path.expanduser('~/.gpgmda/')
-    ctx.obj['gpgmda_config_folder'] = gpgmda_config_folder
+    #ctx.obj['gpgmda_config_folder'] = gpgmda_config_folder
+    ctx.gpgmda_config_folder = gpgmda_config_folder
 
     if verbose:
         ic(time.asctime())
