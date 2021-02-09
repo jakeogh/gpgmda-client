@@ -641,7 +641,8 @@ def decrypt_message(*,
                 ic('this is likely an empty gpg encrypted file')
                 #search_server_logs_command = ['ssh', 'root@v6y.net', '"', 'zgrep', gpgfile.name, '/var/log/*', '"']
                 #search_server_logs_command = ' '.join(search_server_logs_command)
-                search_server_logs_command = "echo '\"{}\" /var/log/*' | ssh root@v6y.net bash".format(gpgfile.name)
+                search_server_logs_command = ' '.join(['echo', '"', 'zgrep', gpgfile.name, '/var/log/*'])
+                search_server_logs_command += " | ssh root@v6y.net bash"
                 ic(search_server_logs_command)
                 sys.exit(1)
                 os.system(' '.join(search_server_logs_command))
