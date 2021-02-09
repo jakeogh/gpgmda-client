@@ -108,7 +108,7 @@ def run_notmuch(*,
         current_env = os.environ.copy()
         current_env["NOTMUCH_CONFIG"] = notmuch_config_file
 
-        notmuch_new_command = ["notmuch", "--config=" + notmuch_config_file, "new"]
+        notmuch_new_command = ["notmuch", "--config=" + notmuch_config_file.as_posix(), "new"]
         ic(notmuch_new_command)
         notmuch_p = subprocess.Popen(notmuch_new_command,
                                      stdout=subprocess.PIPE,
