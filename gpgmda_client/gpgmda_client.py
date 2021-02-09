@@ -486,7 +486,7 @@ def move_to_badmail(*,
     ic(badmail_path)
     os.makedirs(badmail_path, exist_ok=True)
     ic('Processing files for local move and delete gpgfile:', gpgfile)
-    sh.move(gpgfile, badmail_path, verbose=True)
+    sh.mv(gpgfile, badmail_path, verbose=True)
 
 
 def move_badmail_and_delete_off_server(*,
