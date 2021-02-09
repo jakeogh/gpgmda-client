@@ -708,12 +708,15 @@ def gpgmaildir_to_maildir(*,
         ic(rsync_last_new_mail_file, 'does not exist or is 0 bytes')
 
     ic('checking if the message counts in the maildir and the gpgmaildir match')
-    maildir_counts_dict = get_maildir_file_counts(gpgmaildir=gpgmaildir, maildir=maildir, verbose=verbose, debug=debug,)
+    maildir_counts_dict = get_maildir_file_counts(gpgmaildir=gpgmaildir,
+                                                  maildir=maildir,
+                                                  verbose=verbose,
+                                                  debug=debug,)
     ic(maildir_counts_dict)
     maildir_file_count = maildir_counts_dict['files_in_maildir']
     gpgmaildir_file_count = maildir_counts_dict['files_in_gpgmaildir']
-    files_in_gpgmaildir = None
-    if gpgmaildir_file_count > maildir_file_count:
+    #files_in_gpgmaildir = None
+    if gpgmaildir_file_count > maildir_file_count:  # not a good check.
         ic('files_in_gpgmaildir > files_in_maildir:', gpgmaildir_file_count, '>', maildir_file_count)
         ic('locating un-decrypted files')
         files_in_gpgmaildir = [dent.pathlib for dent in files(gpgmaildir, verbose=verbose, debug=debug,)]
@@ -732,8 +735,8 @@ def gpgmaildir_to_maildir(*,
         ic('files_in_gpgmaildir <= files_in_maildir, looks good')
 
 
-    if files_in_gpgmaildir:
-        decrypt_list_of_messages(message_list=files_in_gpgmaildir,
+    if iterator:  # used in 2 places above
+        decrypt_list_of_messages(message_list=iterator,
                                  skip_hashes=skip_hashes,
                                  email_address=email_address,
                                  maildir=maildir,
