@@ -323,11 +323,13 @@ def start_alot(*,
     alot_config_f.close()
     alot_theme_f.close()
 
-    notmuch_config_folder = email_archive_folder + '/_notmuch_config'
+    notmuch_config_folder = email_archive_folder / Path('_notmuch_config')
+    notmuch_config_file = notmuch_config_folder / Path('.notmuch_config')
+    maildirs_folder = email_archive_folder / Path('_Maildirs')
     ic('starting alot')
     os.system(' '.join(['alot', '--version']))
     move_terminal_text_up_one_page()        # so alot does not overwrite the last messages on the terminal
-    alot_config_file = '/dev/shm/__alot_config_' + email_address
+    alot_config_file = Path('/dev/shm/__alot_config_' + email_address)
     if verbose:
         ic(alot_config_file)
     alot_command = ' '.join(['/usr/bin/alot',
@@ -336,11 +338,11 @@ def start_alot(*,
                              '--debug-level=debug',
                              '--logfile=/dev/shm/__alot_log',
                              '--notmuch-config',
-                             notmuch_config_folder + '/.notmuch_config',
+                             notmuch_config_file.as_posix(),
                              '--mailindex-path',
-                             email_archive_folder + '/_Maildirs',
+                             maildirs_folder.as_posix(),
                              '-c',
-                             alot_config_file])
+                             alot_config_file.as_posix()])
 
     if verbose:
         ic(alot_command)
