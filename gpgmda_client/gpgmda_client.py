@@ -127,8 +127,8 @@ def run_notmuch(*,
             ic(line.decode('utf-8'))
 
         ic('notmuch_p_output[1]:')
-        for line in notmuch_p_output[1].split(b'\n'):
-            line = line.decode('utf-8')
+        for line in notmuch_p_output[1].decode('utf8').split('\n'):
+            #line = line.decode('utf-8')
             ic(line)
             if "Note: Ignoring non-mail file:" in line:
                 non_mail_file = line.split(" ")[-1]
