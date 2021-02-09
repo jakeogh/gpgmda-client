@@ -32,6 +32,7 @@ import time
 from pathlib import Path
 
 import click
+import sh
 from getdents import files
 from icecream import ic
 from kcl.dirops import check_or_create_dir
@@ -476,27 +477,35 @@ def decrypt_list_of_messages(*,
     ic('done:', index)
 
 
-def move_to_badmail(gpgfile):
+def move_to_badmail(*,
+                    gpgfile: Path,
+                    verbose: bool,
+                    debug: bool,):
     ic()
     badmail_path = Path('~/.gpgmda/badmail').expanduser()
     ic(badmail_path)
     os.makedirs(badmail_path, exist_ok=True)
     ic('Processing files for local move and delete gpgfile:', gpgfile)
-    shutil.move(gpgfile, badmail_path)
+    sh.move(gpgfile, badmail_path, verbose=True)
 
 
 def move_badmail_and_delete_off_server(*,
-                                       gpgfile,
-                                       verbose=False,):
+                                       gpgfile: Path,
+                                       verbose: bool,
+                                       debug: bool,):
     if verbose:
         ic(gpgfile)
 
+    assert isinstance(gpgfile, Path)
     maildir_subfolder = gpgfile.parent.name
     ic(maildir_subfolder)
-    move_to_badmail(gpgfile)
+    move_to_badmail(gpgfile=gpgfile,
+                    verbose=verbose,
+                    debug=debug,)
     random_id = gpgfile.name
     ic(random_id)
 
+    ic(maildir_subfolder)
     if maildir_subfolder == ".sent":
         target_file = "/home/sentuser/gpgMaildir/new/" + random_id
         command = "ssh root@v6y.net rm -v " + target_file
@@ -518,7 +527,9 @@ def deal_with_badmail(*,
                       verbose: bool,
                       debug: bool):
     if yesall:
-        move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
+        move_badmail_and_delete_off_server(gpgfile=gpgfile,
+                                           verbose=verbose,
+                                           debug=debug,)
         return "yesall"
 
     delete_message_answer = \
@@ -526,7 +537,9 @@ def deal_with_badmail(*,
     delete_message_answer = delete_message_answer.lower()
 
     if delete_message_answer.startswith("yes"):
-        move_badmail_and_delete_off_server(gpgfile=gpgfile, verbose=verbose)
+        move_badmail_and_delete_off_server(gpgfile=gpgfile,
+                                           verbose=verbose,
+                                           debug=debug,)
         if delete_message_answer == "yesall":
             return "yesall"
     return "no"
