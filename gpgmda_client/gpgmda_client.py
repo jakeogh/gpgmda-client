@@ -50,7 +50,7 @@ class EmptyGPGMailFile(ValueError):
 
 
 def check_for_notmuch_database(email_archive_folder):
-    notmuch_database_folder = email_archive_folder + "/_Maildirs/.notmuch/xapian"
+    notmuch_database_folder = email_archive_folder / Path("_Maildirs/.notmuch/xapian")
     if not os.path.isdir(notmuch_database_folder):
         eprint('''Error: notmuch has not created the xapian database yet. Run \"mail_update user@domain.com --update\" first. Exiting.''')
         sys.exit(1)
