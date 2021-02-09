@@ -56,8 +56,8 @@ def check_for_notmuch_database(email_archive_folder):
 
 
 def rsync_mail(*,
-               email_address,
-               gpgMaildir_archive_folder,):
+               email_address: str,
+               gpgMaildir_archive_folder: Path,):
     ic()
     load_ssh_key(email_address=email_address)
     ic('running rsync')
@@ -73,7 +73,7 @@ def rsync_mail(*,
                           '-r',
                           '-vv',
                           email_address + ':gpgMaildir',
-                          gpgMaildir_archive_folder + '/'], stdout=subprocess.PIPE)
+                          gpgMaildir_archive_folder.as_posix() + '/'], stdout=subprocess.PIPE)
     rsync_p_output = rsync_p.communicate()
 
     for line in rsync_p_output[0].split(b'\n'):
