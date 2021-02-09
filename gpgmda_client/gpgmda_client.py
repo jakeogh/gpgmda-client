@@ -421,13 +421,13 @@ def parse_rsync_log_to_list(*,
                     ic(new_gpgmda_file_path)
                     full_path_list.append(new_gpgmda_file_path)
 
-    message_list = []
-    if line:
-        for path in full_path_list:
-            assert len(path.as_posix()) > 0
-            message_list.append(line)
+    #message_list = []
+    #if line:
+    #    for path in full_path_list:
+    #        assert len(path.as_posix()) > 0
+    #        message_list.append(line)
 
-    return message_list
+    return full_path_list
 
 
 def decrypt_list_of_messages(*,
