@@ -712,6 +712,7 @@ def gpgmaildir_to_maildir(*,
     ic(maildir_counts_dict)
     maildir_file_count = maildir_counts_dict['files_in_maildir']
     gpgmaildir_file_count = maildir_counts_dict['files_in_gpgmaildir']
+    files_in_gpgmaildir = None
     if gpgmaildir_file_count > maildir_file_count:
         ic('files_in_gpgmaildir > files_in_maildir:', gpgmaildir_file_count, '>', maildir_file_count)
         ic('locating un-decrypted files')
@@ -730,7 +731,8 @@ def gpgmaildir_to_maildir(*,
     else:
         ic('files_in_gpgmaildir <= files_in_maildir, looks good')
 
-    if iterator:
+
+    if files_in_gpgmaildir:
         decrypt_list_of_messages(message_list=files_in_gpgmaildir,
                                  skip_hashes=skip_hashes,
                                  email_address=email_address,
