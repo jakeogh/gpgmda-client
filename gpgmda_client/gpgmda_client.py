@@ -428,9 +428,9 @@ def parse_rsync_log_to_list(*,
                     full_path_list.append(new_gpgmda_file_path)
 
     message_list = []
-    for line in full_path_list:
-        assert len(line) > 0
-        message_list.append(Path(line))
+    for path in full_path_list:
+        assert len(path.as_posix()) > 0
+        message_list.append(line)
 
     return message_list
 
