@@ -810,8 +810,8 @@ def client(ctx, verbose):
         ic(time.asctime())
 
     gpgmda_config_folder = os.path.expanduser('~/.gpgmda/')
-    #ctx.obj['gpgmda_config_folder'] = gpgmda_config_folder
-    ctx.gpgmda_config_folder = gpgmda_config_folder
+    ctx.obj['gpgmda_config_folder'] = gpgmda_config_folder
+    #ctx.gpgmda_config_folder = gpgmda_config_folder
 
     if verbose:
         ic(time.asctime())
@@ -896,7 +896,7 @@ def decrypt(ctx,
     '''decrypt new mail in encrypted maildir to unencrypted maildir'''
     ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    check_noupdate_list(gpgmda_config_folder=ctx.gpgmda_config_folder,
+    check_noupdate_list(gpgmda_config_folder=ctx.obj['gpgmda_config_folder'],
                         email_address=email_address,
                         verbose=verbose,
                         debug=debug,)
@@ -968,7 +968,7 @@ def download(ctx,
     '''rsync new mail to encrypted maildir'''
     ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    check_noupdate_list(gpgmda_config_folder=ctx.gpgmda_config_folder,
+    check_noupdate_list(gpgmda_config_folder=ctx.obj['gpgmda_config_folder'],
                         email_address=email_address,
                         verbose=verbose,
                         debug=debug,)
