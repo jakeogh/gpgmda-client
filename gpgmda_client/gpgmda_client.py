@@ -945,7 +945,7 @@ def update_notmuch(ctx,
     '''update notmuch with new mail from (normal, unencrypted) maildir'''
     ic()
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    check_noupdate_list(gpgmda_config_folder=ctx.gpgmda_config_folder,
+    check_noupdate_list(gpgmda_config_folder=ctx.obj['gpgmda_config_folder'],
                         email_address=email_address,
                         verbose=verbose,
                         debug=debug,)
