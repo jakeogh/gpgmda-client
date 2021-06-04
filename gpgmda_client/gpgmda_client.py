@@ -23,7 +23,6 @@
 
 import glob
 import os
-#import shutil
 import subprocess
 import sys
 import time
@@ -33,16 +32,25 @@ from pathlib import Path
 
 import click
 import sh
+from dirtool import check_or_create_dir
+from dirtool import path_is_dir
 from getdents import files
-from icecream import ic
-from kcl.dirops import check_or_create_dir
-from kcl.dirops import path_is_dir
-from kcl.fileops import empty_file
-from kcl.pathops import path_exists
-from kcl.printops import eprint
+from pathtool import empty_file
+from pathtool import path_exists
 
 #global NOTMUCH_QUERY_HELP
 #NOTMUCH_QUERY_HELP = "notmuch search --output=files 'thread:000000000003c194'"
+
+def eprint(*args, **kwargs):
+    if 'file' in kwargs.keys():
+        kwargs.pop('file')
+    print(*args, file=sys.stderr, **kwargs)
+
+
+try:
+    from icecream import ic  # https://github.com/gruns/icecream
+except ImportError:
+    ic = eprint
 
 
 class EmptyGPGMailFile(ValueError):
