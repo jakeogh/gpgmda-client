@@ -32,8 +32,8 @@ from pathlib import Path
 
 import click
 import sh
-from dirtool import check_or_create_dir
-from dirtool import path_is_dir
+from pathtool import check_or_create_dir
+from pathtool import path_is_dir
 from getdents import files
 from pathtool import empty_file
 from pathtool import path_exists
