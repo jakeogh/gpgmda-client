@@ -137,7 +137,8 @@ def run_notmuch(*,
                 ic('found file that gmime does not like:', non_mail_file)
                 random_id = Path(non_mail_file.as_posix()[-40:])
                 ic(random_id)
-                maildir_subfolder = Path(non_mail_file.parent.parent)
+                #maildir_subfolder = Path(non_mail_file.parent.parent)
+                maildir_subfolder = Path(non_mail_file.parent)
                 ic(maildir_subfolder)
                 assert maildir_subfolder.as_posix() in ['new', '.sent']
                 encrypted_file = gpgmaildir / maildir_subfolder / Path(random_id)
