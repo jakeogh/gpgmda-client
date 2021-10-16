@@ -140,8 +140,8 @@ def run_notmuch(*,
                 #maildir_subfolder = Path(non_mail_file.parent.parent)
                 maildir_subfolder = Path(non_mail_file.parent).name
                 ic(maildir_subfolder)
-                assert maildir_subfolder.as_posix() in ['new', '.sent']
-                encrypted_file = gpgmaildir / maildir_subfolder / Path(random_id)
+                assert maildir_subfolder in ['new', '.sent']
+                encrypted_file = Path(gpgmaildir) / Path(maildir_subfolder) / Path(random_id)
                 ic(encrypted_file)
                 ic('head -c 500:')
                 command = "head -c 500 " + non_mail_file.as_posix()
