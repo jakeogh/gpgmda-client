@@ -29,17 +29,22 @@ import time
 #from multiprocessing import Process     #https://docs.python.org/3/library/multiprocessing.html
 #from multiprocessing import Pool, cpu_count
 from pathlib import Path
+from typing import Optional
 
 import click
 import sh
 from asserttool import eprint
 from asserttool import ic
+from asserttool import tv
+from clicktool import click_add_options
+from clicktool import click_global_options
 from getdents import files
 from pathtool import check_or_create_dir
 from pathtool import empty_file
 from pathtool import path_exists
 from pathtool import path_is_dir
 
+sh.mv = None  # use busybox
 #global NOTMUCH_QUERY_HELP
 #NOTMUCH_QUERY_HELP = "notmuch search --output=files 'thread:000000000003c194'"
 
@@ -74,7 +79,8 @@ def rsync_mail(*,
                           '-r',
                           '-vv',
                           email_address + ':gpgMaildir',
-                          gpgMaildir_archive_folder.as_posix() + '/'], stdout=subprocess.PIPE)
+                          gpgMaildir_archive_folder.as_posix() + '/'], stdout=subprocess.PIPE,)
+
     rsync_p_output = rsync_p.communicate()
 
     for line in rsync_p_output[0].split(b'\n'):
@@ -93,13 +99,13 @@ def rsync_mail(*,
 
 
 def run_notmuch(*,
-                mode,
-                email_address,
-                email_archive_folder,
-                gpgmaildir,
-                query,
-                notmuch_config_file,
-                notmuch_config_folder,
+                mode: str,
+                email_address: str,
+                email_archive_folder: Path,
+                gpgmaildir: Path,
+                query: Optional[str],
+                notmuch_config_file: Path,
+                notmuch_config_folder: Path,
                 ):
 
     ic()
@@ -107,7 +113,7 @@ def run_notmuch(*,
 
     if mode == "update_notmuch_db":
         current_env = os.environ.copy()
-        current_env["NOTMUCH_CONFIG"] = notmuch_config_file
+        current_env["NOTMUCH_CONFIG"] = notmuch_config_file.as_posix()
 
         notmuch_new_command = ["notmuch", "--config=" + notmuch_config_file.as_posix(), "new"]
         ic(notmuch_new_command)
@@ -115,7 +121,8 @@ def run_notmuch(*,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
                                      shell=False,
-                                     env=current_env)
+                                     env=current_env,
+                                     )
         ic(notmuch_p.args)
         notmuch_p_output = notmuch_p.communicate()
 
@@ -138,10 +145,10 @@ def run_notmuch(*,
                 random_id = Path(non_mail_file.as_posix()[-40:])
                 ic(random_id)
                 #maildir_subfolder = Path(non_mail_file.parent.parent)
-                maildir_subfolder = Path(non_mail_file.parent).name
-                ic(maildir_subfolder)
-                assert maildir_subfolder in ['new', '.sent']
-                encrypted_file = Path(gpgmaildir) / Path(maildir_subfolder) / Path(random_id)
+                maildir_subfolder_name = Path(non_mail_file.parent).name
+                ic(maildir_subfolder_name)
+                assert maildir_subfolder_name in ['new', '.sent']
+                encrypted_file = Path(gpgmaildir) / Path(maildir_subfolder_name) / Path(random_id)
                 ic(encrypted_file)
                 ic('head -c 500:')
                 command = "head -c 500 " + non_mail_file.as_posix()
@@ -152,7 +159,6 @@ def run_notmuch(*,
                     ic('metastable test message... fixme')
 
                 if not yesall:
-
                     #ic('running vi')
                     #command = "vi " + non_mail_file
                     #os.system(command)
@@ -175,24 +181,24 @@ def run_notmuch(*,
                     ic('Processing files for local move and delete:')
 
                     ic(non_mail_file)
-                    sh.mv(non_mail_file, non_mail_path)
+                    sh.busybox.mv('-vi', non_mail_file, non_mail_path)
 
                     ic(encrypted_file)
-                    sh.mv(encrypted_file, non_mail_path)
+                    sh.busybox.mv('-vi', encrypted_file, non_mail_path)
 
-                    if maildir_subfolder == ".sent":
+                    if maildir_subfolder_name == ".sent":
                         target_file = Path("/home/sentuser/gpgMaildir/new/") / random_id
                         command = "ssh root@v6y.net rm -v " + target_file.as_posix()
                         ic(command)
                         os.system(command)
 
-                    elif maildir_subfolder == "new":
+                    elif maildir_subfolder_name == "new":
                         target_file = Path("/home/user/gpgMaildir/new/") / random_id
                         command = "ssh root@v6y.net rm -v " + target_file.as_posix()    # todo use ~/.gpgmda/config
                         ic(command)
                         os.system(command)
                     else:
-                        eprint("unknown maildir_subfolder:", maildir_subfolder.as_posix(), "exiting")
+                        eprint("unknown maildir_subfolder:", maildir_subfolder_name, "exiting")
                         sys.exit(1)
 
         ic(notmuch_p.returncode)
@@ -202,34 +208,40 @@ def run_notmuch(*,
 
     elif mode == "query_notmuch":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = "NOTMUCH_CONFIG=" + notmuch_config_file.as_posix() + " notmuch " + query
-        ic(command)
-        return_code = os.system(command)
-        if return_code != 0:
-            eprint("\"notmuch " + query + "\" returned nonzero, exiting")
-            sys.exit(1)
+        assert query
+        if query:
+            command = "NOTMUCH_CONFIG=" + notmuch_config_file.as_posix() + " notmuch " + query
+            ic(command)
+            return_code = os.system(command)
+            if return_code != 0:
+                eprint("\"notmuch " + query + "\" returned nonzero, exiting")
+                sys.exit(1)
 
     elif mode == "query_afew":
+        assert query
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = "afew" + " --notmuch-config=" + notmuch_config_file.as_posix() + " " + query
-        ic(command)
-        return_code = os.system(command)
-        if return_code != 0:
-            eprint("\"notmuch " + query + "\" returned nonzero, exiting")
-            sys.exit(1)
+        if query:
+            command = "afew" + " --notmuch-config=" + notmuch_config_file.as_posix() + " " + query
+            ic(command)
+            return_code = os.system(command)
+            if return_code != 0:
+                eprint("\"notmuch " + query + "\" returned nonzero, exiting")
+                sys.exit(1)
 
     elif mode == "query_address_db":
-        check_for_notmuch_database(email_archive_folder=email_archive_folder)
-        command = "XDG_CONFIG_HOME=" + \
-                  notmuch_config_folder.as_posix() + \
-                  " NOTMUCH_CONFIG=" + \
-                  notmuch_config_file.as_posix() + " " + \
-                  "nottoomuch-addresses.sh " + \
-                  query
-        return_code = os.system(command)
-        if return_code != 0:
-            eprint("\"nottoomuch-addresses.sh\" returned nonzero, exiting")
-            sys.exit(1)
+        assert query
+        if query:
+            check_for_notmuch_database(email_archive_folder=email_archive_folder)
+            command = "XDG_CONFIG_HOME=" + \
+                      notmuch_config_folder.as_posix() + \
+                      " NOTMUCH_CONFIG=" + \
+                      notmuch_config_file.as_posix() + " " + \
+                      "nottoomuch-addresses.sh " + \
+                      query
+            return_code = os.system(command)
+            if return_code != 0:
+                eprint("\"nottoomuch-addresses.sh\" returned nonzero, exiting")
+                sys.exit(1)
 
     elif mode == "build_address_db":
         check_for_notmuch_database(email_archive_folder=email_archive_folder)
@@ -264,7 +276,7 @@ def run_notmuch(*,
 def make_notmuch_config(*,
                         email_address: str,
                         email_archive_folder: Path,
-                        verbose=False,
+                        verbose: int,
                         ):
 
     ic()
@@ -308,9 +320,9 @@ def move_terminal_text_up_one_page():
 
 
 def start_alot(*,
-               email_address,
-               email_archive_folder,
-               verbose=False,
+               email_address: str,
+               email_archive_folder: Path,
+               verbose: int,
                ):
 
     ic()
@@ -395,14 +407,13 @@ def short_random_string():
 
 
 def get_maildir_file_counts(*,
-                            gpgmaildir,
-                            maildir,
-                            verbose: bool,
-                            debug: bool,
+                            gpgmaildir: Path,
+                            maildir: Path,
+                            verbose: int,
                             ):
     ic()
-    files_in_gpgmaildir = len(list(files(gpgmaildir, verbose=verbose, debug=debug,)))
-    files_in_maildir = len(list(files(maildir, verbose=verbose, debug=debug,)))
+    files_in_gpgmaildir = len(list(files(gpgmaildir, verbose=verbose, )))
+    files_in_maildir = len(list(files(maildir, verbose=verbose, )))
     return {'files_in_gpgmaildir': files_in_gpgmaildir,
             "files_in_maildir": files_in_maildir}
 
@@ -412,13 +423,13 @@ def parse_rsync_log_to_list(*,
                             gpgMaildir_archive_folder: Path,
                             ):
     ic()
-    rsync_log = '/dev/shm/.gpgmda_rsync_last_new_mail_' + email_address
+    rsync_log = Path('/dev/shm/.gpgmda_rsync_last_new_mail_' + email_address)
     with open(rsync_log, 'r') as fh:
-        rsync_log = fh.readlines()
+        rsync_log_lines = fh.readlines()
 
     full_path_list = []
     line = None
-    for line in rsync_log:
+    for line in rsync_log_lines:
         line = line.strip()  # remove newlines
         if 'exists' not in line:
             if 'gpgMaildir' in line:
@@ -441,8 +452,7 @@ def decrypt_list_of_messages(*,
                              email_address: str,
                              maildir: Path,
                              skip_hashes: list,
-                             verbose: bool,
-                             debug: bool,
+                             verbose: int,
                              ):
 
     ic()
@@ -465,13 +475,13 @@ def decrypt_list_of_messages(*,
                             gpgfile=gpgfile,
                             maildir=maildir,
                             verbose=verbose,
-                            debug=debug,)
+                            )
         except EmptyGPGMailFile as e:
             ic(e)
             answer = deal_with_badmail(gpgfile=gpgfile,
                                        yesall=yesall,
                                        verbose=verbose,
-                                       debug=debug,)
+                                       )
             if answer == "yesall":
                 yesall = True
 
@@ -480,21 +490,20 @@ def decrypt_list_of_messages(*,
 
 def move_to_badmail(*,
                     gpgfile: Path,
-                    verbose: bool,
-                    debug: bool,
+                    verbose: int,
                     ):
     ic()
     badmail_path = Path('~/.gpgmda/badmail').expanduser()
     ic(badmail_path)
     os.makedirs(badmail_path, exist_ok=True)
     ic('Processing files for local move and delete gpgfile:', gpgfile)
-    sh.mv(gpgfile, badmail_path, verbose=True)
+    sh.busybox.mv('-vi', gpgfile, badmail_path)
 
 
 def move_badmail_and_delete_off_server(*,
                                        gpgfile: Path,
-                                       verbose: bool,
-                                       debug: bool,):
+                                       verbose: int,
+                                       ):
     if verbose:
         ic(gpgfile)
 
@@ -503,7 +512,7 @@ def move_badmail_and_delete_off_server(*,
     ic(maildir_subfolder)
     move_to_badmail(gpgfile=gpgfile,
                     verbose=verbose,
-                    debug=debug,)
+                    )
     random_id = gpgfile.name
     ic(random_id)
 
@@ -526,13 +535,12 @@ def move_badmail_and_delete_off_server(*,
 def deal_with_badmail(*,
                       gpgfile: Path,
                       yesall: bool,
-                      verbose: bool,
-                      debug: bool,
+                      verbose: int,
                       ):
     if yesall:
         move_badmail_and_delete_off_server(gpgfile=gpgfile,
                                            verbose=verbose,
-                                           debug=debug,)
+                                           )
         return "yesall"
 
     delete_message_answer = \
@@ -542,7 +550,7 @@ def deal_with_badmail(*,
     if delete_message_answer.startswith("yes"):
         move_badmail_and_delete_off_server(gpgfile=gpgfile,
                                            verbose=verbose,
-                                           debug=debug,)
+                                           )
         if delete_message_answer == "yesall":
             return "yesall"
     return "no"
@@ -552,8 +560,7 @@ def decrypt_message(*,
                     email_address: str,
                     gpgfile: Path,
                     maildir: Path,
-                    verbose: bool,
-                    debug: bool,
+                    verbose: int,
                     stdout: bool = False,
                     ):
 
@@ -676,8 +683,8 @@ def gpgmaildir_to_maildir(*,
                           gpgMaildir_archive_folder: Path,
                           gpgmaildir: Path,
                           maildir: Path,
-                          verbose: bool,
-                          debug: bool,):
+                          verbose: int,
+                          ):
 
     # todo add locking
     ic()
@@ -721,7 +728,7 @@ def gpgmaildir_to_maildir(*,
     maildir_counts_dict = get_maildir_file_counts(gpgmaildir=gpgmaildir,
                                                   maildir=maildir,
                                                   verbose=verbose,
-                                                  debug=debug,)
+                                                  )
     ic(maildir_counts_dict)
     maildir_file_count = maildir_counts_dict['files_in_maildir']
     gpgmaildir_file_count = maildir_counts_dict['files_in_gpgmaildir']
@@ -730,9 +737,9 @@ def gpgmaildir_to_maildir(*,
     #if gpgmaildir_file_count != maildir_file_count:  # not a good check.
     #    ic('files_in_gpgmaildir != files_in_maildir:', gpgmaildir_file_count, '!=', maildir_file_count)
     #    ic('locating un-decrypted files')
-    #    files_in_gpgmaildir = [dent.pathlib for dent in files(gpgmaildir, verbose=verbose, debug=debug,)]
+    #    files_in_gpgmaildir = [dent.pathlib for dent in files(gpgmaildir, verbose=verbose, )]
     #    assert isinstance(files_in_gpgmaildir[0], Path)
-    #    files_in_maildir = [dent.pathlib for dent in files(maildir, verbose=verbose, debug=debug,)]
+    #    files_in_maildir = [dent.pathlib for dent in files(maildir, verbose=verbose, )]
     #    ic(len(files_in_gpgmaildir))
     #    ic(len(files_in_maildir))
     #    ic(len(files_in_gpgmaildir) - len(files_in_maildir))
@@ -749,12 +756,13 @@ def gpgmaildir_to_maildir(*,
                                  email_address=email_address,
                                  maildir=maildir,
                                  verbose=verbose,
-                                 debug=debug,)
+                                 )
 
 
 def search_list_of_strings_for_substring(*,
                                          list_to_search,
-                                         substring,):
+                                         substring,
+                                         ):
     item_found = ''
     for item in list_to_search:
         try:
@@ -767,33 +775,39 @@ def search_list_of_strings_for_substring(*,
 
 
 def update_notmuch_db(*,
-                      email_address,
-                      email_archive_folder,
-                      gpgmaildir,
-                      notmuch_config_file,
-                      notmuch_config_folder,):
+                      email_address: str,
+                      email_archive_folder: Path,
+                      gpgmaildir: Path,
+                      notmuch_config_file: Path,
+                      notmuch_config_folder: Path,
+                      ):
+
     run_notmuch(mode="update_notmuch_db",
                 email_address=email_address,
                 email_archive_folder=email_archive_folder,
                 gpgmaildir=gpgmaildir,
-                query=False,
+                query=None,
                 notmuch_config_file=notmuch_config_file,
-                notmuch_config_folder=notmuch_config_folder)
+                notmuch_config_folder=notmuch_config_folder,
+                )
 
 
 def update_notmuch_address_db(*,
-                              email_address,
-                              email_archive_folder,
-                              gpgmaildir,
-                              notmuch_config_file,
-                              notmuch_config_folder,):
+                              email_address: str,
+                              email_archive_folder: Path,
+                              gpgmaildir: Path,
+                              notmuch_config_file: Path,
+                              notmuch_config_folder: Path,
+                              ):
+
     run_notmuch(mode="update_address_db",
                 email_address=email_address,
                 email_archive_folder=email_archive_folder,
                 gpgmaildir=gpgmaildir,
-                query=False,
+                query=None,
                 notmuch_config_file=notmuch_config_file,
-                notmuch_config_folder=notmuch_config_folder)
+                notmuch_config_folder=notmuch_config_folder,
+                )
 
 
 def update_notmuch_address_db_build(*,
@@ -801,21 +815,25 @@ def update_notmuch_address_db_build(*,
                                     email_archive_folder,
                                     gpgmaildir,
                                     notmuch_config_file,
-                                    notmuch_config_folder,):
+                                    notmuch_config_folder,
+                                    ):
+
     run_notmuch(mode="build_address_db",
                 email_address=email_address,
                 email_archive_folder=email_archive_folder,
                 gpgmaildir=gpgmaildir,
-                query=False,
+                query=None,
                 notmuch_config_file=notmuch_config_file,
-                notmuch_config_folder=notmuch_config_folder)
+                notmuch_config_folder=notmuch_config_folder,
+                )
 
 
 def check_noupdate_list(*,
                         gpgmda_config_folder: Path,
                         email_address: str,
-                        verbose: bool,
-                        debug: bool,):
+                        verbose: int,
+                        ):
+
     noupdate_list = open(gpgmda_config_folder / Path(".noupdate"), 'r').readlines()  # todo move config to ~/.gpgmda
     for item in noupdate_list:
         if email_address in item:
@@ -823,10 +841,20 @@ def check_noupdate_list(*,
             sys.exit(1)
 
 
-@click.group()
+@click.group(no_args_is_help=True)
 @click.option("--verbose", is_flag=True)
+@click_add_options(click_global_options)
 @click.pass_context
-def client(ctx, verbose):
+def client(ctx,
+           verbose: int,
+           verbose_inf: bool,
+           ):
+
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
+
     ctx.ensure_object(dict)
     ctx.obj['verbose'] = verbose
 
@@ -847,9 +875,20 @@ def client(ctx, verbose):
 @client.command()
 @click.argument("email_address", nargs=1, required=True, type=str)
 #@click.option("--email-archive-type", help="", type=click.Choice(['gpgMaildir']), default="gpgMaildir")
+@click_add_options(click_global_options)
 @click.pass_context
-def build_paths(ctx, email_address):
+def build_paths(ctx,
+                email_address: str,
+                verbose: int,
+                verbose_inf: bool,
+                ):
+
     assert '@' in email_address
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
+
     ctx.email_archive_type = 'gpgMaildir'
 
     ctx.email_archive_folder = Path("/home/user/__email_folders")
@@ -876,19 +915,29 @@ def build_paths(ctx, email_address):
     check_or_create_dir(ctx.notmuch_config_folder)
 
     ctx.notmuch_config_file = ctx.notmuch_config_folder / Path(".notmuch_config")
-    make_notmuch_config(email_address=email_address, email_archive_folder=ctx.email_archive_folder)
+    make_notmuch_config(email_address=email_address,
+                        email_archive_folder=ctx.email_archive_folder,
+                        verbose=verbose,
+                        )
     return ctx
 
 
 @client.command()
 @click.argument("email_address", nargs=1)
 @click.argument("query", type=str)
+@click_add_options(click_global_options)
 @click.pass_context
 def address_query(ctx,
                   email_address: str,
                   query: str,
+                  verbose: int,
+                  verbose_inf: bool,
                   ):
     '''search for address string'''
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
     ctx = ctx.invoke(build_paths, email_address=email_address)
     run_notmuch(mode="query_address_db",
                 email_address=email_address,
@@ -901,36 +950,53 @@ def address_query(ctx,
 
 @client.command()
 @click.argument("email_address", nargs=1)
+@click_add_options(click_global_options)
 @click.pass_context
 def read(ctx,
          email_address: str,
+         verbose: int,
+         verbose_inf: bool,
          ):
+
     '''read mail without checking for new mail'''
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
     ctx = ctx.invoke(build_paths, email_address=email_address)
     load_ssh_key(email_address=email_address)     # so mail can be sent without having to unlock the key
-    make_notmuch_config(email_address=email_address, email_archive_folder=ctx.email_archive_folder)
+    make_notmuch_config(email_address=email_address,
+                        email_archive_folder=ctx.email_archive_folder,
+                        verbose=verbose,
+                        )
     start_alot(email_address=email_address,
                email_archive_folder=ctx.email_archive_folder,
-               verbose=ctx.obj['verbose'],)
+               verbose=ctx.obj['verbose'],
+               )
 
 
 @client.command()
 @click.argument("email_address", nargs=1)
-@click.option('--verbose', is_flag=True)
-@click.option('--debug', is_flag=True)
+@click_add_options(click_global_options)
 @click.pass_context
 def decrypt(ctx,
             email_address: str,
-            verbose: bool,
-            debug: bool,
+            verbose: int,
+            verbose_inf: bool,
             ):
     '''decrypt new mail in encrypted maildir to unencrypted maildir'''
     ic()
+
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
+
     ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(gpgmda_config_folder=ctx.obj['gpgmda_config_folder'],
                         email_address=email_address,
                         verbose=verbose,
-                        debug=debug,)
+                        )
 
     if ctx.email_archive_type == "gpgMaildir":
         ctx.invoke(warm_up_gpg)
@@ -939,7 +1005,7 @@ def decrypt(ctx,
                               gpgmaildir=ctx.gpgmaildir,
                               maildir=ctx.maildir,
                               verbose=verbose,
-                              debug=debug,)
+                              )
 
         ic('done with gpgmaildir_to_maildir()')
     else:
@@ -949,21 +1015,26 @@ def decrypt(ctx,
 
 @client.command()
 @click.argument("email_address", nargs=1)
-@click.option('--verbose', is_flag=True)
-@click.option('--debug', is_flag=True)
+@click_add_options(click_global_options)
 @click.pass_context
 def update_notmuch(ctx,
                    email_address: str,
-                   verbose: bool,
-                   debug: bool,
+                   verbose: int,
+                   verbose_inf: bool,
                    ):
     '''update notmuch with new mail from (normal, unencrypted) maildir'''
     ic()
+
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
+
     ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(gpgmda_config_folder=ctx.obj['gpgmda_config_folder'],
                         email_address=email_address,
                         verbose=verbose,
-                        debug=debug,)
+                        )
 
     if ctx.email_archive_type == "gpgMaildir":
         ctx.invoke(warm_up_gpg)
@@ -979,32 +1050,37 @@ def update_notmuch(ctx,
                       email_archive_folder=ctx.email_archive_folder,
                       gpgmaildir=ctx.gpgmaildir,
                       notmuch_config_file=ctx.notmuch_config_file,
-                      notmuch_config_folder=ctx.notmuch_config_folder)
+                      notmuch_config_folder=ctx.notmuch_config_folder,
+                      )
 
     update_notmuch_address_db(email_address=email_address,
                               email_archive_folder=ctx.email_archive_folder,
                               gpgmaildir=ctx.gpgmaildir,
                               notmuch_config_file=ctx.notmuch_config_file,
-                              notmuch_config_folder=ctx.notmuch_config_folder)
+                              notmuch_config_folder=ctx.notmuch_config_folder,
+                              )
 
 
 @client.command()
 @click.argument("email_address", nargs=1)
-@click.option('--verbose', is_flag=True)
-@click.option('--debug', is_flag=True)
+@click_add_options(click_global_options)
 @click.pass_context
 def download(ctx,
              email_address: str,
-             verbose: bool,
-             debug: bool,
+             verbose: int,
+             verbose_inf: bool,
              ):
     '''rsync new mail to encrypted maildir'''
     ic()
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
     ctx = ctx.invoke(build_paths, email_address=email_address)
     check_noupdate_list(gpgmda_config_folder=ctx.obj['gpgmda_config_folder'],
                         email_address=email_address,
                         verbose=verbose,
-                        debug=debug,)
+                        )
 
     if ctx.email_archive_type == "gpgMaildir":
         ctx.invoke(warm_up_gpg)
@@ -1018,30 +1094,48 @@ def download(ctx,
 
 @client.command()
 @click.argument("email_address", nargs=1)
+@click_add_options(click_global_options)
 @click.pass_context
 def address_db_build(ctx,
                      email_address: str,
+                     verbose: int,
+                     verbose_inf: bool,
                      ):
     '''build address database for use with address_query'''
     ic()
+
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
+
     ctx = ctx.invoke(build_paths, email_address=email_address)
     update_notmuch_address_db_build(email_address=email_address,
                                     email_archive_folder=ctx.email_archive_folder,
                                     gpgmaildir=ctx.gpgmaildir,
                                     notmuch_config_file=ctx.notmuch_config_file,
-                                    notmuch_config_folder=ctx.notmuch_config_folder)
+                                    notmuch_config_folder=ctx.notmuch_config_folder,
+                                    )
 
 
 @client.command()
 @click.argument("email_address", nargs=1)
 @click.argument("query", type=str)
+@click_add_options(click_global_options)
 @click.pass_context
 def afew_query(ctx,
                email_address: str,
                query: str,
+               verbose: int,
+               verbose_inf: bool,
                ):
     '''execute arbitrary afew query'''
     ic()
+
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
     ctx = ctx.invoke(build_paths, email_address=email_address)
     ic(query)
     run_notmuch(mode="query_afew",
@@ -1050,19 +1144,28 @@ def afew_query(ctx,
                 email_archive_folder=ctx.email_archive_folder,
                 gpgmaildir=ctx.gpgmaildir,
                 notmuch_config_file=ctx.notmuch_config_file,
-                notmuch_config_folder=ctx.notmuch_config_folder)
+                notmuch_config_folder=ctx.notmuch_config_folder,
+                )
 
 
 @client.command()
 @click.argument("email_address", nargs=1)
 @click.argument("query", type=str)
+@click_add_options(click_global_options)
 @click.pass_context
 def notmuch_query(ctx,
                   email_address: str,
                   query: str,
+                  verbose: int,
+                  verbose_inf: bool,
                   ):
     '''execute arbitrary notmuch query notmuch search --output=files "thread:000000000003c194"'''
     ic()
+
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
     ctx = ctx.invoke(build_paths, email_address=email_address)
     ic(query)
     run_notmuch(mode="query_notmuch",
@@ -1071,27 +1174,46 @@ def notmuch_query(ctx,
                 email_archive_folder=ctx.email_archive_folder,
                 gpgmaildir=ctx.gpgmaildir,
                 notmuch_config_file=ctx.notmuch_config_file,
-                notmuch_config_folder=ctx.notmuch_config_folder)
+                notmuch_config_folder=ctx.notmuch_config_folder,
+                )
 
 
 @client.command()
 @click.argument("email_address", nargs=1)
-@click.option('--verbose', is_flag=True)
-@click.option('--debug', is_flag=True)
+@click_add_options(click_global_options)
 @click.pass_context
 def show_message_counts(ctx,
                         email_address: str,
-                        verbose: bool,
-                        debug: bool,
+                        verbose: int,
+                        verbose_inf: bool,
                         ):
+
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
+
     ctx = ctx.invoke(build_paths, email_address=email_address)
-    print(get_maildir_file_counts(gpgmaildir=ctx.gpgmaildir, maildir=ctx.maildir, verbose=verbose, debug=debug))
+    print(get_maildir_file_counts(gpgmaildir=ctx.gpgmaildir,
+                                  maildir=ctx.maildir,
+                                  verbose=verbose,))
 
 
 @client.command()
-def warm_up_gpg():
+@click_add_options(click_global_options)
+@click.pass_context
+def warm_up_gpg(ctx,
+                *,
+                verbose: int,
+                verbose_inf: bool,
+                ):
     '''make sure gpg is working'''
     ic()
+
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
     # due to https://bugs.g10code.com/gnupg/issue1190 first get gpg-agent warmed up by decrypting a test message.
     decrypt_test = 0
 
