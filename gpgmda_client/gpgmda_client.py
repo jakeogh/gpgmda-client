@@ -39,6 +39,7 @@ from asserttool import tv
 from clicktool import click_add_options
 from clicktool import click_global_options
 from getdents import files
+from getdents import files_pathlib
 from pathtool import check_or_create_dir
 from pathtool import empty_file
 from pathtool import path_exists
@@ -704,7 +705,7 @@ def gpgmaildir_to_maildir(*,
     ic('checking to see if', rsync_last_new_mail_file, 'exists and is greater than 0 bytes')
     rsync_files_transferred = 0
     if path_exists(rsync_last_new_mail_file):
-        with open(rsync_last_new_mail_file, 'r') as fh:
+        with open(rsync_last_new_mail_file, 'r', encoding='utf8') as fh:
             for line in fh.readlines():
                 if 'Number of regular files transferred:' in line:
                     ic(line)
@@ -734,21 +735,21 @@ def gpgmaildir_to_maildir(*,
     gpgmaildir_file_count = maildir_counts_dict['files_in_gpgmaildir']
 
     ##if gpgmaildir_file_count > maildir_file_count:  # not a good check.
-    #if gpgmaildir_file_count != maildir_file_count:  # not a good check.
-    #    ic('files_in_gpgmaildir != files_in_maildir:', gpgmaildir_file_count, '!=', maildir_file_count)
-    #    ic('locating un-decrypted files')
-    #    files_in_gpgmaildir = [dent.pathlib for dent in files(gpgmaildir, verbose=verbose, )]
-    #    assert isinstance(files_in_gpgmaildir[0], Path)
-    #    files_in_maildir = [dent.pathlib for dent in files(maildir, verbose=verbose, )]
-    #    ic(len(files_in_gpgmaildir))
-    #    ic(len(files_in_maildir))
-    #    ic(len(files_in_gpgmaildir) - len(files_in_maildir))
-    #    ic('building hash lists')
-    #    #hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
-    #    hashes_in_maildir = [path.name.split('.')[-1] for path in files_in_maildir]
-    #    ic(len(hashes_in_maildir))
-    #    skip_hashes = hashes_in_maildir
-    #    iterator = files_in_gpgmaildir
+    if gpgmaildir_file_count != maildir_file_count:  # not a good check.
+        ic('files_in_gpgmaildir != files_in_maildir:', gpgmaildir_file_count, '!=', maildir_file_count)
+        ic('locating un-decrypted files')
+        files_in_gpgmaildir = [path for path in files_pathlib(gpgmaildir, verbose=verbose,)]
+        #assert isinstance(files_in_gpgmaildir[0], Path)
+        files_in_maildir = [path for path in files_pathlib(maildir, verbose=verbose,)]
+        ic(len(files_in_gpgmaildir))
+        ic(len(files_in_maildir))
+        ic(len(files_in_gpgmaildir) - len(files_in_maildir))
+        ic('building hash lists')
+        #hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
+        hashes_in_maildir = [path.name.split('.')[-1] for path in files_in_maildir]
+        ic(len(hashes_in_maildir))
+        skip_hashes = hashes_in_maildir
+        iterator = files_in_gpgmaildir
 
     if iterator:  # used in 2 places above
         decrypt_list_of_messages(message_list=iterator,
