@@ -26,6 +26,7 @@ import os
 import subprocess
 import sys
 import time
+from math import inf
 #from multiprocessing import Process     #https://docs.python.org/3/library/multiprocessing.html
 #from multiprocessing import Pool, cpu_count
 from pathlib import Path
@@ -349,17 +350,34 @@ def start_alot(*,
     alot_config_file = Path('/dev/shm/__alot_config_' + email_address)
     if verbose:
         ic(alot_config_file)
-    alot_command = ' '.join(['/usr/bin/alot',
-                             '-C',
-                             '256',
-                             '--debug-level=debug',
-                             '--logfile=/dev/shm/__alot_log',
-                             '--notmuch-config',
-                             notmuch_config_file.as_posix(),
-                             '--mailindex-path',
-                             maildirs_folder.as_posix(),
-                             '-c',
-                             alot_config_file.as_posix()])
+
+    alot_command_list = ['/usr/bin/alot',
+                        '-C',
+                        '256',
+                        '--logfile=/dev/shm/__alot_log',
+                        '--notmuch-config',
+                        notmuch_config_file.as_posix(),
+                        '--mailindex-path',
+                        maildirs_folder.as_posix(),
+                        '-c',
+                        alot_config_file.as_posix(),
+                        ]
+
+    if verbose == inf:
+        alot_command_list.append('--debug-level=debug')
+
+    #alot_command = ' '.join(['/usr/bin/alot',
+    #                         '-C',
+    #                         '256',
+    #                         '--debug-level=debug',
+    #                         '--logfile=/dev/shm/__alot_log',
+    #                         '--notmuch-config',
+    #                         notmuch_config_file.as_posix(),
+    #                         '--mailindex-path',
+    #                         maildirs_folder.as_posix(),
+    #                         '-c',
+    #                         alot_config_file.as_posix()])
+    alot_command = ' '.join(alot_command_list)
 
     if verbose:
         ic(alot_command)
