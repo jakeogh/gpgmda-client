@@ -868,6 +868,13 @@ def gpgmaildir_to_maildir(
             ic(rsync_list)
             iterator = rsync_list
             skip_hashes = []
+            decrypt_list_of_messages(
+                message_list=iterator,
+                skip_hashes=skip_hashes,
+                email_address=email_address,
+                maildir=maildir,
+                verbose=verbose,
+            )
 
     else:
         ic(rsync_last_new_mail_file, "does not exist or is 0 bytes")
@@ -916,7 +923,6 @@ def gpgmaildir_to_maildir(
         skip_hashes = hashes_in_maildir
         iterator = files_in_gpgmaildir
 
-    if iterator:  # used in 2 places above
         decrypt_list_of_messages(
             message_list=iterator,
             skip_hashes=skip_hashes,
@@ -1034,9 +1040,6 @@ def client(
         verbose=verbose,
         verbose_inf=verbose_inf,
     )
-
-    ctx.ensure_object(dict)
-    ctx.obj["verbose"] = verbose
 
     start_time = time.time()
     if verbose:
@@ -1190,7 +1193,6 @@ def decrypt(
 ):
     """decrypt new mail in encrypted maildir to unencrypted maildir"""
     ic()
-
     tty, verbose = tv(
         ctx=ctx,
         verbose=verbose,
@@ -1233,7 +1235,6 @@ def update_notmuch(
 ):
     """update notmuch with new mail from (normal, unencrypted) maildir"""
     ic()
-
     tty, verbose = tv(
         ctx=ctx,
         verbose=verbose,
