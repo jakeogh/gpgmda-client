@@ -866,10 +866,9 @@ def gpgmaildir_to_maildir(
                 gpgMaildir_archive_folder=gpgMaildir_archive_folder,
             )
             ic(rsync_list)
-            iterator = rsync_list
             skip_hashes = []
             decrypt_list_of_messages(
-                message_list=iterator,
+                message_list=rsync_list,
                 skip_hashes=skip_hashes,
                 email_address=email_address,
                 maildir=maildir,
@@ -921,15 +920,14 @@ def gpgmaildir_to_maildir(
         hashes_in_maildir = [path.name.split(".")[-1] for path in files_in_maildir]
         ic(len(hashes_in_maildir))
         skip_hashes = hashes_in_maildir
-        iterator = files_in_gpgmaildir
 
-        decrypt_list_of_messages(
-            message_list=iterator,
-            skip_hashes=skip_hashes,
-            email_address=email_address,
-            maildir=maildir,
-            verbose=verbose,
-        )
+        # decrypt_list_of_messages(
+        #    message_list=files_in_gpgmaildir,
+        #    skip_hashes=skip_hashes,
+        #    email_address=email_address,
+        #    maildir=maildir,
+        #    verbose=verbose,
+        # )
 
 
 def search_list_of_strings_for_substring(
