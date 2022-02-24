@@ -889,45 +889,45 @@ def gpgmaildir_to_maildir(
     gpgmaildir_file_count = maildir_counts_dict["files_in_gpgmaildir"]
 
     ##if gpgmaildir_file_count > maildir_file_count:  # not a good check.
-    if gpgmaildir_file_count != maildir_file_count:  # not a good check.
-        ic(
-            "files_in_gpgmaildir != files_in_maildir:",
-            gpgmaildir_file_count,
-            "!=",
-            maildir_file_count,
-        )
-        ic("locating un-decrypted files")
-        files_in_gpgmaildir = [
-            path
-            for path in files_pathlib(
-                gpgmaildir,
-                verbose=verbose,
-            )
-        ]
-        # assert isinstance(files_in_gpgmaildir[0], Path)
-        files_in_maildir = [
-            path
-            for path in files_pathlib(
-                maildir,
-                verbose=verbose,
-            )
-        ]
-        ic(len(files_in_gpgmaildir))
-        ic(len(files_in_maildir))
-        ic(len(files_in_gpgmaildir) - len(files_in_maildir))
-        ic("building hash lists")
-        # hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
-        hashes_in_maildir = [path.name.split(".")[-1] for path in files_in_maildir]
-        ic(len(hashes_in_maildir))
-        skip_hashes = hashes_in_maildir
+    # if gpgmaildir_file_count != maildir_file_count:  # not a good check.
+    #    ic(
+    #        "files_in_gpgmaildir != files_in_maildir:",
+    #        gpgmaildir_file_count,
+    #        "!=",
+    #        maildir_file_count,
+    #    )
+    #    ic("locating un-decrypted files")
+    #    files_in_gpgmaildir = [
+    #        path
+    #        for path in files_pathlib(
+    #            gpgmaildir,
+    #            verbose=verbose,
+    #        )
+    #    ]
+    #    # assert isinstance(files_in_gpgmaildir[0], Path)
+    #    files_in_maildir = [
+    #        path
+    #        for path in files_pathlib(
+    #            maildir,
+    #            verbose=verbose,
+    #        )
+    #    ]
+    #    ic(len(files_in_gpgmaildir))
+    #    ic(len(files_in_maildir))
+    #    ic(len(files_in_gpgmaildir) - len(files_in_maildir))
+    #    ic("building hash lists")
+    #    # hashes_in_gpgmaildir = [path.name.split('.')[-1] for path in files_in_gpgmaildir]
+    #    hashes_in_maildir = [path.name.split(".")[-1] for path in files_in_maildir]
+    #    ic(len(hashes_in_maildir))
+    #    skip_hashes = hashes_in_maildir
 
-        # decrypt_list_of_messages(
-        #    message_list=files_in_gpgmaildir,
-        #    skip_hashes=skip_hashes,
-        #    email_address=email_address,
-        #    maildir=maildir,
-        #    verbose=verbose,
-        # )
+    #    # decrypt_list_of_messages(
+    #    #    message_list=files_in_gpgmaildir,
+    #    #    skip_hashes=skip_hashes,
+    #    #    email_address=email_address,
+    #    #    maildir=maildir,
+    #    #    verbose=verbose,
+    #    # )
 
 
 def search_list_of_strings_for_substring(
