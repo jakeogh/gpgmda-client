@@ -1,6 +1,6 @@
 #!/bin/bash
 
-config_dir=="~/.gpgmda"
+config_dir="~/.gpgmda"
 
 mkdir "${config_dir}" > /dev/null 2>&1 || :
 

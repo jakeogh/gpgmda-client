@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
-# pylint: disable=C0111  # docstrings are always outdated and wrong
-# pylint: disable=W0511  # todo is encouraged
-# pylint: disable=C0301  # line too long
-# pylint: disable=R0902  # too many instance attributes
-# pylint: disable=C0302  # too many lines in module
-# pylint: disable=C0103  # single letter var names, func name too descriptive
-# pylint: disable=R0911  # too many return statements
-# pylint: disable=R0912  # too many branches
-# pylint: disable=R0915  # too many statements
-# pylint: disable=R0913  # too many arguments
-# pylint: disable=R1702  # too many nested blocks
-# pylint: disable=R0914  # too many local variables
-# pylint: disable=R0903  # too few public methods
-# pylint: disable=E1101  # no member for base
-# pylint: disable=W0201  # attribute defined outside __init__
-# pylint: disable=R0916  # Too many boolean expressions in if statement
-
-
-# todo: locking to prevent multiple instances of mail_update
+# pylint: disable=missing-docstring               # [C0111] docstrings are always outdated and wrong
+# pylint: disable=fixme                           # [W0511] todo is encouraged
+# pylint: disable=line-too-long                   # [C0301]
+# pylint: disable=too-many-instance-attributes    # [R0902]
+# pylint: disable=too-many-lines                  # [C0302] too many lines in module
+# pylint: disable=invalid-name                    # [C0103] single letter var names, name too descriptive
+# pylint: disable=too-many-return-statements      # [R0911]
+# pylint: disable=too-many-branches               # [R0912]
+# pylint: disable=too-many-statements             # [R0915]
+# pylint: disable=too-many-arguments              # [R0913]
+# pylint: disable=too-many-nested-blocks          # [R1702]
+# pylint: disable=too-many-locals                 # [R0914]
+# pylint: disable=too-few-public-methods          # [R0903]
+# pylint: disable=no-member                       # [E1101] no member for base
+# pylint: disable=attribute-defined-outside-init  # [W0201]
+# pylint: disable=too-many-boolean-expressions    # [R0916] in if statement
+from __future__ import annotations
 
 import glob
 import os
@@ -27,15 +25,12 @@ import subprocess
 import sys
 import time
 from math import inf
-# from multiprocessing import Process     #https://docs.python.org/3/library/multiprocessing.html
-# from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Optional
-from typing import Union
 
 import click
 import sh
 from asserttool import ic
+from click_auto_help import AHGroup
 from clicktool import click_add_options
 from clicktool import click_global_options
 from clicktool import tv
@@ -46,6 +41,11 @@ from pathtool import check_or_create_dir
 from pathtool import empty_file
 from pathtool import path_exists
 from pathtool import path_is_dir
+
+# from multiprocessing import Process     #https://docs.python.org/3/library/multiprocessing.html
+# from multiprocessing import Pool, cpu_count
+# todo: locking to prevent multiple instances of mail_update
+
 
 sh.mv = None  # use busybox
 # global NOTMUCH_QUERY_HELP
@@ -114,7 +114,7 @@ def run_notmuch(
     email_address: str,
     email_archive_folder: Path,
     gpgmaildir: Path,
-    query: Optional[str],
+    query: None | str,
     notmuch_config_file: Path,
     notmuch_config_folder: Path,
 ):
@@ -318,7 +318,7 @@ def make_notmuch_config(
     *,
     email_address: str,
     email_archive_folder: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
 
     ic()
@@ -373,7 +373,7 @@ def start_alot(
     *,
     email_address: str,
     email_archive_folder: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
 
     ic()
@@ -483,7 +483,7 @@ def get_maildir_file_counts(
     *,
     gpgmaildir: Path,
     maildir: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
     ic()
     files_in_gpgmaildir = len(
@@ -546,7 +546,7 @@ def decrypt_list_of_messages(
     email_address: str,
     maildir: Path,
     skip_hashes: list,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
 
     ic()
@@ -587,7 +587,7 @@ def decrypt_list_of_messages(
 def move_to_badmail(
     *,
     gpgfile: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
     ic()
     badmail_path = Path("~/.gpgmda/badmail").expanduser()
@@ -600,7 +600,7 @@ def move_to_badmail(
 def move_badmail_and_delete_off_server(
     *,
     gpgfile: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
     if verbose:
         ic(gpgfile)
@@ -635,7 +635,7 @@ def deal_with_badmail(
     *,
     gpgfile: Path,
     yesall: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
     if yesall:
         move_badmail_and_delete_off_server(
@@ -664,7 +664,7 @@ def decrypt_message(
     email_address: str,
     gpgfile: Path,
     maildir: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     stdout: bool = False,
 ):
 
@@ -825,7 +825,7 @@ def gpgmaildir_to_maildir(
     gpgMaildir_archive_folder: Path,
     gpgmaildir: Path,
     maildir: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
 
     # todo add locking
@@ -1010,7 +1010,7 @@ def check_noupdate_list(
     *,
     gpgmda_config_folder: Path,
     email_address: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
 
     noupdate_list = open(
@@ -1022,15 +1022,15 @@ def check_noupdate_list(
             sys.exit(1)
 
 
-@click.group(no_args_is_help=True)
+@click.group(no_args_is_help=True, cls=AHGroup)
 @click.option("--verbose", is_flag=True)
 @click_add_options(click_global_options)
 @click.pass_context
 def client(
     ctx,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     tty, verbose = tv(
@@ -1061,9 +1061,9 @@ def client(
 def build_paths(
     ctx,
     email_address: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     assert "@" in email_address
@@ -1122,9 +1122,9 @@ def address_query(
     ctx,
     email_address: str,
     query: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     """search for address string"""
     tty, verbose = tv(
@@ -1151,9 +1151,9 @@ def address_query(
 def read(
     ctx,
     email_address: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     """read mail without checking for new mail"""
@@ -1185,9 +1185,9 @@ def read(
 def decrypt(
     ctx,
     email_address: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     """decrypt new mail in encrypted maildir to unencrypted maildir"""
     ic()
@@ -1227,9 +1227,9 @@ def decrypt(
 def update_notmuch(
     ctx,
     email_address: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     """update notmuch with new mail from (normal, unencrypted) maildir"""
     ic()
@@ -1280,9 +1280,9 @@ def update_notmuch(
 def download(
     ctx,
     email_address: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     """rsync new mail to encrypted maildir"""
     ic()
@@ -1317,9 +1317,9 @@ def download(
 def address_db_build(
     ctx,
     email_address: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     """build address database for use with address_query"""
     ic()
@@ -1349,9 +1349,9 @@ def afew_query(
     ctx,
     email_address: str,
     query: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     """execute arbitrary afew query"""
     ic()
@@ -1383,9 +1383,9 @@ def notmuch_query(
     ctx,
     email_address: str,
     query: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     '''execute arbitrary notmuch query notmuch search --output=files "thread:000000000003c194"'''
     ic()
@@ -1415,9 +1415,9 @@ def notmuch_query(
 def show_message_counts(
     ctx,
     email_address: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     tty, verbose = tv(
@@ -1442,9 +1442,9 @@ def show_message_counts(
 def warm_up_gpg(
     ctx,
     *,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     """make sure gpg is working"""
     ic()
