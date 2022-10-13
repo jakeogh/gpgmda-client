@@ -399,6 +399,7 @@ def start_alot(
 
     alot_config_f.close()
     alot_theme_f.close()
+    ic(alot_config_f, alot_theme_f)
 
     notmuch_config_folder = email_archive_folder / Path("_notmuch_config")
     notmuch_config_file = notmuch_config_folder / Path(".notmuch_config")
@@ -721,8 +722,8 @@ def decrypt_message(
 
     if stdout is False:
         if len(result) == 1:
-            result = result[0]
-            ic("skipping existing file:", result)
+            _result = result[0]
+            ic("skipping existing file:", _result)
             return True
 
     ic("decrypting:", gpgfile)
@@ -840,7 +841,6 @@ def gpgmaildir_to_maildir(
     assert isinstance(maildir, Path)
     assert isinstance(gpgmaildir, Path)
     assert isinstance(gpgMaildir_archive_folder, Path)
-    iterator = None
     ic("gpgmda_to_maildir using:", gpgMaildir_archive_folder)
     ic("Checking for default-recipient in ~/.gnupg/gpg.conf")
     command = 'grep "^default-recipient" ~/.gnupg/gpg.conf'
@@ -1191,7 +1191,7 @@ def read(
     start_alot(
         email_address=email_address,
         email_archive_folder=ctx.email_archive_folder,
-        verbose=ctx.obj["verbose"],
+        verbose=verbose,
     )
 
 
