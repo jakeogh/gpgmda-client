@@ -20,6 +20,7 @@
 from __future__ import annotations
 
 import glob
+import logging
 import os
 import subprocess
 import sys
@@ -36,12 +37,12 @@ from clicktool import click_global_options
 from clicktool import tv
 from eprint import eprint
 from getdents import files
-from getdents import files_pathlib
 from pathtool import check_or_create_dir
 from pathtool import empty_file
 from pathtool import path_exists
 from pathtool import path_is_dir
 
+logging.basicConfig(level=logging.INFO)
 # from multiprocessing import Process     #https://docs.python.org/3/library/multiprocessing.html
 # from multiprocessing import Pool, cpu_count
 # todo: locking to prevent multiple instances of mail_update
@@ -69,9 +70,13 @@ def rsync_mail(
     *,
     email_address: str,
     gpgMaildir_archive_folder: Path,
+    verbose: bool | int | float,
 ):
     ic()
-    load_ssh_key(email_address=email_address)
+    load_ssh_key(
+        email_address=email_address,
+        verbose=verbose,
+    )
     ic("running rsync")
     rsync_p = subprocess.Popen(
         [
@@ -117,6 +122,7 @@ def run_notmuch(
     query: None | str,
     notmuch_config_file: Path,
     notmuch_config_folder: Path,
+    verbose: bool | int | float,
 ):
 
     ic()
@@ -401,8 +407,7 @@ def start_alot(
     os.system(" ".join(["alot", "--version"]))
     move_terminal_text_up_one_page()  # so alot does not overwrite the last messages on the terminal
     alot_config_file = Path("/dev/shm/__alot_config_" + email_address)
-    if verbose:
-        ic(alot_config_file)
+    ic(alot_config_file, notmuch_config_file)
 
     alot_command_list = [
         "/usr/bin/alot",
@@ -441,7 +446,7 @@ def start_alot(
         ic(alot_p)
 
 
-def load_ssh_key(email_address):
+def load_ssh_key(email_address: str, verbose):
     ic(f"load_ssh_key({email_address})")
     if "gmail" in email_address:
         return
@@ -472,10 +477,11 @@ def load_ssh_key(email_address):
             sys.exit(1)
 
 
-def short_random_string():
+def short_random_string() -> bytes:
     command = ["gpg2", "--gen-random", "--armor", "1", "100"]
     cmd_proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=False)
     cmd_output = cmd_proc.stdout.read().strip()  # get rid of newline
+    ic(type(cmd_output), cmd_output)
     return cmd_output
 
 
@@ -512,6 +518,7 @@ def parse_rsync_log_to_list(
     *,
     email_address: str,
     gpgMaildir_archive_folder: Path,
+    verbose: bool | int | float,
 ):
     ic()
     rsync_log = Path("/dev/shm/.gpgmda_rsync_last_new_mail_" + email_address)
@@ -864,6 +871,7 @@ def gpgmaildir_to_maildir(
             rsync_list = parse_rsync_log_to_list(
                 email_address=email_address,
                 gpgMaildir_archive_folder=gpgMaildir_archive_folder,
+                verbose=verbose,
             )
             ic(rsync_list)
             skip_hashes = []
@@ -932,8 +940,9 @@ def gpgmaildir_to_maildir(
 
 def search_list_of_strings_for_substring(
     *,
-    list_to_search,
-    substring,
+    list_to_search: list,
+    substring: str,
+    verbose: bool | int | float,
 ):
     item_found = ""
     for item in list_to_search:
@@ -953,6 +962,7 @@ def update_notmuch_db(
     gpgmaildir: Path,
     notmuch_config_file: Path,
     notmuch_config_folder: Path,
+    verbose: bool | int | float,
 ):
 
     run_notmuch(
@@ -963,6 +973,7 @@ def update_notmuch_db(
         query=None,
         notmuch_config_file=notmuch_config_file,
         notmuch_config_folder=notmuch_config_folder,
+        verbose=verbose,
     )
 
 
@@ -973,6 +984,7 @@ def update_notmuch_address_db(
     gpgmaildir: Path,
     notmuch_config_file: Path,
     notmuch_config_folder: Path,
+    verbose: bool | int | float,
 ):
 
     run_notmuch(
@@ -983,6 +995,7 @@ def update_notmuch_address_db(
         query=None,
         notmuch_config_file=notmuch_config_file,
         notmuch_config_folder=notmuch_config_folder,
+        verbose=verbose,
     )
 
 
@@ -993,6 +1006,7 @@ def update_notmuch_address_db_build(
     gpgmaildir,
     notmuch_config_file,
     notmuch_config_folder,
+    verbose: bool | int | float,
 ):
 
     run_notmuch(
@@ -1003,6 +1017,7 @@ def update_notmuch_address_db_build(
         query=None,
         notmuch_config_file=notmuch_config_file,
         notmuch_config_folder=notmuch_config_folder,
+        verbose=verbose,
     )
 
 
@@ -1141,6 +1156,7 @@ def address_query(
         gpgmaildir=ctx.gpgmaildir,
         notmuch_config_file=ctx.notmuch_config_file,
         notmuch_config_folder=ctx.notmuch_config_folder,
+        verbose=verbose,
     )
 
 
@@ -1164,7 +1180,8 @@ def read(
     )
     ctx = ctx.invoke(build_paths, email_address=email_address)
     load_ssh_key(
-        email_address=email_address
+        email_address=email_address,
+        verbose=verbose,
     )  # so mail can be sent without having to unlock the key
     make_notmuch_config(
         email_address=email_address,
@@ -1262,6 +1279,7 @@ def update_notmuch(
         gpgmaildir=ctx.gpgmaildir,
         notmuch_config_file=ctx.notmuch_config_file,
         notmuch_config_folder=ctx.notmuch_config_folder,
+        verbose=verbose,
     )
 
     update_notmuch_address_db(
@@ -1270,6 +1288,7 @@ def update_notmuch(
         gpgmaildir=ctx.gpgmaildir,
         notmuch_config_file=ctx.notmuch_config_file,
         notmuch_config_folder=ctx.notmuch_config_folder,
+        verbose=verbose,
     )
 
 
@@ -1303,6 +1322,7 @@ def download(
         rsync_mail(
             email_address=email_address,
             gpgMaildir_archive_folder=ctx.gpgMaildir_archive_folder,
+            verbose=verbose,
         )
 
     else:
@@ -1337,6 +1357,7 @@ def address_db_build(
         gpgmaildir=ctx.gpgmaildir,
         notmuch_config_file=ctx.notmuch_config_file,
         notmuch_config_folder=ctx.notmuch_config_folder,
+        verbose=verbose,
     )
 
 
@@ -1371,6 +1392,7 @@ def afew_query(
         gpgmaildir=ctx.gpgmaildir,
         notmuch_config_file=ctx.notmuch_config_file,
         notmuch_config_folder=ctx.notmuch_config_folder,
+        verbose=verbose,
     )
 
 
@@ -1405,6 +1427,7 @@ def notmuch_query(
         gpgmaildir=ctx.gpgmaildir,
         notmuch_config_file=ctx.notmuch_config_file,
         notmuch_config_folder=ctx.notmuch_config_folder,
+        verbose=verbose,
     )
 
 
